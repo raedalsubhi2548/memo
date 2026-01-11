@@ -23,11 +23,20 @@ export default function RoomSetup({ userId, onRoomJoined }: RoomSetupProps) {
     setLoading(true)
     setError(null)
 
+    if (!displayName.trim()) {
+      setError('يرجى إدخال اسمك المستعار')
+      setLoading(false)
+      return
+    }
+
     try {
       // 1. Create Room
       const { data: room, error: roomError } = await supabase
         .from('rooms')
-        .insert({ name: roomName })
+        .insert({ 
+          name: roomName,
+          created_by: displayName
+        })
         .select()
         .single()
 
