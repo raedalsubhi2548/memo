@@ -1,43 +1,40 @@
 "use client"
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import { motion } from 'framer-motion'
-import { Send, Heart } from 'lucide-react'
+import { Heart } from 'lucide-react'
 
 interface QuestionFormProps {
   roomId: string
   userId: string
-  members: any[]
+  nickname: string
 }
 
-export default function QuestionForm({ roomId, userId, members }: QuestionFormProps) {
+export default function QuestionForm({ roomId, userId, nickname }: QuestionFormProps) {
   const [questionText, setQuestionText] = useState('')
   const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState(false)
-  const [recipientId, setRecipientId] = useState<string>('')
-
-  // Default recipient to the other member if exists
-  useEffect(() => {
-    const otherMember = members.find(m => m.user_id !== userId)
-    if (otherMember) {
-      setRecipientId(otherMember.id)
-    }
-  }, [members, userId])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!questionText.trim() || !recipientId) return
+    if (!questionText.trim()) return
 
     setLoading(true)
     try {
+      const payload = JSON.stringify({
+        text: questionText,
+        senderId: userId,
+        senderName: nickname
+      })
+
       const { error } = await supabase
         .from('questions')
         .insert({
           room_id: roomId,
-          from_member_id: members.find(m => m.user_id === userId)?.id,
-          to_member_id: recipientId,
-          question_text: questionText,
+          from_member_id: null,
+          to_member_id: null,
+          question_text: payload,
         })
 
       if (error) throw error
@@ -53,16 +50,6 @@ export default function QuestionForm({ roomId, userId, members }: QuestionFormPr
     }
   }
 
-  const otherMembers = members.filter(m => m.user_id !== userId)
-
-  if (otherMembers.length === 0) {
-    return (
-      <div className="bg-white/60 p-6 rounded-2xl text-center">
-        <p className="text-gray-500">بانتظار انضمام شريكك إلى الغرفة...</p>
-      </div>
-    )
-  }
-
   return (
     <motion.div
       initial={{ opacity: 0, y: 10 }}
@@ -75,26 +62,6 @@ export default function QuestionForm({ roomId, userId, members }: QuestionFormPr
       </h3>
 
       <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">إلى من؟</label>
-          <div className="flex gap-2">
-            {otherMembers.map((member) => (
-              <button
-                key={member.id}
-                type="button"
-                onClick={() => setRecipientId(member.id)}
-                className={`px-4 py-2 rounded-full text-sm transition-all ${
-                  recipientId === member.id
-                    ? 'bg-rose-500 text-white shadow-md'
-                    : 'bg-white text-gray-600 border border-gray-200 hover:border-rose-300'
-                }`}
-              >
-                {member.display_name || 'شريكك'}
-              </button>
-            ))}
-          </div>
-        </div>
-
         <textarea
           value={questionText}
           onChange={(e) => setQuestionText(e.target.value)}
@@ -116,7 +83,7 @@ export default function QuestionForm({ roomId, userId, members }: QuestionFormPr
           
           <button
             type="submit"
-            disabled={loading || !recipientId}
+            disabled={loading}
             className="bg-rose-500 hover:bg-rose-600 text-white px-6 py-2 rounded-full font-medium shadow-lg shadow-rose-200 transition-all flex items-center gap-2 disabled:opacity-50"
           >
             {loading ? 'جاري الإرسال...' : (

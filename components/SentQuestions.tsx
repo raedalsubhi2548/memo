@@ -31,7 +31,7 @@ export default function SentQuestions({ questions }: SentQuestionsProps) {
               }`}
             >
               <p className="text-gray-700 truncate max-w-[70%] text-sm">
-                {q.question_text}
+                {q.parsedText || q.question_text}
               </p>
               
               <div className="flex items-center gap-2 text-xs">

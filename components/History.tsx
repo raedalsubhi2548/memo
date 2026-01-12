@@ -23,10 +23,12 @@ export default function History({ history, currentUserId }: HistoryProps) {
 
       <div className="space-y-6">
         {history.map((item, index) => {
-          const isMyQuestion = item.from_member?.user_id === currentUserId
+          const isMyQuestion = item.senderId === currentUserId
           const answer = item.answers?.[0]
           
-          if (!answer) return null // Should not happen in history view usually
+          if (!answer) return null
+
+          const isMyAnswer = answer.senderId === currentUserId
 
           return (
             <motion.div
@@ -39,27 +41,27 @@ export default function History({ history, currentUserId }: HistoryProps) {
               <div className="bg-rose-50/50 p-4 border-b border-rose-100">
                 <div className="flex justify-between items-start mb-2">
                   <span className="text-xs font-bold text-rose-500 uppercase tracking-wider">
-                    {isMyQuestion ? 'سألتُ أنا' : `سأل ${item.from_member?.display_name}`}
+                    {isMyQuestion ? 'سألتُ أنا' : `سأل ${item.senderName || 'شريكك'}`}
                   </span>
                   <span className="text-[10px] text-gray-400">
                     {new Date(item.created_at).toLocaleDateString('ar-EG')}
                   </span>
                 </div>
-                <p className="text-dark-cocoa font-medium">{item.question_text}</p>
+                <p className="text-dark-cocoa font-medium">{item.parsedText}</p>
               </div>
 
               {/* Answer Section */}
               <div className="p-5 bg-white">
                 <div className="flex justify-between items-start mb-2">
                   <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">
-                    {isMyQuestion ? `أجاب ${item.to_member?.display_name}` : 'أجبتُ أنا'}
+                    {isMyAnswer ? 'أجبتُ أنا' : `أجاب ${answer.senderName || 'شريكك'}`}
                   </span>
                   <span className="text-[10px] text-gray-400">
                     {new Date(answer.created_at).toLocaleDateString('ar-EG')}
                   </span>
                 </div>
                 <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">
-                  {answer.answer_text}
+                  {answer.parsedText}
                 </p>
               </div>
             </motion.div>

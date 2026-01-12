@@ -7,7 +7,7 @@ import { Plus, Users } from 'lucide-react'
 
 interface RoomSetupProps {
   userId: string
-  onRoomJoined: () => void
+  onRoomJoined: (data: { roomId: string; nickname: string; roomName: string }) => void
 }
 
 export default function RoomSetup({ userId, onRoomJoined }: RoomSetupProps) {
@@ -30,7 +30,7 @@ export default function RoomSetup({ userId, onRoomJoined }: RoomSetupProps) {
     }
 
     try {
-      // 1. Create Room
+      // 1. Create Room (Insert name and created_by)
       const { data: room, error: roomError } = await supabase
         .from('rooms')
         .insert({ 
@@ -42,20 +42,16 @@ export default function RoomSetup({ userId, onRoomJoined }: RoomSetupProps) {
 
       if (roomError) throw roomError
 
-      // 2. Add Member
-      const { error: memberError } = await supabase
-        .from('members')
-        .insert({
-          room_id: room.id,
-          user_id: userId,
-          display_name: displayName || 'شريك',
-        })
+      // 2. Success - No members table insertion
+      onRoomJoined({ 
+        roomId: room.id, 
+        nickname: displayName,
+        roomName: room.name
+      })
 
-      if (memberError) throw memberError
-
-      onRoomJoined()
     } catch (err: any) {
-      setError(err.message)
+      console.error(err)
+      setError('حدث خطأ أثناء إنشاء الغرفة. حاول مرة أخرى.')
     } finally {
       setLoading(false)
     }
@@ -66,30 +62,31 @@ export default function RoomSetup({ userId, onRoomJoined }: RoomSetupProps) {
     setLoading(true)
     setError(null)
 
+    if (!displayName.trim()) {
+      setError('يرجى إدخال اسمك المستعار')
+      setLoading(false)
+      return
+    }
+
     try {
       // 1. Check if room exists
       const { data: room, error: roomError } = await supabase
         .from('rooms')
-        .select('id')
+        .select('id, name')
         .eq('id', roomId)
         .single()
 
       if (roomError || !room) throw new Error('الغرفة غير موجودة')
 
-      // 2. Add Member
-      const { error: memberError } = await supabase
-        .from('members')
-        .insert({
-          room_id: roomId,
-          user_id: userId,
-          display_name: displayName || 'شريك',
-        })
+      // 2. Success - No members table insertion
+      onRoomJoined({ 
+        roomId: room.id, 
+        nickname: displayName,
+        roomName: room.name
+      })
 
-      if (memberError) throw memberError
-
-      onRoomJoined()
     } catch (err: any) {
-      setError(err.message)
+      setError(err.message || 'حدث خطأ أثناء الانضمام')
     } finally {
       setLoading(false)
     }

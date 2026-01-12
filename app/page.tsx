@@ -14,7 +14,7 @@ export default function Home() {
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session)
-      if (session) checkRoomStatus(session.user.id)
+      if (session) checkRoomStatus()
       else setLoading(false)
     })
 
@@ -22,7 +22,7 @@ export default function Home() {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session)
-      if (session) checkRoomStatus(session.user.id)
+      if (session) checkRoomStatus()
       else {
         setIsInRoom(null)
         setLoading(false)
@@ -32,23 +32,25 @@ export default function Home() {
     return () => subscription.unsubscribe()
   }, [])
 
-  const checkRoomStatus = async (userId: string) => {
+  const checkRoomStatus = () => {
     try {
-      const { data, error } = await supabase
-        .from('members')
-        .select('id')
-        .eq('user_id', userId)
-        .maybeSingle()
-
-      if (error && error.code !== 'PGRST116') throw error
-      
-      setIsInRoom(!!data)
+      const savedRoom = localStorage.getItem('roomData')
+      if (savedRoom) {
+        setIsInRoom(true)
+      } else {
+        setIsInRoom(false)
+      }
     } catch (error) {
       console.error('Error checking room status:', error)
       setIsInRoom(false)
     } finally {
       setLoading(false)
     }
+  }
+
+  const handleRoomJoined = (data: { roomId: string; nickname: string; roomName: string }) => {
+    localStorage.setItem('roomData', JSON.stringify(data))
+    setIsInRoom(true)
   }
 
   if (loading) {
@@ -64,7 +66,7 @@ export default function Home() {
   }
 
   if (isInRoom === false) {
-    return <RoomSetup userId={session.user.id} onRoomJoined={() => setIsInRoom(true)} />
+    return <RoomSetup userId={session.user.id} onRoomJoined={handleRoomJoined} />
   }
 
   return <Dashboard session={session} />

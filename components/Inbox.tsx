@@ -7,10 +7,11 @@ import { MessageCircleHeart, Send } from 'lucide-react'
 
 interface InboxProps {
   questions: any[]
-  currentMemberId: string
+  currentUserId: string
+  nickname: string
 }
 
-export default function Inbox({ questions, currentMemberId }: InboxProps) {
+export default function Inbox({ questions, currentUserId, nickname }: InboxProps) {
   const [replyText, setReplyText] = useState<{ [key: string]: string }>({})
   const [loading, setLoading] = useState<{ [key: string]: boolean }>({})
 
@@ -19,18 +20,23 @@ export default function Inbox({ questions, currentMemberId }: InboxProps) {
 
     setLoading(prev => ({ ...prev, [questionId]: true }))
     try {
+      const payload = JSON.stringify({
+        text: replyText[questionId],
+        senderId: currentUserId,
+        senderName: nickname
+      })
+
       const { error } = await supabase
         .from('answers')
         .insert({
           question_id: questionId,
-          from_member_id: currentMemberId,
-          answer_text: replyText[questionId],
+          from_member_id: null,
+          answer_text: payload,
         })
 
       if (error) throw error
 
       setReplyText(prev => ({ ...prev, [questionId]: '' }))
-      // Optimistic update or wait for realtime
     } catch (error) {
       console.error('Error sending reply:', error)
       alert('حدث خطأ أثناء إرسال الرد')
@@ -62,7 +68,7 @@ export default function Inbox({ questions, currentMemberId }: InboxProps) {
         >
           <div className="flex justify-between items-start mb-3">
             <span className="text-sm font-medium text-rose-500 bg-rose-50 px-3 py-1 rounded-full">
-              من {q.from_member?.display_name || 'شريكك'}
+              من {q.senderName || 'شريكك'}
             </span>
             <span className="text-xs text-gray-400">
               {new Date(q.created_at).toLocaleDateString('ar-EG')}
@@ -70,7 +76,7 @@ export default function Inbox({ questions, currentMemberId }: InboxProps) {
           </div>
           
           <p className="text-lg text-gray-800 mb-6 font-medium leading-relaxed">
-            "{q.question_text}"
+            "{q.parsedText}"
           </p>
 
           <div className="relative">

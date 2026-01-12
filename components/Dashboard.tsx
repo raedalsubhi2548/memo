@@ -18,9 +18,7 @@ export default function Dashboard({ session }: DashboardProps) {
   const [acceptedEntrance, setAcceptedEntrance] = useState(false)
   const [activeTab, setActiveTab] = useState<'ask' | 'inbox' | 'sent' | 'history'>('ask')
   const [loading, setLoading] = useState(true)
-  const [room, setRoom] = useState<any>(null)
-  const [member, setMember] = useState<any>(null)
-  const [members, setMembers] = useState<any[]>([])
+  const [roomData, setRoomData] = useState<{ roomId: string; nickname: string; roomName: string } | null>(null)
   
   // Data states
   const [inboxQuestions, setInboxQuestions] = useState<any[]>([])
@@ -30,92 +28,45 @@ export default function Dashboard({ session }: DashboardProps) {
 
   // Fetch initial data
   useEffect(() => {
-    fetchRoomData()
-  }, [session.user.id])
+    const saved = localStorage.getItem('roomData')
+    if (saved) {
+      setRoomData(JSON.parse(saved))
+    }
+    setLoading(false)
+  }, [])
 
   // Realtime subscriptions
   useEffect(() => {
-    if (!room?.id) return
+    if (!roomData?.roomId) return
+
+    fetchQuestions()
 
     const channel = supabase
       .channel('room_updates')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'questions', filter: `room_id=eq.${room.id}` }, () => {
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'questions', filter: `room_id=eq.${roomData.roomId}` }, () => {
         fetchQuestions()
       })
       .on('postgres_changes', { event: '*', schema: 'public', table: 'answers' }, () => {
         fetchQuestions()
-      })
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'members', filter: `room_id=eq.${room.id}` }, () => {
-        fetchMembers()
       })
       .subscribe()
 
     return () => {
       supabase.removeChannel(channel)
     }
-  }, [room?.id])
+  }, [roomData?.roomId])
 
-  const fetchRoomData = async () => {
-    try {
-      setLoading(true)
-      
-      // Get member details
-      const { data: memberData, error: memberError } = await supabase
-        .from('members')
-        .select('*, rooms(*)')
-        .eq('user_id', session.user.id)
-        .single()
+  const fetchQuestions = async () => {
+    if (!roomData?.roomId) return
 
-      if (memberError) throw memberError
-      
-      setMember(memberData)
-      setRoom(memberData.rooms)
-      
-      await Promise.all([
-        fetchMembers(memberData.room_id),
-        fetchQuestions(memberData.id, memberData.room_id)
-      ])
-
-    } catch (error) {
-      console.error('Error fetching data:', error)
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const fetchMembers = async (roomIdToUse?: string) => {
-    const rId = roomIdToUse || room?.id
-    if (!rId) return
-
-    const { data } = await supabase
-      .from('members')
-      .select('*')
-      .eq('room_id', rId)
-    
-    if (data) setMembers(data)
-  }
-
-  const fetchQuestions = async (memberIdToUse?: string, roomIdToUse?: string) => {
-    const mId = memberIdToUse || member?.id
-    const rId = roomIdToUse || room?.id
-    if (!mId || !rId) return
-
-    // Inbox: Questions sent TO me, that are NOT answered yet (or show answered in history?)
-    // Logic: 
-    // Inbox = Questions to me where answers count is 0
-    // History = Questions (to/from me) where answers count > 0
-    // Sent = Questions from me where answers count is 0 (waiting)
-
-    // Let's fetch all questions in room with answers and members
+    // Get all questions for the room
     const { data: allQuestions } = await supabase
       .from('questions')
       .select(`
         *,
-        answers(*),
-        from_member:members!from_member_id(display_name, user_id),
-        to_member:members!to_member_id(display_name, user_id)
+        answers(*)
       `)
-      .eq('room_id', rId)
+      .eq('room_id', roomData.roomId)
       .order('created_at', { ascending: false })
 
     if (!allQuestions) return
@@ -125,15 +76,41 @@ export default function Dashboard({ session }: DashboardProps) {
     const history = []
 
     for (const q of allQuestions) {
+      // Parse question metadata
+      try {
+        const parsed = JSON.parse(q.question_text)
+        q.parsedText = parsed.text
+        q.senderName = parsed.senderName
+        q.senderId = parsed.senderId
+      } catch (e) {
+        // Fallback
+        q.parsedText = q.question_text
+        q.senderName = 'شريكك'
+        q.senderId = 'unknown'
+      }
+
       const hasAnswer = q.answers && q.answers.length > 0
       
       if (hasAnswer) {
+        // Parse answer metadata
+        if (q.answers[0]) {
+          try {
+            const parsedAns = JSON.parse(q.answers[0].answer_text)
+            q.answers[0].parsedText = parsedAns.text
+            q.answers[0].senderName = parsedAns.senderName
+            q.answers[0].senderId = parsedAns.senderId
+          } catch (e) {
+            q.answers[0].parsedText = q.answers[0].answer_text
+            q.answers[0].senderName = 'شريكك'
+          }
+        }
         history.push(q)
       } else {
-        if (q.to_member_id === mId) {
-          inbox.push(q)
-        } else if (q.from_member_id === mId) {
+        if (q.senderId === session.user.id) {
           sent.push(q)
+        } else {
+          // If not sent by me, it's for me
+          inbox.push(q)
         }
       }
     }
@@ -144,8 +121,8 @@ export default function Dashboard({ session }: DashboardProps) {
   }
 
   const copyRoomId = () => {
-    if (room?.id) {
-      navigator.clipboard.writeText(room.id)
+    if (roomData?.roomId) {
+      navigator.clipboard.writeText(roomData.roomId)
       setCopied(true)
       setTimeout(() => setCopied(false), 2000)
     }
@@ -168,14 +145,17 @@ export default function Dashboard({ session }: DashboardProps) {
       {/* Header */}
       <header className="p-6 flex justify-between items-center bg-white/50 backdrop-blur-sm sticky top-0 z-40">
         <div>
-          <h1 className="text-xl font-bold text-dark-cocoa">{room?.name}</h1>
+          <h1 className="text-xl font-bold text-dark-cocoa">{roomData?.roomName || 'غرفة العشاق'}</h1>
           <div className="flex items-center gap-2 text-xs text-gray-500 cursor-pointer" onClick={copyRoomId}>
-            <span>ID: {room?.id?.slice(0, 8)}...</span>
+            <span>ID: {roomData?.roomId?.slice(0, 8)}...</span>
             {copied ? <Check className="w-3 h-3 text-green-500" /> : <Copy className="w-3 h-3" />}
           </div>
         </div>
         <button 
-          onClick={() => supabase.auth.signOut()}
+          onClick={() => {
+            localStorage.removeItem('roomData')
+            window.location.reload()
+          }}
           className="text-rose-400 hover:text-rose-600 transition-colors"
         >
           <LogOut className="w-5 h-5" />
@@ -184,18 +164,19 @@ export default function Dashboard({ session }: DashboardProps) {
 
       {/* Main Content */}
       <main className="p-4 space-y-6">
-        {activeTab === 'ask' && (
+        {activeTab === 'ask' && roomData && (
           <QuestionForm 
-            roomId={room.id} 
+            roomId={roomData.roomId} 
             userId={session.user.id} 
-            members={members} 
+            nickname={roomData.nickname}
           />
         )}
         
-        {activeTab === 'inbox' && (
+        {activeTab === 'inbox' && roomData && (
           <Inbox 
             questions={inboxQuestions} 
-            currentMemberId={member.id} 
+            currentUserId={session.user.id}
+            nickname={roomData.nickname}
           />
         )}
 
