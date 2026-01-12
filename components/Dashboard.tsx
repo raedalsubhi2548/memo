@@ -43,10 +43,12 @@ export default function Dashboard({ session }: DashboardProps) {
 
     const channel = supabase
       .channel('room_updates')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'questions', filter: `room_id=eq.${roomData.roomId}` }, () => {
-        fetchQuestions()
-      })
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'answers' }, () => {
+      .on('postgres_changes', { 
+        event: '*', 
+        schema: 'public', 
+        table: 'qa_rounds', 
+        filter: `room_id=eq.${roomData.roomId}` 
+      }, () => {
         fetchQuestions()
       })
       .subscribe()
@@ -59,58 +61,34 @@ export default function Dashboard({ session }: DashboardProps) {
   const fetchQuestions = async () => {
     if (!roomData?.roomId) return
 
-    // Get all questions for the room
-    const { data: allQuestions } = await supabase
-      .from('questions')
-      .select(`
-        *,
-        answers(*)
-      `)
+    // Get all rounds for the room from qa_rounds
+    const { data: rounds, error } = await supabase
+      .from('qa_rounds')
+      .select('*')
       .eq('room_id', roomData.roomId)
       .order('created_at', { ascending: false })
 
-    if (!allQuestions) return
+    if (error) {
+      console.error('Error fetching qa_rounds:', error)
+      return
+    }
+
+    if (!rounds) return
 
     const inbox = []
     const sent = []
     const history = []
 
-    for (const q of allQuestions) {
-      // Parse question metadata
-      try {
-        const parsed = JSON.parse(q.question_text)
-        q.parsedText = parsed.text
-        q.senderName = parsed.senderName
-        q.senderId = parsed.senderId
-      } catch (e) {
-        // Fallback
-        q.parsedText = q.question_text
-        q.senderName = 'شريكك'
-        q.senderId = 'unknown'
-      }
-
-      const hasAnswer = q.answers && q.answers.length > 0
-      
-      if (hasAnswer) {
-        // Parse answer metadata
-        if (q.answers[0]) {
-          try {
-            const parsedAns = JSON.parse(q.answers[0].answer_text)
-            q.answers[0].parsedText = parsedAns.text
-            q.answers[0].senderName = parsedAns.senderName
-            q.answers[0].senderId = parsedAns.senderId
-          } catch (e) {
-            q.answers[0].parsedText = q.answers[0].answer_text
-            q.answers[0].senderName = 'شريكك'
-          }
-        }
-        history.push(q)
+    for (const round of rounds) {
+      if (round.status === 'answered') {
+        history.push(round)
       } else {
-        if (q.senderId === session.user.id) {
-          sent.push(q)
+        // Status is 'question_sent' (or null/undefined treated as pending)
+        if (round.question_sender === roomData.nickname) {
+          sent.push(round)
         } else {
-          // If not sent by me, it's for me
-          inbox.push(q)
+          // If I didn't send it, it's for me
+          inbox.push(round)
         }
       }
     }
@@ -167,7 +145,6 @@ export default function Dashboard({ session }: DashboardProps) {
         {activeTab === 'ask' && roomData && (
           <QuestionForm 
             roomId={roomData.roomId} 
-            userId={session.user.id} 
             nickname={roomData.nickname}
           />
         )}
@@ -175,7 +152,6 @@ export default function Dashboard({ session }: DashboardProps) {
         {activeTab === 'inbox' && roomData && (
           <Inbox 
             questions={inboxQuestions} 
-            currentUserId={session.user.id}
             nickname={roomData.nickname}
           />
         )}
@@ -184,10 +160,10 @@ export default function Dashboard({ session }: DashboardProps) {
           <SentQuestions questions={sentQuestions} />
         )}
 
-        {activeTab === 'history' && (
+        {activeTab === 'history' && roomData && (
           <History 
             history={historyItems} 
-            currentUserId={session.user.id} 
+            currentNickname={roomData.nickname}
           />
         )}
       </main>

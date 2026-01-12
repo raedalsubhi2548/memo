@@ -7,11 +7,10 @@ import { MessageCircleHeart, Send } from 'lucide-react'
 
 interface InboxProps {
   questions: any[]
-  currentUserId: string
   nickname: string
 }
 
-export default function Inbox({ questions, currentUserId, nickname }: InboxProps) {
+export default function Inbox({ questions, nickname }: InboxProps) {
   const [replyText, setReplyText] = useState<{ [key: string]: string }>({})
   const [loading, setLoading] = useState<{ [key: string]: boolean }>({})
 
@@ -20,19 +19,15 @@ export default function Inbox({ questions, currentUserId, nickname }: InboxProps
 
     setLoading(prev => ({ ...prev, [questionId]: true }))
     try {
-      const payload = JSON.stringify({
-        text: replyText[questionId],
-        senderId: currentUserId,
-        senderName: nickname
-      })
-
       const { error } = await supabase
-        .from('answers')
-        .insert({
-          question_id: questionId,
-          from_member_id: null,
-          answer_text: payload,
+        .from('qa_rounds')
+        .update({
+          answer_text: replyText[questionId],
+          answer_sender: nickname,
+          status: 'answered',
+          answered_at: new Date().toISOString()
         })
+        .eq('id', questionId)
 
       if (error) throw error
 
@@ -68,7 +63,7 @@ export default function Inbox({ questions, currentUserId, nickname }: InboxProps
         >
           <div className="flex justify-between items-start mb-3">
             <span className="text-sm font-medium text-rose-500 bg-rose-50 px-3 py-1 rounded-full">
-              من {q.senderName || 'شريكك'}
+              من {q.question_sender || 'شريكك'}
             </span>
             <span className="text-xs text-gray-400">
               {new Date(q.created_at).toLocaleDateString('ar-EG')}
@@ -76,7 +71,7 @@ export default function Inbox({ questions, currentUserId, nickname }: InboxProps
           </div>
           
           <p className="text-lg text-gray-800 mb-6 font-medium leading-relaxed">
-            "{q.parsedText}"
+            "{q.question_text}"
           </p>
 
           <div className="relative">

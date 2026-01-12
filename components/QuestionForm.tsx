@@ -7,11 +7,10 @@ import { Heart } from 'lucide-react'
 
 interface QuestionFormProps {
   roomId: string
-  userId: string
   nickname: string
 }
 
-export default function QuestionForm({ roomId, userId, nickname }: QuestionFormProps) {
+export default function QuestionForm({ roomId, nickname }: QuestionFormProps) {
   const [questionText, setQuestionText] = useState('')
   const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState(false)
@@ -22,19 +21,13 @@ export default function QuestionForm({ roomId, userId, nickname }: QuestionFormP
 
     setLoading(true)
     try {
-      const payload = JSON.stringify({
-        text: questionText,
-        senderId: userId,
-        senderName: nickname
-      })
-
       const { error } = await supabase
-        .from('questions')
+        .from('qa_rounds')
         .insert({
           room_id: roomId,
-          from_member_id: null,
-          to_member_id: null,
-          question_text: payload,
+          question_text: questionText,
+          question_sender: nickname,
+          status: 'question_sent'
         })
 
       if (error) throw error

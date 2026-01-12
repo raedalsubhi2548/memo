@@ -5,10 +5,10 @@ import { Heart } from 'lucide-react'
 
 interface HistoryProps {
   history: any[]
-  currentUserId: string
+  currentNickname: string
 }
 
-export default function History({ history, currentUserId }: HistoryProps) {
+export default function History({ history, currentNickname }: HistoryProps) {
   if (history.length === 0) return null
 
   return (
@@ -23,12 +23,8 @@ export default function History({ history, currentUserId }: HistoryProps) {
 
       <div className="space-y-6">
         {history.map((item, index) => {
-          const isMyQuestion = item.senderId === currentUserId
-          const answer = item.answers?.[0]
-          
-          if (!answer) return null
-
-          const isMyAnswer = answer.senderId === currentUserId
+          const isMyQuestion = item.question_sender === currentNickname
+          const isMyAnswer = item.answer_sender === currentNickname
 
           return (
             <motion.div
@@ -41,27 +37,30 @@ export default function History({ history, currentUserId }: HistoryProps) {
               <div className="bg-rose-50/50 p-4 border-b border-rose-100">
                 <div className="flex justify-between items-start mb-2">
                   <span className="text-xs font-bold text-rose-500 uppercase tracking-wider">
-                    {isMyQuestion ? 'سألتُ أنا' : `سأل ${item.senderName || 'شريكك'}`}
+                    {isMyQuestion ? 'سألتُ أنا' : `سأل ${item.question_sender || 'شريكك'}`}
                   </span>
                   <span className="text-[10px] text-gray-400">
                     {new Date(item.created_at).toLocaleDateString('ar-EG')}
                   </span>
                 </div>
-                <p className="text-dark-cocoa font-medium">{item.parsedText}</p>
+                <p className="text-dark-cocoa font-medium">{item.question_text}</p>
               </div>
 
               {/* Answer Section */}
               <div className="p-5 bg-white">
                 <div className="flex justify-between items-start mb-2">
                   <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">
-                    {isMyAnswer ? 'أجبتُ أنا' : `أجاب ${answer.senderName || 'شريكك'}`}
+                    {isMyAnswer ? 'أجبتُ أنا' : `أجاب ${item.answer_sender || 'شريكك'}`}
                   </span>
                   <span className="text-[10px] text-gray-400">
-                    {new Date(answer.created_at).toLocaleDateString('ar-EG')}
+                    {item.answered_at 
+                      ? new Date(item.answered_at).toLocaleDateString('ar-EG') 
+                      : new Date().toLocaleDateString('ar-EG')
+                    }
                   </span>
                 </div>
                 <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">
-                  {answer.parsedText}
+                  {item.answer_text}
                 </p>
               </div>
             </motion.div>

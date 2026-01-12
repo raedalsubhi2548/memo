@@ -16,7 +16,7 @@ export default function SentQuestions({ questions }: SentQuestionsProps) {
       
       <div className="grid gap-3">
         {questions.map((q, index) => {
-          const isAnswered = q.answers && q.answers.length > 0
+          const isAnswered = q.status === 'answered'
           
           return (
             <motion.div
@@ -31,7 +31,7 @@ export default function SentQuestions({ questions }: SentQuestionsProps) {
               }`}
             >
               <p className="text-gray-700 truncate max-w-[70%] text-sm">
-                {q.parsedText || q.question_text}
+                {q.question_text}
               </p>
               
               <div className="flex items-center gap-2 text-xs">
