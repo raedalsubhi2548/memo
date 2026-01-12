@@ -80,14 +80,22 @@ export default function Dashboard({ session }: DashboardProps) {
     const history = []
 
     for (const round of rounds) {
-      if (round.status === 'answered') {
-        history.push(round)
-      } else {
-        // Status is 'question_sent' (or null/undefined treated as pending)
-        if (round.question_sender === roomData.nickname) {
+      // إذا أنا المرسل للسؤال
+      if (round.question_sender === roomData.nickname) {
+        if (round.status === 'answered') {
+          // السؤال تم الرد عليه - يظهر في المرسل مع الرد
           sent.push(round)
         } else {
-          // If I didn't send it, it's for me
+          // السؤال ينتظر الرد
+          sent.push(round)
+        }
+      } else {
+        // أنا المستقبل للسؤال
+        if (round.status === 'answered') {
+          // رديت عليه - يروح للذكريات
+          history.push(round)
+        } else {
+          // سؤال جديد ينتظر ردي
           inbox.push(round)
         }
       }
