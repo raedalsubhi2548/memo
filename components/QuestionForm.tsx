@@ -17,7 +17,17 @@ export default function QuestionForm({ roomId, nickname }: QuestionFormProps) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!questionText.trim()) return
+    
+    // Frontend Validation
+    if (!roomId) {
+      alert('خطأ: رقم الغرفة غير موجود. يرجى إعادة تحميل الصفحة.')
+      return
+    }
+
+    if (!questionText.trim()) {
+      alert('يرجى كتابة سؤال قبل الإرسال')
+      return
+    }
 
     setLoading(true)
     try {
@@ -26,17 +36,22 @@ export default function QuestionForm({ roomId, nickname }: QuestionFormProps) {
         .insert({
           room_id: roomId,
           question_text: questionText,
-          question_sender: nickname,
+          question_sender: nickname || 'guest',
           status: 'question_sent'
         })
 
-      if (error) throw error
+      if (error) {
+        console.error('Supabase insert error:', error)
+        throw error
+      }
 
       setQuestionText('')
       setSuccess(true)
       setTimeout(() => setSuccess(false), 3000)
     } catch (error) {
-      console.error('Error sending question:', error)
+      // Error is already logged above if it came from Supabase
+      // If it's another error, we might want to log it too, but the requirement specifically asked for logging the Supabase error.
+      // The catch block catches the thrown error.
       alert('حدث خطأ أثناء إرسال السؤال')
     } finally {
       setLoading(false)
