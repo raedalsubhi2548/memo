@@ -1,0 +1,22 @@
+{
+  "name": "عناية ميمي | Mimi Care",
+  "short_name": "عناية ميمي",
+  "lang": "ar",
+  "dir": "rtl",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#fdf7f4",
+  "theme_color": "#7d3f4c",
+  "icons": [
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    }
+  ]
+}

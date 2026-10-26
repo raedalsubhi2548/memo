@@ -1,0 +1,202 @@
+/* ==========================================================================
+   Mimi Care design tokens — three layers
+   1. Primitive  : raw values (never used directly in components)
+   2. Semantic   : purpose aliases (what components reference)
+   3. Component  : per-component knobs built from semantic tokens
+   Brand: rose wine #7d3f4c · blush #e9c3bd · cream #fdf7f4 · white #ffffff
+   ========================================================================== */
+
+:root {
+  /* ---------- 1. PRIMITIVE ---------- */
+  /* Green — brand primary #1b2b44 at 900 */
+  --p-green-950: #48252c;
+  --p-green-900: #7d3f4c;
+  --p-green-800: #874e5a;
+  --p-green-700: #94626c;
+  --p-green-600: #a47982;
+  --p-green-200: #e2d5d8;
+  --p-green-100: #efe8ea;
+  --p-green-50: #f7f3f4;
+
+  /* Gold — brand accent #c3cedd at 400 */
+  --p-gold-700: #986068; /* text-safe on cream (4.6:1) */
+  --p-gold-600: #be8e90;
+  --p-gold-500: #d6aba9;
+  --p-gold-400: #e9c3bd;
+  --p-gold-200: #f3dedb;
+  --p-gold-100: #f8edeb;
+
+  /* Cream — brand ground #fbfcfe at 50 */
+  --p-cream-50: #fdf7f4;
+  --p-cream-100: #f9f1ee;
+  --p-cream-200: #f0e5e3;
+  --p-cream-300: #e9dad9;
+
+  --p-white: #ffffff;
+  --p-ink-900: #48252c;  /* body text */
+  --p-ink-600: #725e6b;  /* muted text, 5.6:1 on cream */
+  --p-ink-400: #a8959c;  /* disabled/placeholder only */
+  --p-red-600: #a3322b;
+  --p-red-100: #f6e3e1;
+  --p-amber-700: #8a5a00;
+  --p-amber-100: #fbf0d4;
+  --p-teal-700: #1d7a52;
+  --p-teal-100: #e3f1e8;
+
+  /* Type */
+  --p-font-display: 'IBM Plex Sans Arabic', system-ui, sans-serif;
+  --p-font-script: 'El Messiri', 'IBM Plex Sans Arabic', sans-serif;
+  --p-font-text: 'IBM Plex Sans Arabic', system-ui, -apple-system, 'Segoe UI', Tahoma, sans-serif;
+  /* Major-third scale, 16px base */
+  --p-size-12: 0.75rem;
+  --p-size-14: 0.875rem;
+  --p-size-16: 1rem;
+  --p-size-18: 1.125rem;
+  --p-size-20: 1.25rem;
+  --p-size-24: 1.5rem;
+  --p-size-30: 1.875rem;
+  --p-size-38: 2.375rem;
+  --p-size-48: 3rem;
+  --p-size-60: 3.75rem;
+
+  /* Space — 4px grid */
+  --p-space-1: 4px;  --p-space-2: 8px;  --p-space-3: 12px; --p-space-4: 16px;
+  --p-space-5: 20px; --p-space-6: 24px; --p-space-8: 32px; --p-space-10: 40px;
+  --p-space-12: 48px; --p-space-16: 64px; --p-space-20: 80px; --p-space-24: 96px;
+
+  /* Radius */
+  --p-radius-xs: 6px; --p-radius-sm: 10px; --p-radius-md: 14px;
+  --p-radius-lg: 20px; --p-radius-xl: 28px; --p-radius-pill: 999px;
+
+  /* Shadows — tinted with brand green, never grey */
+  --p-shadow-1: 0 1px 2px rgb(125 63 76 / 0.06);
+  --p-shadow-2: 0 1px 2px rgb(125 63 76 / 0.05), 0 8px 24px -12px rgb(125 63 76 / 0.22);
+  --p-shadow-3: 0 2px 4px rgb(125 63 76 / 0.06), 0 24px 48px -24px rgb(125 63 76 / 0.38);
+
+  /* Motion */
+  --p-dur-fast: 120ms; --p-dur-base: 200ms; --p-dur-slow: 320ms; --p-dur-stage: 520ms;
+  --p-ease-standard: cubic-bezier(0.2, 0.7, 0.2, 1);
+  --p-ease-emphasized: cubic-bezier(0.16, 1, 0.3, 1);
+  --p-ease-exit: cubic-bezier(0.4, 0, 1, 1);
+
+  /* ---------- 2. SEMANTIC ---------- */
+  --background: var(--p-cream-50);
+  --foreground: var(--p-ink-900);
+  --surface: var(--p-white);
+  --surface-sunken: var(--p-cream-100);
+  --surface-inverse: var(--p-green-900);
+  --on-inverse: var(--p-cream-50);
+  --muted-foreground: var(--p-ink-600);
+  --subtle-foreground: var(--p-ink-400);
+
+  --primary: var(--p-green-900);
+  --primary-hover: var(--p-green-800);
+  --primary-foreground: var(--p-cream-50);
+  --accent: var(--p-gold-400);
+  --accent-hover: var(--p-gold-200);
+  --accent-foreground: var(--p-green-900);
+  --accent-text: var(--p-gold-700);
+
+  --border: var(--p-cream-200);
+  --border-strong: var(--p-cream-300);
+  --ring: var(--p-gold-700); /* readable focus ring on cream (≥3:1) */
+
+  --success: var(--p-teal-700);   --success-soft: var(--p-teal-100);
+  --warning: var(--p-amber-700);  --warning-soft: var(--p-amber-100);
+  --danger: var(--p-red-600);     --danger-soft: var(--p-red-100);
+
+  --font-display: var(--p-font-display);
+  --font-text: var(--p-font-text);
+
+  --radius-control: var(--p-radius-pill);
+  --radius-card: var(--p-radius-lg);
+  --radius-panel: var(--p-radius-xl);
+
+  --elevation-card: var(--p-shadow-2);
+  --elevation-overlay: var(--p-shadow-3);
+
+  --motion-hover: var(--p-dur-base) var(--p-ease-standard);
+  --motion-enter: var(--p-dur-slow) var(--p-ease-emphasized);
+  --motion-exit: var(--p-dur-fast) var(--p-ease-exit);
+
+  /* ---------- 3. COMPONENT ---------- */
+  --btn-height: 48px;
+  --btn-height-lg: 56px;
+  --btn-primary-bg: var(--primary);
+  --btn-primary-bg-hover: var(--primary-hover);
+  --btn-primary-fg: var(--primary-foreground);
+  --btn-accent-bg: var(--accent);
+  --btn-accent-fg: var(--accent-foreground);
+
+  --ticket-bg: var(--surface);
+  --ticket-notch: var(--background);
+  --ticket-rule: var(--border-strong);
+  --ticket-radius: var(--p-radius-lg);
+
+  --tracker-rail: var(--border-strong);
+  --tracker-fill: var(--primary);
+  --tracker-stop: var(--surface);
+  --tracker-stop-active: var(--accent);
+  --tracker-stamp: var(--accent);
+
+  --chip-bg: var(--surface-sunken);
+  --chip-fg: var(--primary);
+  --chip-bg-active: var(--primary);
+  --chip-fg-active: var(--accent);
+
+  --header-height: 72px;
+  --container: 1240px;
+}
+
+/* Tailwind v4 theme mapping — utilities read the semantic layer */
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-surface: var(--surface);
+  --color-sunken: var(--surface-sunken);
+  --color-inverse: var(--surface-inverse);
+  --color-on-inverse: var(--on-inverse);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-subtle: var(--subtle-foreground);
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent-text: var(--accent-text);
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+  --color-ring: var(--ring);
+  --color-success: var(--success);
+  --color-success-soft: var(--success-soft);
+  --color-warning: var(--warning);
+  --color-warning-soft: var(--warning-soft);
+  --color-danger: var(--danger);
+  --color-danger-soft: var(--danger-soft);
+
+  --font-display: var(--p-font-display);
+  --font-sans: var(--p-font-text);
+
+  --radius-xs: var(--p-radius-xs);
+  --radius-sm: var(--p-radius-sm);
+  --radius-md: var(--p-radius-md);
+  --radius-lg: var(--p-radius-lg);
+  --radius-xl: var(--p-radius-xl);
+
+  --shadow-card: var(--p-shadow-2);
+  --shadow-overlay: var(--p-shadow-3);
+  --shadow-hairline: var(--p-shadow-1);
+
+  --ease-standard: var(--p-ease-standard);
+  --ease-emphasized: var(--p-ease-emphasized);
+
+  --text-display-xl: 3rem;
+  --text-display-xl--line-height: 1.15;
+  --text-display-lg: 2.5rem;
+  --text-display-lg--line-height: 1.2;
+  --text-display-md: 2rem;
+  --text-display-md--line-height: 1.25;
+  --text-display-sm: 1.625rem;
+  --text-display-sm--line-height: 1.3;
+}

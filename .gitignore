@@ -1,0 +1,10 @@
+node_modules
+dist
+.env
+.env.local
+dist-ssr
+
+# local helpers and design review screenshots
+.tmp-*
+.claude/settings.local.json
+.impeccable/review/
