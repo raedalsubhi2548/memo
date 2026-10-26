@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
-import { Check } from 'lucide-react'
 import { PageHead } from '@/components/ui/kit.jsx'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
@@ -32,30 +31,29 @@ export default function Policies() {
   }, [active])
   return (
     <div className="container-w py-10 sm:py-14">
-      <PageHead title="السياسات والشروط" lead="راجعها قبل الطلب. إذا عندك سؤال، كلّمنا على واتساب." />
-      <p className="-mt-6 mb-8 text-center text-sm text-muted-foreground">آخر تحديث للسياسات: <time dateTime={POLICY_DATE}>{date(POLICY_DATE + 'T12:00:00')}</time></p>
-      <div className="grid items-start gap-8 lg:grid-cols-[240px_1fr]">
-        <nav className="flex gap-2 overflow-x-auto [scrollbar-width:none] lg:sticky lg:top-[calc(var(--header-height)+24px)] lg:grid" aria-label="الأقسام">
-          {SECTIONS.map((s, i) => (
+      <PageHead title="السياسات والشروط" lead={<>راجعيها قبل الطلب، وإذا عندك سؤال كلّمينا على واتساب. آخر تحديث <time dateTime={POLICY_DATE}>{date(POLICY_DATE + 'T12:00:00')}</time>.</>} />
+      <div className="grid items-start gap-10 lg:grid-cols-[260px_1fr] lg:gap-16">
+        <nav className="flex gap-2 overflow-x-auto [scrollbar-width:none] lg:sticky lg:top-[calc(var(--header-height)+24px)] lg:grid lg:gap-1" aria-label="الأقسام">
+          {SECTIONS.map((s) => (
             <a key={s.id} href={`#${s.id}`} data-nav={s.id} onClick={() => setActive(s.id)} aria-current={active === s.id ? 'true' : undefined}
-              className={cn('flex shrink-0 items-center gap-3 rounded-full px-4 py-2.5 text-sm font-semibold ring-1 transition-colors lg:rounded-md', active === s.id ? 'bg-primary text-primary-foreground ring-primary' : 'text-primary ring-border hover:bg-sunken lg:ring-transparent')}>
-              <span className={cn('tabular text-xs', active === s.id ? 'text-primary-foreground/70' : 'text-accent-text')}>{String(i + 1).padStart(2, '0')}</span>{s.h}
+              className={cn('flex shrink-0 items-center px-4 py-2.5 text-[16px] font-bold transition-colors', active === s.id ? 'bg-primary text-primary-foreground' : 'bg-sunken text-primary hover:bg-[var(--p-cream-200)] lg:bg-transparent')}>
+              {s.h}
             </a>
           ))}
         </nav>
-        <div className="grid gap-4">
-          {SECTIONS.map((s, i) => (
-            <section key={s.id} id={s.id} className={cn('scroll-mt-28 rounded-lg bg-surface p-6 shadow-hairline ring-1 transition-[box-shadow,background-color] duration-300 sm:p-8', active === s.id ? 'bg-sunken ring-2 ring-primary/40' : 'ring-border')}>
-              <h2 className="flex items-baseline gap-3 font-display text-xl font-semibold text-primary"><span className="tabular text-sm text-accent-text">{String(i + 1).padStart(2, '0')}</span>{s.h}</h2>
-              <ul className="mt-4 grid gap-3">
-                {s.p.map((x) => <li key={x} className="flex gap-3 leading-8"><Check className="mt-2 size-4 shrink-0 text-primary" />{x}</li>)}
-              </ul>
+        <div className="grid gap-14">
+          {SECTIONS.map((s) => (
+            <section key={s.id} id={s.id} className="scroll-mt-28">
+              <h2 className="font-display text-[clamp(1.6rem,1.2rem+1.4vw,2.4rem)] font-extrabold text-primary">{s.h}</h2>
+              <div className="mt-4 grid max-w-[78ch] gap-3 text-[18px] leading-[1.85]">
+                {s.p.map((x) => <p key={x}>{x}</p>)}
+              </div>
             </section>
           ))}
-          <div className="flex flex-wrap items-center justify-between gap-4 rounded-lg bg-sunken p-6">
-            <p className="font-semibold text-primary">عندك سؤال عن الشروط؟</p>
+          <div className="flex flex-wrap items-center justify-between gap-4 bg-sunken p-6 sm:p-8">
+            <p className="text-[20px] font-extrabold text-primary">عندك سؤال عن الشروط؟</p>
             <div className="flex gap-2">
-              <Button asChild variant="outline"><Link to="/contact">تواصل معنا</Link></Button>
+              <Button asChild variant="outline"><Link to="/contact">تواصلي معنا</Link></Button>
               <Button asChild><a href={waLink('عندي سؤال عن السياسات')} target="_blank" rel="noreferrer">واتساب</a></Button>
             </div>
           </div>

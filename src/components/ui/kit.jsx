@@ -4,7 +4,7 @@ import { Check, Minus, Plus } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { ORDER_STATUSES } from '@/data/seed.js'
 
-const control = 'w-full rounded-md border-[1.5px] border-border bg-surface px-3.5 text-[15px] text-foreground outline-none transition-[border-color,box-shadow] duration-200 placeholder:text-subtle focus:border-primary focus:ring-[3px] focus:ring-ring/35 disabled:opacity-60 read-only:bg-sunken read-only:text-muted-foreground'
+const control = 'w-full rounded-md border-[1.5px] border-border bg-surface px-3.5 text-[16px] text-foreground outline-none transition-[border-color,box-shadow] duration-200 placeholder:text-subtle focus:border-primary focus:ring-[3px] focus:ring-ring/35 disabled:opacity-60 read-only:bg-sunken read-only:text-muted-foreground'
 
 export const Input = React.forwardRef(({ className, ...p }, ref) => <input ref={ref} className={cn(control, 'h-12', className)} {...p} />)
 Input.displayName = 'Input'
@@ -28,7 +28,7 @@ export function Field({ label, hint, error, className, children }) {
 
 export function Panel({ className, title, action, children }) {
   return (
-    <section className={cn('rounded-lg bg-surface p-5 shadow-hairline ring-1 ring-border sm:p-6', className)}>
+    <section className={cn('bg-surface p-5 sm:p-7', className)}>
       {(title || action) && (
         <div className="mb-4 flex items-center justify-between gap-3">
           {title && <h2 className="font-display text-lg font-semibold text-primary">{title}</h2>}
@@ -42,13 +42,11 @@ export function Panel({ className, title, action, children }) {
 
 export function PageHead({ title, lead, crumbs, action }) {
   return (
-    <div className={cn('relative mb-10 flex flex-wrap items-end gap-4', action ? 'justify-between' : 'justify-center text-center')}>
-      <span className="pointer-events-none absolute inset-x-[-50vw] -top-[calc(var(--header-height)+60px)] -z-10 h-[calc(100%+var(--header-height)+120px)] bg-[radial-gradient(40%_70%_at_50%_0%,color-mix(in_srgb,var(--p-green-900)_8%,transparent),transparent_75%)]" aria-hidden="true" />
-      <div className="max-w-2xl">
-        {crumbs && <nav className={cn('mb-3 flex flex-wrap items-center gap-1.5 text-[13px] text-muted-foreground', !action && 'justify-center')} aria-label="المسار">{crumbs}</nav>}
-        <h1 className="text-balance font-display text-[2.2rem] font-bold leading-[1.4] text-primary sm:text-[2.8rem]">{title}</h1>
-        <span className={cn('mt-3 block h-px w-24 bg-[linear-gradient(90deg,transparent,color-mix(in_srgb,var(--p-green-900)_35%,transparent),transparent)]', !action && 'mx-auto')} aria-hidden="true" />
-        {lead && <p className="mt-3 text-[16.5px] leading-8 text-muted-foreground">{lead}</p>}
+    <div className="mb-12 flex flex-wrap items-end justify-between gap-6 sm:mb-16">
+      <div className="max-w-3xl">
+        {crumbs && <nav className="mb-4 flex flex-wrap items-center gap-1.5 text-[16px] text-muted-foreground" aria-label="المسار">{crumbs}</nav>}
+        <h1 className="text-balance font-display text-[clamp(2.6rem,1rem+4.6vw,5.75rem)] font-extrabold leading-[1.1] text-primary motion-safe:animate-[rise-in_.8s_var(--p-ease-emphasized)_both]">{title}</h1>
+        {lead && <p className="mt-5 max-w-[52ch] text-[18px] leading-8 text-foreground motion-safe:animate-[rise-in_1s_var(--p-ease-emphasized)_both]">{lead}</p>}
       </div>
       {action}
     </div>
@@ -57,7 +55,7 @@ export function PageHead({ title, lead, crumbs, action }) {
 
 export function Empty({ icon: IconC, title, children, action }) {
   return (
-    <div className="grid justify-items-center gap-3 rounded-lg border-2 border-dashed border-border-strong px-6 py-14 text-center">
+    <div className="grid justify-items-center gap-3 bg-sunken px-6 py-14 text-center">
       {IconC && <span className="grid size-14 place-items-center rounded-full bg-sunken text-primary"><IconC className="size-6" /></span>}
       <p className="font-display text-lg font-semibold text-primary">{title}</p>
       {children && <p className="max-w-md text-muted-foreground">{children}</p>}
@@ -69,10 +67,10 @@ export function Empty({ icon: IconC, title, children, action }) {
 export function Qty({ value, onChange, size = 'md' }) {
   const h = size === 'sm' ? 'h-9' : 'h-12'
   return (
-    <div className={cn('inline-flex items-center rounded-full border-[1.5px] border-border-strong', h)}>
-      <button type="button" onClick={() => onChange(value + 1)} className="grid h-full w-10 place-items-center rounded-full text-primary hover:bg-sunken" aria-label="زيادة الكمية"><Plus className="size-4" /></button>
+    <div className={cn('inline-flex items-center border-[1.5px] border-border-strong bg-background', h)}>
+      <button type="button" onClick={() => onChange(value + 1)} className="grid h-full w-10 place-items-center text-primary hover:bg-sunken" aria-label="زيادة الكمية"><Plus className="size-4" /></button>
       <span className="tabular min-w-7 text-center font-bold" aria-live="polite">{value}</span>
-      <button type="button" onClick={() => onChange(Math.max(1, value - 1))} disabled={value <= 1} className="grid h-full w-10 place-items-center rounded-full text-primary hover:bg-sunken disabled:opacity-30 disabled:hover:bg-transparent" aria-label="تقليل الكمية"><Minus className="size-4" /></button>
+      <button type="button" onClick={() => onChange(Math.max(1, value - 1))} disabled={value <= 1} className="grid h-full w-10 place-items-center text-primary hover:bg-sunken disabled:opacity-30 disabled:hover:bg-transparent" aria-label="تقليل الكمية"><Minus className="size-4" /></button>
     </div>
   )
 }

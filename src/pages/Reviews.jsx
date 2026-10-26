@@ -22,7 +22,7 @@ export default function Reviews() {
   return (
     <div className="container-w py-10 sm:py-14">
       <PageIntro crumb="آراء العملاء" title="آراء عملائنا" className="-mt-10 sm:-mt-14">
-        <p className="mx-auto mt-4 inline-flex items-center gap-3 rounded-full bg-white px-4 py-2 text-[15px] text-primary shadow-[0_12px_28px_-18px_color-mix(in_srgb,var(--p-green-900)_60%,transparent)] ring-1 ring-primary/10">
+        <p className="mt-4 inline-flex items-center gap-3 bg-sunken px-4 py-2 text-[16px] text-primary">
           <Stars className="text-primary" value={avg} /><b className="tabular">{avg.toFixed(1)}</b><span className="h-4 w-px bg-primary/20" /><span><b className="tabular">{all.length}</b> رأي مكتوب من عملائنا</span>
         </p>
       </PageIntro>

@@ -1,14 +1,7 @@
-/* Fonts served from the store itself (no Google Fonts round-trip, nothing blocking the first paint). El Messiri (headings) loads its Arabic subset only; digits and Latin fall back to IBM Plex Sans Arabic. */
-@import '@fontsource/el-messiri/arabic-500.css';
-@import '@fontsource/el-messiri/arabic-600.css';
-@import '@fontsource/el-messiri/arabic-700.css';
-@import '@fontsource/ibm-plex-sans-arabic/arabic-300.css';
-@import '@fontsource/ibm-plex-sans-arabic/latin-300.css';
-@import '@fontsource/ibm-plex-sans-arabic/arabic-400.css';
-@import '@fontsource/ibm-plex-sans-arabic/latin-400.css';
-@import '@fontsource/ibm-plex-sans-arabic/arabic-500.css';
-@import '@fontsource/ibm-plex-sans-arabic/latin-500.css';
-@import '@fontsource/ibm-plex-sans-arabic/arabic-600.css';
-@import '@fontsource/ibm-plex-sans-arabic/latin-600.css';
-@import '@fontsource/ibm-plex-sans-arabic/arabic-700.css';
-@import '@fontsource/ibm-plex-sans-arabic/latin-700.css';
+/* Fonts served from the store itself (no Google Fonts round-trip). Almarai is the store's one face: headings and text. */
+@import '@fontsource/almarai/arabic-400.css';
+@import '@fontsource/almarai/latin-400.css';
+@import '@fontsource/almarai/arabic-700.css';
+@import '@fontsource/almarai/latin-700.css';
+@import '@fontsource/almarai/arabic-800.css';
+@import '@fontsource/almarai/latin-800.css';

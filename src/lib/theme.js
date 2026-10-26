@@ -6,7 +6,7 @@ export const DEFAULT_SETTINGS = {
   logo: '/logo-300.png', // on light backgrounds (header after scrolling, menus)
   logoLight: '/logo-white.png', // on dark backgrounds (hero, footer)
   logoScale: 100, // percent
-  colors: { primary: '#7d3f4c', accent: '#e9c3bd', background: '#fdf7f4' },
+  colors: { primary: '#4a1d28', accent: '#c99a92', background: '#efe6e3' },
   announcement: { on: false, text: '', link: '' },
 }
 
@@ -17,10 +17,10 @@ export const DEFAULT_STORE = {
   social: { instagram: '', x: '', tiktok: '', snapchat: '' },
 }
 export const FONTS = {
-  heading: [['elmessiri', 'المسيري (الأصلي)', "'El Messiri'"], ['marhey', 'مرحي', "'Marhey'"], ['plex', 'آي بي إم بلكس', "'IBM Plex Sans Arabic'"], ['cairo', 'القاهرة', "'Cairo'"], ['tajawal', 'تجوال', "'Tajawal'"], ['almarai', 'المراعي', "'Almarai'"], ['reemkufi', 'ريم كوفي', "'Reem Kufi'"]],
-  body: [['plex', 'آي بي إم بلكس (الأصلي)', "'IBM Plex Sans Arabic'"], ['cairo', 'القاهرة', "'Cairo'"], ['tajawal', 'تجوال', "'Tajawal'"], ['almarai', 'المراعي', "'Almarai'"]],
+  heading: [['almarai', 'المراعي (الأصلي)', "'Almarai'"], ['elmessiri', 'المسيري', "'El Messiri'"], ['marhey', 'مرحي', "'Marhey'"], ['plex', 'آي بي إم بلكس', "'IBM Plex Sans Arabic'"], ['cairo', 'القاهرة', "'Cairo'"], ['tajawal', 'تجوال', "'Tajawal'"], ['almarai', 'المراعي', "'Almarai'"], ['reemkufi', 'ريم كوفي', "'Reem Kufi'"]],
+  body: [['almarai', 'المراعي (الأصلي)', "'Almarai'"], ['plex', 'آي بي إم بلكس', "'IBM Plex Sans Arabic'"], ['cairo', 'القاهرة', "'Cairo'"], ['tajawal', 'تجوال', "'Tajawal'"]],
 }
-export const RADII = [['round', 'دائرية (الأصلي)'], ['soft', 'ناعمة'], ['sharp', 'حادة']]
+export const RADII = [['round', 'حادة (الأصلي)'], ['soft', 'ناعمة']]
 /** 05xxxxxxxx, 5xxxxxxxx, +9665xxxxxxxx → 9665xxxxxxxx (international, digits only). */
 export const normPhone = (v) => { const d = String(v || '').replace(/\D/g, ''); return d.startsWith('05') ? '966' + d.slice(1) : d.startsWith('5') && d.length === 9 ? '966' + d : d }
 
@@ -29,8 +29,8 @@ export const normPhone = (v) => { const d = String(v || '').replace(/\D/g, ''); 
 // text · textarea · link · image · switch · select · number · category · product · products · items
 export const ICONS = ['truck', 'shield', 'chat', 'leaf', 'drop', 'gift'] // the line drawings in LineArt
 export const BLOCKS = {
-  hero: { name: 'الواجهة الرئيسية', icon: 'Sparkles', hint: 'صورة كبيرة بعنوان وزر، أول ما يشوفه الزائر.', fields: [
-    ['eyebrow', 'سطر صغير فوق العنوان', 'text', 60], ['title1', 'العنوان (السطر الأول)', 'text', 60], ['title2', 'العنوان (السطر الثاني)', 'text', 60],
+  hero: { name: 'الواجهة الرئيسية', icon: 'Sparkles', hint: 'صورة كبيرة وتحتها اسم المتجر بخط ضخم، مع جملة وزر.', fields: [
+    ['title1', 'الاسم الكبير', 'text', 24],
     ['text', 'الوصف', 'textarea', 220], ['cta', 'نص الزر', 'text', 30], ['ctaLink', 'رابط الزر', 'link'],
     ['image', 'صورة الخلفية (كمبيوتر)', 'image'], ['imageMobile', 'صورة الخلفية (جوال)', 'image'],
   ] },
@@ -40,50 +40,51 @@ export const BLOCKS = {
   ] },
   promises: { name: 'مميزات المتجر', icon: 'BadgeCheck', hint: 'ثلاث نقاط قصيرة مع رسومات.', fields: [['items', 'المميزات', 'items']] },
   products: { name: 'منتجات', icon: 'LayoutGrid', hint: 'رف منتجات: من قسم، أو تختارها بنفسك، أو الأحدث.', fields: [
-    ['eyebrow', 'سطر صغير فوق العنوان', 'text', 60], ['title', 'العنوان', 'text', 60],
+    ['title', 'العنوان', 'text', 60],
     ['source', 'المنتجات', 'select', [['category', 'من قسم'], ['picked', 'أختارها بنفسي'], ['latest', 'الأحدث'], ['featured', 'المميزة']]],
     ['category', 'القسم', 'category'], ['ids', 'اختر المنتجات', 'products'], ['limit', 'عدد المنتجات', 'number', [2, 12]], ['viewAll', 'زر «عرض الكل»', 'switch'],
   ] },
-  categories: { name: 'أقسام المتجر', icon: 'Shapes', hint: 'كل أقسام المتجر بصورها.', fields: [['eyebrow', 'سطر صغير فوق العنوان', 'text', 60], ['title', 'العنوان', 'text', 60]] },
+  categories: { name: 'أقسام المتجر', icon: 'Shapes', hint: 'كل أقسام المتجر بصورها.', fields: [['title', 'العنوان', 'text', 60]] },
   imageText: { name: 'بانر مدموج', icon: 'PanelLeft', hint: 'صورة تذوب في خلفية المتجر وبجانبها عنوان ووصف وزر.', fields: [
     ['kicker', 'سطر صغير', 'text', 60], ['title', 'العنوان', 'text', 60], ['accent', 'سطر ثاني للعنوان', 'text', 60], ['text', 'الوصف', 'textarea', 260],
     ['cta', 'نص الزر', 'text', 30], ['link', 'الرابط', 'link'], ['image', 'الصورة', 'image'], ['priceOf', 'إظهار سعر منتج (اختياري)', 'product'], ['payIcons', 'إظهار شعارات الدفع', 'switch'],
   ] },
   text: { name: 'نص حر', icon: 'Type', hint: 'عنوان وفقرة، مع زر اختياري.', fields: [
-    ['eyebrow', 'سطر صغير فوق العنوان', 'text', 60], ['title', 'العنوان', 'text', 80], ['text', 'النص', 'textarea', 900],
+    ['title', 'العنوان', 'text', 80], ['text', 'النص', 'textarea', 900],
     ['cta', 'نص الزر (اختياري)', 'text', 30], ['link', 'رابط الزر', 'link'], ['align', 'المحاذاة', 'select', [['center', 'وسط'], ['start', 'يمين']]],
   ] },
-  reviews: { name: 'آراء العملاء', icon: 'MessageSquareQuote', hint: 'تقييمات العملاء تتحرك في صفين.', fields: [['eyebrow', 'سطر صغير فوق العنوان', 'text', 60], ['title', 'العنوان', 'text', 60]] },
-  faq: { name: 'الأسئلة الشائعة', icon: 'CircleHelp', hint: 'أسئلة تتكرر مع إجاباتها.', fields: [['eyebrow', 'سطر صغير فوق العنوان', 'text', 60], ['title', 'العنوان', 'text', 60]] },
+  reviews: { name: 'آراء العملاء', icon: 'MessageSquareQuote', hint: 'تقييمات العملاء تتحرك في صفين.', fields: [['title', 'العنوان', 'text', 60]] },
+  ingredients: { name: 'المكونات', icon: 'Leaf', hint: 'صور المكونات تمر خلف عنوان كبير ثابت.', fields: [['title', 'العنوان', 'text', 40]] },
+  journey: { name: 'خطوات الطلب', icon: 'Truck', hint: 'من الطلب لباب البيت، على شكل إيصال.', fields: [['title', 'العنوان', 'text', 40], ['text', 'الوصف', 'textarea', 160]] },
+  faq: { name: 'الأسئلة الشائعة', icon: 'CircleHelp', hint: 'أسئلة تتكرر مع إجاباتها.', fields: [['title', 'العنوان', 'text', 60]] },
 }
 
 const HERO = {
-  eyebrow: 'زيوت وصابونيات للعناية', title1: 'عناية ميمي', title2: 'دلّعي شعرك وبشرتك',
-  text: 'صابونيات تقليدية وزيت للشعر، مختارة بعناية لروتينك.',
-  cta: 'تسوّقي الحين', ctaLink: '/shop', image: '', imageMobile: '',
+  title1: 'عناية ميمي',
+  text: 'صابونيات تقليدية وزيت للشعر، تُطلب أونلاين وتوصل لباب بيتك.',
+  cta: 'تسوّقي المنتجات', ctaLink: '#products', image: '', imageMobile: '',
 }
 /** What a freshly added block starts with. */
 export const BLOCK_DEFAULTS = {
   hero: HERO,
   banner: { image: '', imageMobile: '', link: '', alt: '', size: 'container' },
   promises: { items: [{ icon: 'truck', title: 'شحن لباب بيتك', text: 'وتتابعين طلبك من حسابك' }, { icon: 'shield', title: 'دفع آمن', text: 'مدى، فيزا، ماستركارد وApple Pay' }, { icon: 'chat', title: 'خدمة العملاء', text: 'نرد عليك على واتساب' }] },
-  products: { eyebrow: '', title: 'منتجاتنا', source: 'latest', category: '', ids: [], limit: 4, viewAll: true },
-  categories: { eyebrow: 'تسوّقي حسب احتياجك', title: 'أقسام المتجر' },
+  products: { title: 'منتجاتنا', source: 'latest', category: '', ids: [], limit: 4, viewAll: true },
+  categories: { title: 'الأقسام' },
   imageText: { kicker: '', title: 'عنوان جذاب', accent: '', text: '', cta: 'اطلب الحين', link: '/shop', image: '', priceOf: '', payIcons: false },
-  text: { eyebrow: '', title: 'عنوان القسم', text: 'اكتب هنا النص اللي تبيه يظهر لعملائك.', cta: '', link: '', align: 'center' },
-  reviews: { eyebrow: 'آراء عميلاتنا', title: 'تجاربهن مع منتجاتنا' },
-  faq: { eyebrow: 'قبل ما تطلبين', title: 'أسئلة تتكرر' },
+  text: { title: 'عنوان القسم', text: 'اكتب هنا النص اللي تبيه يظهر لعملائك.', cta: '', link: '', align: 'center' },
+  reviews: { title: 'آراء العميلات' },
+  faq: { title: 'قبل ما تطلبين' },
+  ingredients: { title: 'أسرار العطّارة' },
+  journey: { title: 'من طلبك لباب بيتك', text: 'خطوات واضحة، ويوصلك إيميل مع كل تحديث على طلبك.' },
 }
 
 /** The home page as it was designed (used until the owner saves their own). */
 export const defaultHome = (hero = {}) => [
   { id: 'hero', type: 'hero', on: true, ...HERO, ...hero },
-  { id: 'categories', type: 'categories', on: true, ...BLOCK_DEFAULTS.categories },
-  { id: 'hair-banner', type: 'imageText', on: true, kicker: 'العناية بالشعر', title: 'شعر يلمع', accent: 'من الجذور للأطراف', text: 'زيت للشعر تستخدمينه ثلاث مرات بالأسبوع على فروة الشعر وأطرافه.', cta: 'تسوّقي الحين', link: '/hair-care', image: '/brand/banner-hair.webp', priceOf: '', payIcons: false },
-  { id: 'hair', type: 'products', on: true, eyebrow: 'العناية بالشعر', title: 'منتجات الشعر', source: 'category', category: 'hair-care', ids: [], limit: 4, viewAll: true },
-  { id: 'skin-banner', type: 'imageText', on: true, kicker: 'العناية بالبشرة', title: 'صابونيات تقليدية', accent: 'لبشرة ناعمة ومشرقة', text: 'الكركم والعكر الفارسي والنيلة المغربية، بخلطات صابونية لروتين الاستحمام.', cta: 'تسوّقي الحين', link: '/skin-care', image: '/brand/banner-skin.webp', priceOf: '', payIcons: false },
-  { id: 'skin', type: 'products', on: true, eyebrow: 'العناية بالبشرة', title: 'منتجات البشرة', source: 'category', category: 'skin-care', ids: [], limit: 4, viewAll: true },
-  { id: 'promises', type: 'promises', on: true, ...BLOCK_DEFAULTS.promises },
+  { id: 'products', type: 'products', on: true, title: 'المنتجات', source: 'latest', category: '', ids: [], limit: 12, viewAll: false },
+  { id: 'ingredients', type: 'ingredients', on: true, ...BLOCK_DEFAULTS.ingredients },
+  { id: 'journey', type: 'journey', on: true, ...BLOCK_DEFAULTS.journey },
   { id: 'reviews', type: 'reviews', on: true, ...BLOCK_DEFAULTS.reviews },
   { id: 'faq', type: 'faq', on: true, ...BLOCK_DEFAULTS.faq },
 ]
@@ -119,7 +120,8 @@ export const DEFAULT_ABOUT = 'عناية ميمي: صابونيات تقليدي
 
 /** Ready-made palettes the owner can start from. */
 export const PRESETS = [
-  { name: 'وردي ناعم (الأصلي)', primary: '#7d3f4c', accent: '#e9c3bd', background: '#fdf7f4' },
+  { name: 'عنابي على وردي (الأصلي)', primary: '#4a1d28', accent: '#c99a92', background: '#efe6e3' },
+  { name: 'وردي ناعم', primary: '#7d3f4c', accent: '#e9c3bd', background: '#fdf7f4' },
   { name: 'كحلي', primary: '#1b2b44', accent: '#c3cedd', background: '#fbfcfe' },
   { name: 'أسود وذهبي', primary: '#161616', accent: '#d4b06a', background: '#fbf9f5' },
   { name: 'أخضر زيتي', primary: '#1f3b2d', accent: '#c9b37e', background: '#f8f7f2' },
@@ -171,8 +173,8 @@ export function mergeSettings(raw) {
       social: Object.fromEntries(Object.keys(DEFAULT_STORE.social).map((k) => [k, /^https:\/\//i.test(s.store?.social?.[k] || '') ? safeLink(s.store.social[k], '') : ''])),
     },
     fonts: {
-      heading: FONTS.heading.some(([k]) => k === s.fonts?.heading) ? s.fonts.heading : 'elmessiri',
-      body: FONTS.body.some(([k]) => k === s.fonts?.body) ? s.fonts.body : 'plex',
+      heading: FONTS.heading.some(([k]) => k === s.fonts?.heading) ? s.fonts.heading : 'almarai',
+      body: FONTS.body.some(([k]) => k === s.fonts?.body) ? s.fonts.body : 'almarai',
     },
     radius: RADII.some(([k]) => k === s.radius) ? s.radius : 'round',
     categoryImages: Object.fromEntries(Object.entries(s.categoryImages && typeof s.categoryImages === 'object' ? s.categoryImages : {}).filter(([k, v]) => SLUG.test(k) && safeUrl(v, '')).slice(0, 40)),
@@ -217,8 +219,8 @@ export function themeCss(settings) {
   }
   if (s.logoScale !== 100) v.push(['--logo-scale', String(s.logoScale / 100)])
   const fam = (list, k) => list.find(([x]) => x === k)[2]
-  if (s.fonts.heading !== 'elmessiri') v.push(['--p-font-script', `${fam(FONTS.heading, s.fonts.heading)}, 'IBM Plex Sans Arabic', sans-serif`])
-  if (s.fonts.body !== 'plex') { const f = `${fam(FONTS.body, s.fonts.body)}, 'IBM Plex Sans Arabic', system-ui, sans-serif`; v.push(['--p-font-text', f], ['--p-font-display', f]) }
+  if (s.fonts.heading !== 'almarai') v.push(['--p-font-script', `${fam(FONTS.heading, s.fonts.heading)}, 'IBM Plex Sans Arabic', sans-serif`])
+  if (s.fonts.body !== 'almarai') { const f = `${fam(FONTS.body, s.fonts.body)}, 'IBM Plex Sans Arabic', system-ui, sans-serif`; v.push(['--p-font-text', f], ['--p-font-display', f]) }
   if (s.radius === 'soft') v.push(['--p-radius-pill', '14px'], ['--p-radius-lg', '14px'], ['--p-radius-xl', '18px'])
   if (s.radius === 'sharp') v.push(['--p-radius-pill', '6px'], ['--p-radius-lg', '6px'], ['--p-radius-xl', '8px'], ['--p-radius-md', '6px'], ['--p-radius-sm', '4px'])
   let css = v.length ? `:root{${v.map(([k, x]) => `${k}:${x}`).join(';')}}` : ''

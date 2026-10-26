@@ -8,3 +8,7 @@ dist-ssr
 .tmp-*
 .claude/settings.local.json
 .impeccable/review/
+
+# downloaded originals (credits.json stays)
+/assets/*.jpg
+.taste-skill/

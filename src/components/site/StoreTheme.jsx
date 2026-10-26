@@ -9,7 +9,8 @@ import { themeCss } from '@/lib/theme.js'
 const FONT_CSS = {
   cairo: () => [import('@fontsource/cairo/arabic-400.css'), import('@fontsource/cairo/arabic-500.css'), import('@fontsource/cairo/arabic-700.css')],
   tajawal: () => [import('@fontsource/tajawal/arabic-400.css'), import('@fontsource/tajawal/arabic-500.css'), import('@fontsource/tajawal/arabic-700.css')],
-  almarai: () => [import('@fontsource/almarai/arabic-400.css'), import('@fontsource/almarai/arabic-700.css')],
+  elmessiri: () => [import('@fontsource/el-messiri/arabic-500.css'), import('@fontsource/el-messiri/arabic-700.css')],
+  plex: () => [import('@fontsource/ibm-plex-sans-arabic/arabic-400.css'), import('@fontsource/ibm-plex-sans-arabic/arabic-600.css')],
   marhey: () => [import('@fontsource/marhey/arabic-500.css'), import('@fontsource/marhey/arabic-700.css')],
   reemkufi: () => [import('@fontsource/reem-kufi/arabic-500.css'), import('@fontsource/reem-kufi/arabic-700.css')],
 }

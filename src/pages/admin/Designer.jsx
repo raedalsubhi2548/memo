@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { useOutletContext } from 'react-router-dom'
 import {
   Smartphone, Monitor, Upload, RotateCcw, Check, Loader2, ImageIcon, Undo2, ChevronUp, ChevronDown, Eye, EyeOff, Trash2, Plus, Pencil, X,
-  History, Sparkles, Image as ImageLucide, BadgeCheck, LayoutGrid, Shapes, PanelLeft, Type, GalleryHorizontal, MessageSquareQuote, CircleHelp, Copy,
+  History, Sparkles, Image as ImageLucide, BadgeCheck, LayoutGrid, Shapes, PanelLeft, Type, GalleryHorizontal, MessageSquareQuote, CircleHelp, Copy, Leaf, Truck,
 } from 'lucide-react'
 import { api } from '@/lib/api.js'
 import { useApp } from '@/state.jsx'
@@ -15,7 +15,7 @@ import { AdminHead, useConfirm } from '@/components/admin/ui.jsx'
 import * as Dialog from '@radix-ui/react-dialog'
 
 const MAX_IMAGE = 4 * 1024 * 1024
-const BLOCK_ICON = { Sparkles, Image: ImageLucide, BadgeCheck, LayoutGrid, Shapes, PanelLeft, Type, GalleryHorizontal, MessageSquareQuote, CircleHelp }
+const BLOCK_ICON = { Sparkles, Image: ImageLucide, BadgeCheck, LayoutGrid, Shapes, PanelLeft, Type, GalleryHorizontal, MessageSquareQuote, CircleHelp, Leaf, Truck }
 const ICON_NAMES = { truck: 'شحن', shield: 'حماية', chat: 'محادثة', leaf: 'ورقة', drop: 'قطرة', gift: 'هدية' }
 const BUILT_IN_CAT = { 'hair-care': '/brand/cat-hair-care.webp', 'skin-care': '/brand/cat-skin-care.webp' }
 const uid = () => 'b' + Math.random().toString(36).slice(2, 8)

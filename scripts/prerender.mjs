@@ -35,8 +35,7 @@ const sb = (process.env.VITE_SUPABASE_URL || '').trim().replace(/\/rest\/v1\/?$/
 const EARLY = [
   ...(/^https:\/\/[\w.-]+$/.test(sb) ? [`<link rel="preconnect" href="${sb}" crossorigin />`] : []),
   '<link rel="dns-prefetch" href="https://www.googletagmanager.com" />',
-  ...(S0.fonts.heading === 'elmessiri' ? [font(/^el-messiri-arabic-600-normal-.*\.woff2$/)] : []),
-  ...(S0.fonts.body === 'plex' ? [font(/^ibm-plex-sans-arabic-arabic-400-normal-.*\.woff2$/)] : []),
+  ...(S0.fonts.heading === 'almarai' ? [font(/^almarai-arabic-800-normal-.*\.woff2$/), font(/^almarai-arabic-400-normal-.*\.woff2$/)] : []),
 ].filter(Boolean).map((x) => (x.startsWith('<') ? x : `<link rel="preload" as="font" type="font/woff2" href="/assets/${x}" crossorigin />`)).join('\n    ')
 const HERO_PRELOAD = `    <link rel="preload" as="image" href="${attr(hero.imageMobile || hero.image || '/brand/hero-mobile.webp')}" media="(max-width: 767px)" fetchpriority="high" />\n    <link rel="preload" as="image" href="${attr(hero.image || '/brand/hero.webp')}" media="(min-width: 768px)" fetchpriority="high" />\n`
 

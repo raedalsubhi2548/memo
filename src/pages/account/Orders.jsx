@@ -19,9 +19,9 @@ export default function Orders() {
   const spent = orders.filter((o) => !['pending', 'cancelled'].includes(o.status)).reduce((s, o) => s + o.total, 0)
   return (
     <>
-      <dl className="mb-6 grid grid-cols-3 divide-x divide-border overflow-hidden rounded-lg bg-surface shadow-hairline ring-1 ring-border">
+      <dl className="mb-6 grid grid-cols-3 gap-1 overflow-hidden">
         {[['كل الطلبات', orders.length], ['قيد المتابعة', active], ['إجمالي مشترياتك', money(spent)]].map(([l, v]) => (
-          <div key={l} className="p-4 sm:p-5">
+          <div key={l} className="bg-sunken p-4 sm:p-5">
             <dt className="text-xs text-muted-foreground sm:text-sm">{l}</dt>
             <dd className="tabular mt-1 font-display text-lg font-semibold text-primary sm:text-2xl">{v}</dd>
           </div>

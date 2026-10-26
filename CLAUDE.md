@@ -26,8 +26,11 @@ A custom-coded store for hair and skin care products, forked (Oct 2026) from Rae
 - Domain: `VITE_SITE_URL` / `SITE_URL` env. `admin.<domain>` opens the dashboard; until a domain is set, use `/admin`.
 
 ## Key places
-- Brand: `src/styles/tokens.css` (rose wine #7d3f4c, blush #e9c3bd, cream #fdf7f4), `src/lib/theme.js` (defaults, home blocks, shipping settings, `mergeSettings`).
-- Home: `src/pages/Home.jsx` (hero with the logo, category arches, blended banners, product shelves). Product card: `src/components/home/ServiceTicket.jsx`.
+- Brand: `src/styles/tokens.css` (wine ink #4a1d28, rose #c99a92, rose-bone ground #efe6e3), `src/lib/theme.js` (defaults, home blocks, shipping settings, `mergeSettings`).
+- Design (Oct 2026 rebuild, taste skill direction «name as a monument», seed 435523750; working files in `.taste-skill/`, not committed):
+  one face (Almarai 400/700/800), square corners everywhere, no shadows at rest, no gradients, no thin rules, no small labels above headings.
+  Surfaces are separated by a tone step (`bg-sunken`), never by a line or a shadow.
+- Home: `src/pages/Home.jsx` — hero (rose-petal picture, the store name across the full width with the logo between the words), the product line-up with «رتّبي روتينك» (tick products → total with shipping → add all), ingredients (real pictures from Wikimedia Commons, credited in the footer via `src/data/world.js`), the order journey as a receipt, questions. Product card: `src/components/home/ServiceTicket.jsx`. Entrances: `src/components/Reveal.jsx` (hides nothing until the visitor scrolls).
 - Catalog seed: `src/data/seed.js` → `node scripts/seed-sql.mjs` writes `supabase/seed.sql`.
 - Checkout + address: `src/pages/Checkout.jsx`, `src/lib/address.js`. Admin order sheet shows the address + «نسخ العنوان للشحن».
 - Policies: `src/data/terms.js` (DRAFT — the owner reviews returns/shipping wording and adds her CR / freelance number).

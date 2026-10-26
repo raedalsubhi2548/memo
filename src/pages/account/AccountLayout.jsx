@@ -34,7 +34,7 @@ export default function AccountLayout() {
         {user?.role === 'admin' && <Button asChild variant="accent"><a href={ADMIN_ORIGIN} target="_blank" rel="noreferrer"><LayoutDashboard className="size-4" />لوحة التحكم</a></Button>}
       </header>
       {user && (
-        <nav className="-mx-4 mb-8 flex gap-2 overflow-x-auto border-b border-border px-4 [scrollbar-width:none] sm:mx-0 sm:px-0" aria-label="حسابي">
+        <nav className="-mx-4 mb-8 flex gap-2 overflow-x-auto px-4 [scrollbar-width:none] sm:mx-0 sm:px-0" aria-label="حسابي">
           {TABS.map(({ to, end, icon: I, label }) => (
             <NavLink key={to} to={to} end={end} className={({ isActive }) => cn('-mb-px flex h-12 shrink-0 items-center gap-2 border-b-[3px] px-4 text-sm font-bold transition-colors', isActive ? 'border-accent text-primary' : 'border-transparent text-muted-foreground hover:text-primary')}>
               <I className="size-4" />{label}

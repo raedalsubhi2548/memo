@@ -38,7 +38,7 @@ export default function AccountSheet({ open, onOpenChange }) {
 
         {user ? (
           <>
-            <div className="mt-4 flex items-center gap-3 rounded-xl bg-inverse p-4 text-on-inverse">
+            <div className="mt-4 flex items-center gap-3 bg-inverse p-4 text-on-inverse">
               <span className="grid size-12 shrink-0 place-items-center rounded-full bg-accent font-display text-xl font-semibold text-accent-foreground">{(user.name || user.email || '؟').trim().charAt(0)}</span>
               <div className="min-w-0">
                 <p className="truncate font-display text-lg font-semibold">أهلاً {user.name || ''}</p>
@@ -61,7 +61,7 @@ export default function AccountSheet({ open, onOpenChange }) {
           </>
         ) : (
           <>
-            <div className="mt-4 rounded-xl bg-inverse p-5 text-on-inverse">
+            <div className="mt-4 bg-inverse p-5 text-on-inverse">
               <span className="grid size-12 place-items-center rounded-full bg-accent text-accent-foreground"><UserRound className="size-6" /></span>
               <p className="mt-3 font-display text-xl font-semibold">حسابك في {settings.store.name}</p>
               <p className="mt-1 text-sm leading-6 text-on-inverse/75">سجّلي دخولك وتابعي طلباتك ومفضلتك من مكان واحد.</p>
@@ -70,7 +70,7 @@ export default function AccountSheet({ open, onOpenChange }) {
               <Button asChild size="lg"><Link to="/login"><LogIn />تسجيل الدخول</Link></Button>
               <Button asChild size="lg" variant="outline"><Link to="/login?mode=up"><UserPlus />حساب جديد</Link></Button>
             </div>
-            <ul className="mt-6 grid border-t border-border pt-3">
+            <ul className="mt-8 grid">
               <Row to="/login?next=/account" icon={PackageSearch} label="تتبّع طلبك" />
               <Row to="/login?next=/account/wishlist" icon={Heart} label="المفضلة" badge={wishlist.length} />
             </ul>
