@@ -3,39 +3,39 @@
    1. Primitive  : raw values (never used directly in components)
    2. Semantic   : purpose aliases (what components reference)
    3. Component  : per-component knobs built from semantic tokens
-   Brand: wine ink #4a1d28 · rose #c99a92 · rose-bone ground #efe6e3
+   Brand: rose wine #7d3f4c · blush #e7c2bb · rose-gold #b98572 · soft blush ground #fbf6f4
    ========================================================================== */
 
 :root {
   /* ---------- 1. PRIMITIVE ---------- */
   /* Green — brand primary #1b2b44 at 900 */
-  --p-green-950: #34141c;
-  --p-green-900: #4a1d28;
-  --p-green-800: #582f39;
-  --p-green-700: #6b464f;
-  --p-green-600: #806168;
-  --p-green-200: #d7cdd0;
-  --p-green-100: #e9e4e5;
-  --p-green-50: #f4f1f2;
+  --p-green-950: #48252c;
+  --p-green-900: #7d3f4c;
+  --p-green-800: #874e5a;
+  --p-green-700: #94626c;
+  --p-green-600: #a47982;
+  --p-green-200: #e2d5d8;
+  --p-green-100: #efe8ea;
+  --p-green-50: #f7f3f4;
 
   /* Gold — brand accent #c3cedd at 400 */
-  --p-gold-700: #6a3c42;
-  --p-gold-600: #966868;
-  --p-gold-500: #b2847f;
-  --p-gold-400: #c99a92;
-  --p-gold-200: #dec4bf;
-  --p-gold-100: #e7d7d3;
+  --p-gold-700: #9c6b5c;
+  --p-gold-600: #b98572;
+  --p-gold-500: #cf9f8c;
+  --p-gold-400: #e7c2bb;
+  --p-gold-200: #f2ddda;
+  --p-gold-100: #f8edeb;
 
   /* Cream — brand ground #fbfcfe at 50 */
-  --p-cream-50: #efe6e3;
-  --p-cream-100: #e8dedc;
-  --p-cream-200: #e0d4d2;
-  --p-cream-300: #d6c8c7;
+  --p-cream-50: #fbf6f4;
+  --p-cream-100: #f7ece9;
+  --p-cream-200: #f0dfdb;
+  --p-cream-300: #e8d2cd;
 
   --p-white: #ffffff;
-  --p-ink-900: #4a1d28;
-  --p-ink-600: #78555c;
-  --p-ink-400: #9c8286;
+  --p-ink-900: #3d2a2e;
+  --p-ink-600: #7a6268;
+  --p-ink-400: #ad979c;
   --p-red-600: #a3322b;
   --p-red-100: #f6e3e1;
   --p-amber-700: #8a5a00;
@@ -44,9 +44,9 @@
   --p-teal-100: #e3f1e8;
 
   /* Type */
-  --p-font-display: 'Almarai', 'IBM Plex Sans Arabic', system-ui, sans-serif;
-  --p-font-script: 'Almarai', 'IBM Plex Sans Arabic', sans-serif;
-  --p-font-text: 'Almarai', 'IBM Plex Sans Arabic', system-ui, -apple-system, 'Segoe UI', Tahoma, sans-serif;
+  --p-font-display: 'El Messiri', 'Tajawal', system-ui, sans-serif;
+  --p-font-script: 'El Messiri', 'Tajawal', sans-serif;
+  --p-font-text: 'Tajawal', system-ui, -apple-system, 'Segoe UI', Tahoma, sans-serif;
   /* Major-third scale, 16px base */
   --p-size-12: 0.75rem;
   --p-size-14: 0.875rem;
@@ -65,13 +65,13 @@
   --p-space-12: 48px; --p-space-16: 64px; --p-space-20: 80px; --p-space-24: 96px;
 
   /* Radius */
-  --p-radius-xs: 0; --p-radius-sm: 0; --p-radius-md: 0;
-  --p-radius-lg: 0; --p-radius-xl: 0; --p-radius-pill: 0; /* square corners everywhere (house style) */
+  --p-radius-xs: 8px; --p-radius-sm: 12px; --p-radius-md: 16px;
+  --p-radius-lg: 22px; --p-radius-xl: 30px; --p-radius-pill: 999px;
 
   /* Shadows — tinted with brand green, never grey */
-  --p-shadow-1: none;
-  --p-shadow-2: none;
-  --p-shadow-3: 0 18px 50px -20px rgb(74 29 40 / 0.35); /* floating things only: menus, dialogs */
+  --p-shadow-1: 0 1px 2px rgb(125 63 76 / 0.06);
+  --p-shadow-2: 0 2px 6px rgb(125 63 76 / 0.05), 0 18px 40px -22px rgb(125 63 76 / 0.30);
+  --p-shadow-3: 0 4px 10px rgb(125 63 76 / 0.06), 0 30px 60px -28px rgb(125 63 76 / 0.40);
 
   /* Motion */
   --p-dur-fast: 120ms; --p-dur-base: 200ms; --p-dur-slow: 320ms; --p-dur-stage: 520ms;
@@ -82,7 +82,7 @@
   /* ---------- 2. SEMANTIC ---------- */
   --background: var(--p-cream-50);
   --foreground: var(--p-ink-900);
-  --surface: #f8f3f1;
+  --surface: var(--p-white);
   --surface-sunken: var(--p-cream-100);
   --surface-inverse: var(--p-green-900);
   --on-inverse: var(--p-cream-50);

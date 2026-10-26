@@ -9,16 +9,24 @@
     background: var(--background);
     color: var(--foreground);
     font-family: var(--font-text);
-    font-size: 17px;
-    line-height: 1.7;
+    font-size: 15.5px;
+    line-height: 1.8;
     -webkit-font-smoothing: antialiased;
   }
-  h1, h2, h3, h4 { font-family: var(--font-display); font-weight: 700; letter-spacing: 0; line-height: 1.35; }
+  h1, h2, h3, h4 { font-family: var(--font-display); font-weight: 600; letter-spacing: 0; line-height: 1.4; }
   h3, h4 { font-family: var(--font-text); font-weight: 700; }
-  /* storefront headings: the store face, heavy */
-  .site-main :is(h1, h2), .font-script { font-family: var(--p-font-script) !important; font-weight: 800; }
-  /* square corners on every control (house style); dots, spinners and avatars stay round */
-  :is(a, button, input, select, textarea, label, summary).rounded-full { border-radius: 0; }
+  /* storefront headings in El Messiri */
+  .site-main :is(h1, h2), .font-script { font-family: var(--p-font-script) !important; font-weight: 600; }
+  /* the store's soft background: blush glows and rose-gold light, fixed behind every page */
+  body {
+    background-color: var(--background);
+    background-image:
+      radial-gradient(42% 32% at 92% 6%, rgb(231 194 187 / 0.55), transparent 70%),
+      radial-gradient(38% 30% at 4% 38%, rgb(240 214 206 / 0.6), transparent 70%),
+      radial-gradient(40% 30% at 96% 72%, rgb(236 205 197 / 0.45), transparent 70%),
+      radial-gradient(36% 28% at 8% 96%, rgb(231 194 187 / 0.45), transparent 70%);
+    background-attachment: fixed;
+  }
   :lang(ar), [dir="rtl"] * { letter-spacing: 0 !important; }
   :focus-visible { outline: 2.5px solid var(--ring); outline-offset: 3px; }
   /* no grey flash on tap (phones) */
@@ -28,7 +36,7 @@
 }
 
 @layer components {
-  .skip { position: absolute; inset-inline-start: 1rem; top: -60px; z-index: 100; background: var(--primary); color: var(--primary-foreground); padding: .5rem 1rem; font-weight: 700; }
+  .skip { position: absolute; inset-inline-start: 1rem; top: -60px; z-index: 100; background: var(--primary); color: var(--primary-foreground); padding: .5rem 1rem; border-radius: 999px; font-weight: 700; }
   .skip:focus { top: 1rem; }
   .social { display: flex; flex-wrap: wrap; gap: .5rem; }
   .social a { display: grid; place-items: center; width: 44px; height: 44px; border-radius: var(--p-radius-md); background: var(--primary); color: var(--accent); transition: background-color .2s, color .2s, transform .2s; }
@@ -58,6 +66,8 @@
 }
 
 @layer utilities {
+  /* an arch: a round top with soft bottom corners (rounded-t-full would squeeze the bottom corners to nothing) */
+  .arch { border-radius: 50% 50% var(--arch-b, 24px) var(--arch-b, 24px) / 34% 34% var(--arch-b, 24px) var(--arch-b, 24px); }
   .container-w { width: min(var(--container), 100% - 32px); margin-inline: auto; }
   @media (min-width: 768px) { .container-w { width: min(var(--container), 100% - 64px); } }
   .tabular { font-variant-numeric: tabular-nums; }

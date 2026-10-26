@@ -38,7 +38,7 @@ export default function Shop({ categoryId: fromProps }) {
   }, [products, categoryId, q, sort])
 
   const set = (k, v) => { const n = new URLSearchParams(params); v ? n.set(k, v) : n.delete(k); setParams(n, { replace: true }) }
-  const chip = (on) => cn('inline-flex min-h-11 shrink-0 items-center gap-2 px-5 text-[15px] font-bold transition-colors', on ? 'bg-primary text-primary-foreground' : 'bg-sunken text-primary hover:bg-[var(--p-cream-200)]')
+  const chip = (on) => cn('inline-flex h-9 shrink-0 items-center gap-2 rounded-full px-4 text-[13px] font-bold transition-colors', on ? 'bg-primary text-white shadow-[0_8px_16px_-10px_rgb(125_63_76/0.9)]' : 'bg-white/80 text-primary ring-1 ring-[var(--p-cream-200)] hover:bg-white')
 
   return (
     <div className="container-w py-10 sm:py-14 [--notch:var(--background)]">
@@ -60,12 +60,12 @@ export default function Shop({ categoryId: fromProps }) {
       <div className="mb-6 flex flex-wrap items-center gap-3">
         <label className="relative min-w-[240px] flex-1 sm:max-w-md">
           <Search className="pointer-events-none absolute top-1/2 start-4 size-5 -translate-y-1/2 text-muted-foreground" />
-          <Input value={q} onChange={(e) => set('q', e.target.value)} placeholder="ابحثي داخل المنتجات" aria-label="بحث" className="ps-12" />
+          <Input value={q} onChange={(e) => set('q', e.target.value)} placeholder="ابحثي داخل المنتجات" aria-label="بحث" className="rounded-full ps-12" />
         </label>
-        <Select value={sort} onChange={(e) => set('sort', e.target.value)} aria-label="ترتيب" className="w-auto">
+        <Select value={sort} onChange={(e) => set('sort', e.target.value)} aria-label="ترتيب" className="w-auto rounded-full">
           {SORTS.map((s) => <option key={s.id} value={s.id}>ترتيب: {s.label}</option>)}
         </Select>
-        <span className="tabular ms-auto text-[16px] text-muted-foreground">{list.length} منتجات</span>
+        <span className="tabular ms-auto text-[13px] text-muted-foreground">{list.length} منتجات</span>
       </div>
 
       {!catalogReady ? (
@@ -74,7 +74,7 @@ export default function Shop({ categoryId: fromProps }) {
         <Empty icon={Search} title="ما فيه منتج يطابق بحثك" action={<Button variant="outline" onClick={() => setParams({})}>مسح البحث</Button>}>امسحي البحث أو اختاري قسم ثاني.</Empty>
       ) : (
         <><h2 className="sr-only">{cat?.name || 'المنتجات'}</h2>
-        <div className="grid grid-cols-2 gap-x-4 gap-y-12 sm:gap-x-8 sm:gap-y-16 lg:grid-cols-4">{list.map((p) => <ServiceTicket key={p.id} p={p} />)}</div></>
+        <div className="grid grid-cols-2 gap-x-3.5 gap-y-7 sm:gap-x-5 md:grid-cols-3 lg:grid-cols-4">{list.map((p) => <ServiceTicket key={p.id} p={p} />)}</div></>
       )}
     </div>
   )

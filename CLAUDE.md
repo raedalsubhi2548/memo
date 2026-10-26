@@ -26,11 +26,12 @@ A custom-coded store for hair and skin care products, forked (Oct 2026) from Rae
 - Domain: `VITE_SITE_URL` / `SITE_URL` env. `admin.<domain>` opens the dashboard; until a domain is set, use `/admin`.
 
 ## Key places
-- Brand: `src/styles/tokens.css` (wine ink #4a1d28, rose #c99a92, rose-bone ground #efe6e3), `src/lib/theme.js` (defaults, home blocks, shipping settings, `mergeSettings`).
-- Design (Oct 2026 rebuild, taste skill direction «name as a monument», seed 435523750; working files in `.taste-skill/`, not committed):
-  one face (Almarai 400/700/800), square corners everywhere, no shadows at rest, no gradients, no thin rules, no small labels above headings.
-  Surfaces are separated by a tone step (`bg-sunken`), never by a line or a shadow.
-- Home: `src/pages/Home.jsx` — hero (rose-petal picture, the store name across the full width with the logo between the words), the product line-up with «رتّبي روتينك» (tick products → total with shipping → add all), ingredients (real pictures from Wikimedia Commons, credited in the footer via `src/data/world.js`), the order journey as a receipt, questions. Product card: `src/components/home/ServiceTicket.jsx`. Entrances: `src/components/Reveal.jsx` (hides nothing until the visitor scrolls).
+- Brand: `src/styles/tokens.css` (rose wine #7d3f4c, blush #e7c2bb, rose-gold #b98572, soft blush ground #fbf6f4), `src/lib/theme.js` (defaults, home blocks, shipping settings, `mergeSettings`).
+- Design (Oct 2026, the owner's taste — soft, feminine, luxurious): El Messiri for headings, Tajawal for text, modest sizes (titles ~2.25rem, text 15.5px),
+  rounded corners, soft wine-tinted shadows, a fixed blush background with rose-gold glows (`body` in `src/index.css`), arches via the `.arch` class.
+  Raed rejected a big-type «name as a monument» design (huge type, square corners) on 26 Oct 2026 — don't go back to it.
+- Home: `src/pages/Home.jsx` — hero (words + products in an arch with floating petals), product cards side by side with section tabs, ingredients in arches (real pictures, credits in `src/data/world.js` and the footer), the order steps as a chain, questions.
+  Product card: `src/components/home/ServiceTicket.jsx` (white card hung from a rose-gold bead, like rraed's service cards). Entrances: `src/components/Reveal.jsx`.
 - Catalog seed: `src/data/seed.js` → `node scripts/seed-sql.mjs` writes `supabase/seed.sql`.
 - Checkout + address: `src/pages/Checkout.jsx`, `src/lib/address.js`. Admin order sheet shows the address + «نسخ العنوان للشحن».
 - Policies: `src/data/terms.js` (DRAFT — the owner reviews returns/shipping wording and adds her CR / freelance number).

@@ -20,8 +20,8 @@ export default function Cart() {
         <div className="grid items-start gap-6 lg:grid-cols-[1fr_380px]">
           <ul className="grid gap-3">
             {lines.map(({ key, product: p, qty, chosen, unit }) => (
-              <li key={key} className="grid grid-cols-[72px_1fr] gap-4 bg-sunken p-4 sm:grid-cols-[88px_1fr_auto]">
-                <img src={p.image} alt="" className="size-[72px] object-cover sm:size-[88px]" />
+              <li key={key} className="grid grid-cols-[72px_1fr] gap-4 rounded-[22px] bg-white/90 p-4 shadow-[0_18px_40px_-32px_rgb(125_63_76/0.5)] ring-1 ring-white sm:grid-cols-[88px_1fr_auto]">
+                <img src={p.image} alt="" className="size-[72px] rounded-2xl object-cover sm:size-[88px]" />
                 <div className="grid min-w-0 gap-1.5">
                   <Link to={productPath(p.id)} className="font-semibold leading-6 hover:underline">{p.name}</Link>
                   <OptionList items={chosen} />

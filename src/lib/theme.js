@@ -6,7 +6,7 @@ export const DEFAULT_SETTINGS = {
   logo: '/logo-300.png', // on light backgrounds (header after scrolling, menus)
   logoLight: '/logo-white.png', // on dark backgrounds (hero, footer)
   logoScale: 100, // percent
-  colors: { primary: '#4a1d28', accent: '#c99a92', background: '#efe6e3' },
+  colors: { primary: '#7d3f4c', accent: '#e7c2bb', background: '#fbf6f4' },
   announcement: { on: false, text: '', link: '' },
 }
 
@@ -17,10 +17,10 @@ export const DEFAULT_STORE = {
   social: { instagram: '', x: '', tiktok: '', snapchat: '' },
 }
 export const FONTS = {
-  heading: [['almarai', 'المراعي (الأصلي)', "'Almarai'"], ['elmessiri', 'المسيري', "'El Messiri'"], ['marhey', 'مرحي', "'Marhey'"], ['plex', 'آي بي إم بلكس', "'IBM Plex Sans Arabic'"], ['cairo', 'القاهرة', "'Cairo'"], ['tajawal', 'تجوال', "'Tajawal'"], ['almarai', 'المراعي', "'Almarai'"], ['reemkufi', 'ريم كوفي', "'Reem Kufi'"]],
-  body: [['almarai', 'المراعي (الأصلي)', "'Almarai'"], ['plex', 'آي بي إم بلكس', "'IBM Plex Sans Arabic'"], ['cairo', 'القاهرة', "'Cairo'"], ['tajawal', 'تجوال', "'Tajawal'"]],
+  heading: [['elmessiri', 'المسيري (الأصلي)', "'El Messiri'"], ['almarai', 'المراعي', "'Almarai'"], ['marhey', 'مرحي', "'Marhey'"], ['plex', 'آي بي إم بلكس', "'IBM Plex Sans Arabic'"], ['cairo', 'القاهرة', "'Cairo'"], ['almarai', 'المراعي', "'Almarai'"], ['reemkufi', 'ريم كوفي', "'Reem Kufi'"]],
+  body: [['tajawal', 'تجوال (الأصلي)', "'Tajawal'"], ['almarai', 'المراعي', "'Almarai'"], ['plex', 'آي بي إم بلكس', "'IBM Plex Sans Arabic'"], ['cairo', 'القاهرة', "'Cairo'"]],
 }
-export const RADII = [['round', 'حادة (الأصلي)'], ['soft', 'ناعمة']]
+export const RADII = [['round', 'ناعمة (الأصلي)'], ['soft', 'أقل نعومة'], ['sharp', 'حادة']]
 /** 05xxxxxxxx, 5xxxxxxxx, +9665xxxxxxxx → 9665xxxxxxxx (international, digits only). */
 export const normPhone = (v) => { const d = String(v || '').replace(/\D/g, ''); return d.startsWith('05') ? '966' + d.slice(1) : d.startsWith('5') && d.length === 9 ? '966' + d : d }
 
@@ -29,8 +29,8 @@ export const normPhone = (v) => { const d = String(v || '').replace(/\D/g, ''); 
 // text · textarea · link · image · switch · select · number · category · product · products · items
 export const ICONS = ['truck', 'shield', 'chat', 'leaf', 'drop', 'gift'] // the line drawings in LineArt
 export const BLOCKS = {
-  hero: { name: 'الواجهة الرئيسية', icon: 'Sparkles', hint: 'صورة كبيرة وتحتها اسم المتجر بخط ضخم، مع جملة وزر.', fields: [
-    ['title1', 'الاسم الكبير', 'text', 24],
+  hero: { name: 'الواجهة الرئيسية', icon: 'Sparkles', hint: 'العنوان والوصف والأزرار، وجنبها صورة داخل قوس.', fields: [
+    ['eyebrow', 'سطر صغير فوق العنوان', 'text', 60], ['title1', 'العنوان', 'text', 40], ['title2', 'السطر الثاني', 'text', 60],
     ['text', 'الوصف', 'textarea', 220], ['cta', 'نص الزر', 'text', 30], ['ctaLink', 'رابط الزر', 'link'],
     ['image', 'صورة الخلفية (كمبيوتر)', 'image'], ['imageMobile', 'صورة الخلفية (جوال)', 'image'],
   ] },
@@ -60,9 +60,9 @@ export const BLOCKS = {
 }
 
 const HERO = {
-  title1: 'عناية ميمي',
-  text: 'صابونيات تقليدية وزيت للشعر، تُطلب أونلاين وتوصل لباب بيتك.',
-  cta: 'تسوّقي المنتجات', ctaLink: '#products', image: '', imageMobile: '',
+  eyebrow: 'زيوت وصابونيات للعناية', title1: 'عناية ميمي', title2: 'دلّعي شعرك وبشرتك',
+  text: 'صابونيات تقليدية وزيت للشعر، مختارة بعناية لروتينك، وتوصلك لباب بيتك.',
+  cta: 'تسوّقي الحين', ctaLink: '#products', image: '', imageMobile: '',
 }
 /** What a freshly added block starts with. */
 export const BLOCK_DEFAULTS = {
@@ -76,13 +76,13 @@ export const BLOCK_DEFAULTS = {
   reviews: { title: 'آراء العميلات' },
   faq: { title: 'قبل ما تطلبين' },
   ingredients: { title: 'أسرار العطّارة' },
-  journey: { title: 'من طلبك لباب بيتك', text: 'خطوات واضحة، ويوصلك إيميل مع كل تحديث على طلبك.' },
+  journey: { title: 'من طلبك لباب بيتك', text: 'أربع خطوات سهلة، ويوصلك إيميل مع كل تحديث على طلبك.' },
 }
 
 /** The home page as it was designed (used until the owner saves their own). */
 export const defaultHome = (hero = {}) => [
   { id: 'hero', type: 'hero', on: true, ...HERO, ...hero },
-  { id: 'products', type: 'products', on: true, title: 'المنتجات', source: 'latest', category: '', ids: [], limit: 12, viewAll: false },
+  { id: 'products', type: 'products', on: true, title: 'منتجاتنا', source: 'latest', category: '', ids: [], limit: 8, viewAll: false },
   { id: 'ingredients', type: 'ingredients', on: true, ...BLOCK_DEFAULTS.ingredients },
   { id: 'journey', type: 'journey', on: true, ...BLOCK_DEFAULTS.journey },
   { id: 'reviews', type: 'reviews', on: true, ...BLOCK_DEFAULTS.reviews },
@@ -120,8 +120,8 @@ export const DEFAULT_ABOUT = 'عناية ميمي: صابونيات تقليدي
 
 /** Ready-made palettes the owner can start from. */
 export const PRESETS = [
-  { name: 'عنابي على وردي (الأصلي)', primary: '#4a1d28', accent: '#c99a92', background: '#efe6e3' },
-  { name: 'وردي ناعم', primary: '#7d3f4c', accent: '#e9c3bd', background: '#fdf7f4' },
+  { name: 'وردي ناعم (الأصلي)', primary: '#7d3f4c', accent: '#e7c2bb', background: '#fbf6f4' },
+  { name: 'عنابي غامق', primary: '#4a1d28', accent: '#c99a92', background: '#efe6e3' },
   { name: 'كحلي', primary: '#1b2b44', accent: '#c3cedd', background: '#fbfcfe' },
   { name: 'أسود وذهبي', primary: '#161616', accent: '#d4b06a', background: '#fbf9f5' },
   { name: 'أخضر زيتي', primary: '#1f3b2d', accent: '#c9b37e', background: '#f8f7f2' },
@@ -173,8 +173,8 @@ export function mergeSettings(raw) {
       social: Object.fromEntries(Object.keys(DEFAULT_STORE.social).map((k) => [k, /^https:\/\//i.test(s.store?.social?.[k] || '') ? safeLink(s.store.social[k], '') : ''])),
     },
     fonts: {
-      heading: FONTS.heading.some(([k]) => k === s.fonts?.heading) ? s.fonts.heading : 'almarai',
-      body: FONTS.body.some(([k]) => k === s.fonts?.body) ? s.fonts.body : 'almarai',
+      heading: FONTS.heading.some(([k]) => k === s.fonts?.heading) ? s.fonts.heading : 'elmessiri',
+      body: FONTS.body.some(([k]) => k === s.fonts?.body) ? s.fonts.body : 'tajawal',
     },
     radius: RADII.some(([k]) => k === s.radius) ? s.radius : 'round',
     categoryImages: Object.fromEntries(Object.entries(s.categoryImages && typeof s.categoryImages === 'object' ? s.categoryImages : {}).filter(([k, v]) => SLUG.test(k) && safeUrl(v, '')).slice(0, 40)),
@@ -219,8 +219,8 @@ export function themeCss(settings) {
   }
   if (s.logoScale !== 100) v.push(['--logo-scale', String(s.logoScale / 100)])
   const fam = (list, k) => list.find(([x]) => x === k)[2]
-  if (s.fonts.heading !== 'almarai') v.push(['--p-font-script', `${fam(FONTS.heading, s.fonts.heading)}, 'IBM Plex Sans Arabic', sans-serif`])
-  if (s.fonts.body !== 'almarai') { const f = `${fam(FONTS.body, s.fonts.body)}, 'IBM Plex Sans Arabic', system-ui, sans-serif`; v.push(['--p-font-text', f], ['--p-font-display', f]) }
+  if (s.fonts.heading !== 'elmessiri') v.push(['--p-font-script', `${fam(FONTS.heading, s.fonts.heading)}, 'IBM Plex Sans Arabic', sans-serif`])
+  if (s.fonts.body !== 'tajawal') { const f = `${fam(FONTS.body, s.fonts.body)}, 'IBM Plex Sans Arabic', system-ui, sans-serif`; v.push(['--p-font-text', f], ['--p-font-display', f]) }
   if (s.radius === 'soft') v.push(['--p-radius-pill', '14px'], ['--p-radius-lg', '14px'], ['--p-radius-xl', '18px'])
   if (s.radius === 'sharp') v.push(['--p-radius-pill', '6px'], ['--p-radius-lg', '6px'], ['--p-radius-xl', '8px'], ['--p-radius-md', '6px'], ['--p-radius-sm', '4px'])
   let css = v.length ? `:root{${v.map(([k, x]) => `${k}:${x}`).join(';')}}` : ''

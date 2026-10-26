@@ -36,22 +36,22 @@ export default function Policies() {
         <nav className="flex gap-2 overflow-x-auto [scrollbar-width:none] lg:sticky lg:top-[calc(var(--header-height)+24px)] lg:grid lg:gap-1" aria-label="الأقسام">
           {SECTIONS.map((s) => (
             <a key={s.id} href={`#${s.id}`} data-nav={s.id} onClick={() => setActive(s.id)} aria-current={active === s.id ? 'true' : undefined}
-              className={cn('flex shrink-0 items-center px-4 py-2.5 text-[16px] font-bold transition-colors', active === s.id ? 'bg-primary text-primary-foreground' : 'bg-sunken text-primary hover:bg-[var(--p-cream-200)] lg:bg-transparent')}>
+              className={cn('flex shrink-0 items-center rounded-full px-4 py-2 text-[13.5px] font-bold transition-colors lg:rounded-xl', active === s.id ? 'bg-primary text-white' : 'bg-white/80 text-primary hover:bg-white lg:bg-transparent')}>
               {s.h}
             </a>
           ))}
         </nav>
-        <div className="grid gap-14">
+        <div className="grid gap-4">
           {SECTIONS.map((s) => (
-            <section key={s.id} id={s.id} className="scroll-mt-28">
-              <h2 className="font-display text-[clamp(1.6rem,1.2rem+1.4vw,2.4rem)] font-extrabold text-primary">{s.h}</h2>
-              <div className="mt-4 grid max-w-[78ch] gap-3 text-[18px] leading-[1.85]">
+            <section key={s.id} id={s.id} className="scroll-mt-28 rounded-[24px] bg-white/85 p-6 shadow-[0_18px_40px_-32px_rgb(125_63_76/0.5)] ring-1 ring-white sm:p-8">
+              <h2 className="font-display text-[1.35rem] font-semibold text-primary">{s.h}</h2>
+              <div className="mt-3 grid max-w-[78ch] gap-2.5 text-[14.5px] leading-[1.95] text-foreground/85">
                 {s.p.map((x) => <p key={x}>{x}</p>)}
               </div>
             </section>
           ))}
-          <div className="flex flex-wrap items-center justify-between gap-4 bg-sunken p-6 sm:p-8">
-            <p className="text-[20px] font-extrabold text-primary">عندك سؤال عن الشروط؟</p>
+          <div className="flex flex-wrap items-center justify-between gap-4 rounded-[24px] bg-[var(--p-cream-100)] p-6 sm:p-8">
+            <p className="font-display text-[1.25rem] font-semibold text-primary">عندك سؤال عن الشروط؟</p>
             <div className="flex gap-2">
               <Button asChild variant="outline"><Link to="/contact">تواصلي معنا</Link></Button>
               <Button asChild><a href={waLink('عندي سؤال عن السياسات')} target="_blank" rel="noreferrer">واتساب</a></Button>

@@ -28,7 +28,7 @@ export function Field({ label, hint, error, className, children }) {
 
 export function Panel({ className, title, action, children }) {
   return (
-    <section className={cn('bg-surface p-5 sm:p-7', className)}>
+    <section className={cn('rounded-[22px] bg-white/90 p-5 shadow-card ring-1 ring-[var(--p-cream-200)] sm:p-7', className)}>
       {(title || action) && (
         <div className="mb-4 flex items-center justify-between gap-3">
           {title && <h2 className="font-display text-lg font-semibold text-primary">{title}</h2>}
@@ -42,20 +42,32 @@ export function Panel({ className, title, action, children }) {
 
 export function PageHead({ title, lead, crumbs, action }) {
   return (
-    <div className="mb-12 flex flex-wrap items-end justify-between gap-6 sm:mb-16">
-      <div className="max-w-3xl">
-        {crumbs && <nav className="mb-4 flex flex-wrap items-center gap-1.5 text-[16px] text-muted-foreground" aria-label="المسار">{crumbs}</nav>}
-        <h1 className="text-balance font-display text-[clamp(2.6rem,1rem+4.6vw,5.75rem)] font-extrabold leading-[1.1] text-primary motion-safe:animate-[rise-in_.8s_var(--p-ease-emphasized)_both]">{title}</h1>
-        {lead && <p className="mt-5 max-w-[52ch] text-[18px] leading-8 text-foreground motion-safe:animate-[rise-in_1s_var(--p-ease-emphasized)_both]">{lead}</p>}
+    <div className={cn('mb-10 flex flex-wrap items-end gap-6 sm:mb-14', action ? 'justify-between' : 'justify-center text-center')}>
+      <div className="max-w-2xl">
+        {crumbs && <nav className={cn('mb-3 flex flex-wrap items-center gap-1.5 text-[13px] text-muted-foreground', !action && 'justify-center')} aria-label="المسار">{crumbs}</nav>}
+        <h1 className="text-balance font-display text-[2rem] font-semibold leading-[1.35] text-primary sm:text-[2.5rem]">{title}</h1>
+        <Ornament className={cn('mt-2', !action && 'mx-auto')} />
+        {lead && <p className="mt-3 text-[15.5px] leading-8 text-muted-foreground">{lead}</p>}
       </div>
       {action}
     </div>
   )
 }
 
+/** A thin rose-gold line with a small leaf in the middle, under titles. */
+export function Ornament({ className }) {
+  return (
+    <svg viewBox="0 0 140 14" fill="none" className={cn('block h-3.5 w-[140px]', className)} aria-hidden="true">
+      <path d="M2 7 H56 M84 7 H138" stroke="var(--p-gold-500)" strokeWidth="1" strokeLinecap="round" />
+      <path d="M70 12.5 C64.5 9.5 64.5 4.5 70 1.5 C75.5 4.5 75.5 9.5 70 12.5 Z" fill="var(--p-gold-500)" />
+      <circle cx="61" cy="7" r="1.6" fill="var(--p-gold-500)" /><circle cx="79" cy="7" r="1.6" fill="var(--p-gold-500)" />
+    </svg>
+  )
+}
+
 export function Empty({ icon: IconC, title, children, action }) {
   return (
-    <div className="grid justify-items-center gap-3 bg-sunken px-6 py-14 text-center">
+    <div className="grid justify-items-center gap-3 rounded-[22px] bg-white/70 px-6 py-14 text-center ring-1 ring-[var(--p-cream-200)]">
       {IconC && <span className="grid size-14 place-items-center rounded-full bg-sunken text-primary"><IconC className="size-6" /></span>}
       <p className="font-display text-lg font-semibold text-primary">{title}</p>
       {children && <p className="max-w-md text-muted-foreground">{children}</p>}
@@ -67,10 +79,10 @@ export function Empty({ icon: IconC, title, children, action }) {
 export function Qty({ value, onChange, size = 'md' }) {
   const h = size === 'sm' ? 'h-9' : 'h-12'
   return (
-    <div className={cn('inline-flex items-center border-[1.5px] border-border-strong bg-background', h)}>
-      <button type="button" onClick={() => onChange(value + 1)} className="grid h-full w-10 place-items-center text-primary hover:bg-sunken" aria-label="زيادة الكمية"><Plus className="size-4" /></button>
+    <div className={cn('inline-flex items-center rounded-full border-[1.5px] border-border-strong bg-white', h)}>
+      <button type="button" onClick={() => onChange(value + 1)} className="grid h-full w-10 place-items-center rounded-full text-primary hover:bg-sunken" aria-label="زيادة الكمية"><Plus className="size-4" /></button>
       <span className="tabular min-w-7 text-center font-bold" aria-live="polite">{value}</span>
-      <button type="button" onClick={() => onChange(Math.max(1, value - 1))} disabled={value <= 1} className="grid h-full w-10 place-items-center text-primary hover:bg-sunken disabled:opacity-30 disabled:hover:bg-transparent" aria-label="تقليل الكمية"><Minus className="size-4" /></button>
+      <button type="button" onClick={() => onChange(Math.max(1, value - 1))} disabled={value <= 1} className="grid h-full w-10 place-items-center rounded-full text-primary hover:bg-sunken disabled:opacity-30 disabled:hover:bg-transparent" aria-label="تقليل الكمية"><Minus className="size-4" /></button>
     </div>
   )
 }

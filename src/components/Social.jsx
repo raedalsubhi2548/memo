@@ -8,7 +8,7 @@ import { WHATSAPP, EMAIL } from '../lib/format.js'
 const NETS = [['instagram', 'إنستقرام', siInstagram], ['x', 'إكس', siX], ['tiktok', 'تيك توك', siTiktok], ['snapchat', 'سناب شات', siSnapchat]]
 export const socialLinks = (social = {}) => [
   { name: 'واتساب', href: `https://wa.me/${WHATSAPP}`, icon: siWhatsapp },
-  { name: 'البريد', href: `mailto:${EMAIL}`, icon: MAIL },
+  ...(EMAIL ? [{ name: 'البريد', href: `mailto:${EMAIL}`, icon: MAIL }] : []),
   ...NETS.filter(([k]) => social[k]).map(([k, name, icon]) => ({ name, href: social[k], icon })),
 ]
 
