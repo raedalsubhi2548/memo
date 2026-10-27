@@ -38,7 +38,8 @@ const EARLY = [
   ...(S0.fonts.heading === 'elmessiri' ? [font(/^el-messiri-arabic-600-normal-.*\.woff2$/)] : []),
   ...(S0.fonts.body === 'tajawal' ? [font(/^tajawal-arabic-400-normal-.*\.woff2$/)] : []),
 ].filter(Boolean).map((x) => (x.startsWith('<') ? x : `<link rel="preload" as="font" type="font/woff2" href="/assets/${x}" crossorigin />`)).join('\n    ')
-const HERO_PRELOAD = `    <link rel="preload" as="image" href="${attr(hero.imageMobile || hero.image || '/brand/hero-mobile.webp')}" media="(max-width: 767px)" fetchpriority="high" />\n    <link rel="preload" as="image" href="${attr(hero.image || '/brand/hero.webp')}" media="(min-width: 768px)" fetchpriority="high" />\n`
+const HERO_PRELOAD = `    <link rel="preload" as="image" href="${attr(hero.image || '/brand/hero-v2.webp')}" fetchpriority="high" />
+`
 
 // categories and products share the top level with the fixed pages: a clash would hide one of them
 const taken = new Set(RESERVED)

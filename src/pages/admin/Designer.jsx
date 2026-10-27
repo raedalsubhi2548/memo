@@ -17,7 +17,7 @@ import * as Dialog from '@radix-ui/react-dialog'
 const MAX_IMAGE = 4 * 1024 * 1024
 const BLOCK_ICON = { Sparkles, Image: ImageLucide, BadgeCheck, LayoutGrid, Shapes, PanelLeft, Type, GalleryHorizontal, MessageSquareQuote, CircleHelp, Leaf, Truck }
 const ICON_NAMES = { truck: 'شحن', shield: 'حماية', chat: 'محادثة', leaf: 'ورقة', drop: 'قطرة', gift: 'هدية' }
-const BUILT_IN_CAT = { 'hair-care': '/brand/cat-hair-care.webp', 'skin-care': '/brand/cat-skin-care.webp' }
+const BUILT_IN_CAT = { 'hair-care': '/brand/cat-hair-care-v2.webp', 'skin-care': '/brand/cat-skin-care-v2.webp' }
 const uid = () => 'b' + Math.random().toString(36).slice(2, 8)
 
 /** One image slot: upload, preview on the background it will sit on, back to the original. */
@@ -141,7 +141,7 @@ function BlockForm({ block, onChange, catImages, setCatImage }) {
         if (kind === 'text') control = <Input value={v} maxLength={opt} onChange={(e) => set(key, e.target.value)} />
         else if (kind === 'textarea') control = <Textarea value={v} maxLength={opt} onChange={(e) => set(key, e.target.value)} />
         else if (kind === 'link') control = <LinkInput value={v} onChange={(x) => set(key, x)} />
-        else if (kind === 'image') return <div key={key} className="sm:col-span-2"><ImageSlot tall label={label} value={v} fallback={block.type === 'hero' ? (key === 'image' ? '/brand/ai/raed-hero-v3.webp' : '/brand/ai/raed-hero-mobile-v3.webp') : ''} onChange={(x) => set(key, x)} /></div>
+        else if (kind === 'image') return <div key={key} className="sm:col-span-2"><ImageSlot tall label={label} value={v} fallback={block.type === 'hero' ? (key === 'image' ? '/brand/hero-v2.webp' : '') : ''} onChange={(x) => set(key, x)} /></div>
         else if (kind === 'switch') return <div key={key} className="sm:col-span-2"><Switch checked={!!v} onChange={(x) => set(key, x)} label={label} /></div>
         else if (kind === 'select') control = <Select value={v} onChange={(e) => set(key, e.target.value)}>{opt.map(([x, t]) => <option key={x} value={x}>{t}</option>)}</Select>
         else if (kind === 'number') control = <Input type="number" min={opt[0]} max={opt[1]} value={v} onChange={(e) => set(key, Number(e.target.value))} dir="ltr" className="tabular" />

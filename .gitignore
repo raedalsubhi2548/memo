@@ -12,3 +12,4 @@ dist-ssr
 # downloaded originals (credits.json stays)
 /assets/*.jpg
 .taste-skill/
+/samples/

@@ -28,7 +28,7 @@ export const SITE = {
   description: 'عناية ميمي: صابونية الكركم، صابونية العكر الفارسي، صابونية النيلة المغربية وزيت الشعر. اطلبيها أونلاين وتوصلك لباب بيتك.',
 }
 
-const CAT_ART = { 'hair-care': '/brand/cat-hair-care.webp', 'skin-care': '/brand/cat-skin-care.webp' }
+const CAT_ART = { 'hair-care': '/brand/cat-hair-care-v2.webp', 'skin-care': '/brand/cat-skin-care-v2.webp' }
 
 // Search titles/descriptions per section and product (blank = built from the catalog).
 const SEO_CAT = {

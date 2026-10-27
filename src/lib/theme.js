@@ -70,8 +70,8 @@ export const BLOCK_DEFAULTS = {
   banner: { image: '', imageMobile: '', link: '', alt: '', size: 'container' },
   promises: { items: [{ icon: 'truck', title: 'شحن لباب بيتك', text: 'وتتابعين طلبك من حسابك' }, { icon: 'shield', title: 'دفع آمن', text: 'مدى، فيزا، ماستركارد وApple Pay' }, { icon: 'chat', title: 'خدمة العملاء', text: 'نرد عليك على واتساب' }] },
   products: { title: 'منتجاتنا', source: 'latest', category: '', ids: [], limit: 4, viewAll: true },
-  categories: { title: 'الأقسام' },
-  imageText: { kicker: '', title: 'عنوان جذاب', accent: '', text: '', cta: 'اطلب الحين', link: '/shop', image: '', priceOf: '', payIcons: false },
+  categories: { title: 'تسوّقي حسب القسم' },
+  imageText: { kicker: '', title: 'عنوان جذاب', accent: '', text: '', cta: 'اطلبي الحين', link: '/shop', image: '', priceOf: '', payIcons: false },
   text: { title: 'عنوان القسم', text: 'اكتب هنا النص اللي تبيه يظهر لعملائك.', cta: '', link: '', align: 'center' },
   reviews: { title: 'آراء العميلات' },
   faq: { title: 'قبل ما تطلبين' },
@@ -83,6 +83,7 @@ export const BLOCK_DEFAULTS = {
 export const defaultHome = (hero = {}) => [
   { id: 'hero', type: 'hero', on: true, ...HERO, ...hero },
   { id: 'products', type: 'products', on: true, title: 'منتجاتنا', source: 'latest', category: '', ids: [], limit: 8, viewAll: false },
+  { id: 'categories', type: 'categories', on: true, ...BLOCK_DEFAULTS.categories },
   { id: 'ingredients', type: 'ingredients', on: true, ...BLOCK_DEFAULTS.ingredients },
   { id: 'journey', type: 'journey', on: true, ...BLOCK_DEFAULTS.journey },
   { id: 'reviews', type: 'reviews', on: true, ...BLOCK_DEFAULTS.reviews },

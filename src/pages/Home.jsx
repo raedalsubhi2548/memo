@@ -72,7 +72,7 @@ function Hero({ b: h, first }) {
           <span className="absolute -inset-x-5 -bottom-4 top-10 arch [--arch-b:40px] bg-[var(--p-gold-100)]/70" aria-hidden="true" />
           <span className="arch absolute inset-x-3 -top-3 bottom-6 border border-[var(--p-gold-500)]/60 [--arch-b:28px]" aria-hidden="true" />
           <div className="relative overflow-hidden arch [--arch-b:28px] bg-white p-2.5 shadow-[0_30px_60px_-30px_rgb(125_63_76/0.55)]">
-            <img src={h.image || '/brand/cat-skin-care.webp'} alt="منتجات عناية ميمي" width="900" height="1200" fetchpriority="high" className="aspect-[4/5] w-full arch [--arch-b:22px] object-cover" />
+            <img src={h.image || '/brand/hero-v2.webp'} alt="منتجات عناية ميمي" width="900" height="1200" fetchpriority="high" className="aspect-[4/5] w-full arch [--arch-b:22px] object-cover" />
           </div>
           {PETALS.map(([x, y, s, r], i) => <Petal key={i} x={x} y={y} s={s} r={r} />)}
           {oil && (
@@ -261,10 +261,11 @@ function TextBlock({ b }) {
     </section>
   )
 }
+const countLabel = (n) => (n === 1 ? 'منتج واحد' : n === 2 ? 'منتجان' : `${n} منتجات`)
 function CategoriesBlock({ b }) {
   const { categories, products } = useApp()
   if (!categories.length) return null
-  const ART = { 'hair-care': '/brand/cat-hair-care.webp', 'skin-care': '/brand/cat-skin-care.webp' }
+  const ART = { 'hair-care': '/brand/cat-hair-care-v2.webp', 'skin-care': '/brand/cat-skin-care-v2.webp' }
   return (
     <section className="py-14 sm:py-20">
       <div className="container-w">
@@ -272,9 +273,9 @@ function CategoriesBlock({ b }) {
         <ul className="mx-auto mt-10 grid max-w-[760px] grid-cols-2 gap-5">
           {categories.map((c) => (
             <li key={c.id}><Link to={`/${c.id}`} className="group block text-center">
-              <span className="block overflow-hidden arch [--arch-b:22px] bg-white p-2 shadow-[0_20px_40px_-28px_rgb(125_63_76/0.6)]"><img src={ART[c.id] || '/brand/cat-skin-care.webp'} alt="" loading="lazy" className="aspect-[3/4] w-full arch [--arch-b:16px] object-cover transition-transform duration-700 group-hover:scale-105" /></span>
+              <span className="block overflow-hidden arch [--arch-b:22px] bg-white p-2 shadow-[0_20px_40px_-28px_rgb(125_63_76/0.6)]"><img src={ART[c.id] || '/brand/cat-skin-care-v2.webp'} alt="" loading="lazy" className="aspect-[3/4] w-full arch [--arch-b:16px] object-cover transition-transform duration-700 group-hover:scale-105" /></span>
               <b className="mt-3 block font-display text-[1.2rem] font-semibold text-primary">{c.name}</b>
-              <span className="tabular text-[12.5px] text-muted-foreground">{products.filter((p) => p.categoryId === c.id).length} منتجات</span>
+              <span className="tabular text-[12.5px] text-muted-foreground">{countLabel(products.filter((p) => p.categoryId === c.id).length)}</span>
             </Link></li>
           ))}
         </ul>
