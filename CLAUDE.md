@@ -30,10 +30,10 @@ A custom-coded store for hair and skin care products, forked (Oct 2026) from Rae
 - Design (27 Oct 2026, from Raed's own reference screenshot of a store he likes): formal and soft. Almarai for headings (soft and formal — Raed: «ناعم ورسمي»; Reem Kufi was too hard), IBM Plex Sans Arabic for text,
   modest sizes, rounded corners, soft wine-tinted shadows, a fixed blush background (`body` in `src/index.css`).
   Raed rejected a big-type «name as a monument» design (26 Oct) — don't go back to it. When he sends a reference, build from it.
-- Home: `src/pages/Home.jsx` — the hero is marketing only: three banners of words over soft pictures with no products in them
-  (silk, hair, ingredients: `hero-*-v4.webp`). Raed rejected product pictures in the hero. Motion: slow zoom, headline unmask, progress line per banner.
+- Home: `src/pages/Home.jsx` — the hero: three banners, marketing words over soft pictures (`hero-*-v4.webp`) with the store's own product photos
+  fanned on them like cards (`HeroProducts`, the logo is on the labels). Raed wants his real products (with the logo) in the hero, never staged look-alikes. Motion: slow zoom, headline unmask, progress line per banner.
   Under them: round section pictures (`categories`), then each section as one frame (`shelf`): its banner, joined to its products.
-  A rose-gold thread with a bead (`Thread`) draws itself between the parts of the page, so the store reads as one chain. Then the order steps and questions.
+  A rose-gold thread with a bead (`Thread`) draws itself between the parts of the page, so the store reads as one chain. Then the order steps as one chain across (a light runs step to step while on screen; on phones the current step's line shows under it) and questions.
   «أسرار العطارة» was removed from the home page (`src/data/world.js` kept for the blog later).
   Product card: `src/components/home/ServiceTicket.jsx` (4:5 photo on blush, name, a line, price, full-width «أضيفي للسلة» that turns into «تمت الإضافة»;
   `useAddToCart` / `AddButton` are shared). A section with one product shows it wide (`FeaturedProduct`).
@@ -41,7 +41,7 @@ A custom-coded store for hair and skin care products, forked (Oct 2026) from Rae
 - Checkout + address: `src/pages/Checkout.jsx`, `src/lib/address.js`. Admin order sheet shows the address + «نسخ العنوان للشحن».
 - Policies: `src/data/terms.js` (DRAFT — the owner reviews returns/shipping wording and adds her CR / freelance number).
 - Images: `public/brand/` (`hero-silk|hair|herbs-v4.webp`, `products/*-v4.webp`; `cat-*-v2.webp` still used by SEO and the dashboard). `/brand/*` is cached 30 days: a new image = a new file name.
-  Generated with Codex (gpt-image) on 27 Oct 2026. Products copy Raed's real containers: the saboonia jar (clear PET, only a little taller than wide, smooth flat cream — never swirled «ice cream») and the oil (round PET bottle, white screw cap, dark brown oil — not a glass dropper), white label with the logo and the name, on a travertine pedestal over blush. Hero pictures keep the right half empty for the words. Recipe: scene with the exact Arabic label text and no reference image, then an edit pass with the HD logo as reference.
+  Generated with Codex (gpt-image) on 27 Oct 2026. Products copy Raed's real containers: the saboonia jar (clear PET, only a little taller than wide, smooth flat cream — never swirled «ice cream») and the oil (PET bottle, white screw cap, dark brown oil, label = the woman drawn large with no ring and no text, green leaves on the left — exactly his photo), soap labels: logo and the name, on a travertine pedestal over blush. Hero pictures keep the right half empty for the words. Recipe: scene with the exact Arabic label text and no reference image, then an edit pass with the HD logo as reference.
   `scripts/brand-art.mjs` is the old code-drawn fallback (writes the pre-v2 names); don't run it over the photos.
 
 ## Database
@@ -56,4 +56,5 @@ A custom-coded store for hair and skin care products, forked (Oct 2026) from Rae
 - The server is the only place prices and totals are computed (`place_order`). Test the demo checkout after touching checkout/payments.
 - Hydration: anything that differs between server and first client render (cart, dates) loads after hydration.
 - `mergeSettings` is the only way settings reach the page.
+- Demo mode keeps the catalog in localStorage; `SEED_VERSION` in `src/lib/local.js` includes the product image paths so a renamed picture re-seeds it (old paths showed broken images).
 - Prerendered pages need a redeploy after catalog rows change (the dashboard triggers it via `VERCEL_DEPLOY_HOOK`).

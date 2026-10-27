@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { ArrowLeft, ChevronDown, ChevronLeft, ShoppingBag, CreditCard, Gift, Truck, ShieldCheck, MessageCircle } from 'lucide-react'
 import { useApp } from '@/state.jsx'
@@ -36,13 +36,34 @@ const Go = ({ link, className, children }) => {
 /* ---------------- Hero: marketing banners that take turns — words first, a soft picture behind them ---------------- */
 // the first banner is the owner's (store designer → الواجهة الرئيسية); the other two speak for the two sections
 const MORE_SLIDES = [
-  { title1: 'شعرك يستاهل دلع أكثر', title2: 'زيت الشعر من عناية ميمي', text: 'دقائق ثلاث مرات بالأسبوع على فروة الشعر وأطرافه، وخلّي شعرك يحس بالفرق مع الاستمرار.', cta: 'اطلبي زيت الشعر', ctaLink: '/hair-oil', image: '/brand/hero-hair-v4.webp' },
-  { title1: 'خلطات جداتنا بلمسة اليوم', title2: 'صابونيات تقليدية لبشرتك', text: 'الكركم والعكر الفارسي والنيلة المغربية، في صابونيات ناعمة تخلي وقت الاستحمام لحظة عناية.', cta: 'تسوّقي الصابونيات', ctaLink: '/skin-care', image: '/brand/hero-herbs-v4.webp' },
+  { title1: 'شعرك يستاهل دلع أكثر', title2: 'زيت الشعر من عناية ميمي', text: 'دقائق ثلاث مرات بالأسبوع على فروة الشعر وأطرافه، وخلّي شعرك يحس بالفرق مع الاستمرار.', cta: 'اطلبي زيت الشعر', ctaLink: '/hair-oil', image: '/brand/hero-hair-v4.webp', show: ['hair-oil'] },
+  { title1: 'خلطات جداتنا بلمسة اليوم', title2: 'صابونيات تقليدية لبشرتك', text: 'الكركم والعكر الفارسي والنيلة المغربية، في صابونيات ناعمة تخلي وقت الاستحمام لحظة عناية.', cta: 'تسوّقي الصابونيات', ctaLink: '/skin-care', image: '/brand/hero-herbs-v4.webp', show: ['persian-akar-soap', 'turmeric-soap', 'moroccan-nila-soap'] },
 ]
+const FIRST_SHOW = ['turmeric-soap', 'hair-oil', 'moroccan-nila-soap']
+const TILT = { 1: [-3], 3: [7, 0, -7] }
+/** The banner's products as photo cards, fanned like a hand of cards; the middle one stands in front. */
+function HeroProducts({ ids }) {
+  const { byId } = useApp()
+  const list = ids.map((id) => byId[id]).filter(Boolean)
+  if (!list.length) return null
+  const tilt = TILT[list.length] || list.map(() => 0)
+  const mid = (list.length - 1) / 2
+  return (
+    <div className="pointer-events-none absolute inset-x-0 top-6 flex h-[240px] items-center justify-center md:inset-y-0 md:start-auto md:end-0 md:top-0 md:h-auto md:w-[46%]" aria-hidden="true">
+      {list.map((p, k) => (
+        <span key={p.id} className={cn('hero-card relative block overflow-hidden rounded-[20px] bg-white p-1.5 shadow-[0_26px_44px_-24px_rgb(90_40_50/0.6)]',
+          list.length === 1 ? 'w-[44%] max-w-[300px] md:w-[62%]' : 'w-[31%] max-w-[210px] md:w-[34%]', k !== mid && list.length > 1 && '-mx-[3%] scale-[0.9]', k === mid && 'z-10')}
+          style={{ '--r': `${tilt[k] || 0}deg`, '--k': k, rotate: `${tilt[k] || 0}deg` }}>
+          <img src={p.image} alt="" width="900" height="1125" loading="eager" className="aspect-[4/5] w-full rounded-[15px] object-cover" />
+        </span>
+      ))}
+    </div>
+  )
+}
 const SLIDE_MS = 7000
 function Hero({ b: h, first }) {
   const { settings } = useApp()
-  const slides = [{ ...h, image: h.image || '/brand/hero-silk-v4.webp' }, ...MORE_SLIDES]
+  const slides = [{ ...h, image: h.image || '/brand/hero-silk-v4.webp', show: FIRST_SHOW }, ...MORE_SLIDES]
   const [i, setI] = useState(0)
   const [paused, setPaused] = useState(false)
   useEffect(() => {
@@ -59,7 +80,7 @@ function Hero({ b: h, first }) {
           const on = n === i
           return (
             <div key={n} data-on={on} aria-roledescription="slide" aria-label={`${n + 1} من ${slides.length}`} aria-hidden={!on} inert={on ? undefined : ''}
-              className="hero-slide relative col-start-1 row-start-1 min-h-[560px] transition-opacity duration-700 ease-out data-[on=false]:opacity-0 md:min-h-[520px] lg:min-h-[560px]">
+              className="hero-slide relative col-start-1 row-start-1 min-h-[580px] transition-opacity duration-700 ease-out data-[on=false]:opacity-0 md:min-h-[520px] lg:min-h-[560px]">
               <picture>
                 {x.imageMobile && <source media="(max-width: 767px)" srcSet={x.imageMobile} />}
                 <img src={x.image} alt="" width="1600" height="900" fetchpriority={n === 0 ? 'high' : undefined} loading={n === 0 ? 'eager' : 'lazy'}
@@ -67,6 +88,7 @@ function Hero({ b: h, first }) {
               </picture>
               {/* the wash the words stand on: from the right edge on wide screens, from the bottom on phones */}
               <span className="absolute inset-0 bg-[linear-gradient(to_top,rgb(253_247_244)_42%,rgb(253_247_244/0.85)_60%,transparent_85%)] md:bg-[linear-gradient(to_left,rgb(253_247_244)_30%,rgb(253_247_244/0.82)_52%,transparent_75%)]" aria-hidden="true" />
+              <HeroProducts ids={x.show || []} />
               <div className="relative flex h-full min-h-[inherit] flex-col justify-end px-6 pt-10 pb-20 text-center md:w-[58%] md:justify-center md:px-14 md:pb-16 md:text-start lg:px-20">
                 <H className="hero-line font-display text-[2.15rem] font-extrabold leading-[1.3] text-primary sm:text-[2.7rem] lg:text-[3.3rem]">
                   <span className="hero-mask"><span>{x.title1 || settings.store.name}</span></span>
@@ -202,7 +224,7 @@ function ProductsBlock({ b }) {
   )
 }
 
-/* ---------------- The journey: four steps linked like a chain ---------------- */
+/* ---------------- The journey: four steps in one chain across; a light runs along it, step by step ---------------- */
 function JourneyBlock({ b }) {
   const { settings } = useApp()
   const fee = settings.shipping.fee
@@ -212,27 +234,53 @@ function JourneyBlock({ b }) {
     { icon: Gift, t: 'نجهّز طلبك', d: 'نغلّفه بعناية ويوصلك إيميل بالتحديث' },
     { icon: Truck, t: 'يوصلك لباب بيتك', d: fee > 0 ? `شحن ${money(fee)} لعنوانك الوطني` : 'شحن مجاني لعنوانك' },
   ]
+  const [step, setStep] = useState(0)
+  const [live, setLive] = useState(false)
+  const box = useRef(null)
+  // runs only while the chain is on screen, and never for reduced motion
+  useEffect(() => {
+    const el = box.current
+    if (!el || typeof IntersectionObserver === 'undefined' || matchMedia('(prefers-reduced-motion: reduce)').matches) return
+    const io = new IntersectionObserver(([e]) => setLive(e.isIntersecting), { threshold: 0.4 })
+    io.observe(el)
+    return () => io.disconnect()
+  }, [])
+  useEffect(() => {
+    if (!live) return
+    const t = setTimeout(() => setStep((x) => (x + 1) % STEPS.length), step === STEPS.length - 1 ? 3200 : 2000)
+    return () => clearTimeout(t)
+  }, [live, step, STEPS.length])
   return (
     <section className="py-6 sm:py-8" aria-labelledby={`h-${b.id}`}>
       <div className="container-w">
         <Title title={<span id={`h-${b.id}`}>{b.title}</span>} lead={b.text} />
-        <ol className="relative mx-auto mt-12 grid max-w-[1000px] gap-8 md:grid-cols-4 md:gap-4">
-          {/* the chain: a rose-gold line through the four stones (across on desktop, down on phones) */}
-          <span className="absolute inset-x-[12.5%] top-[38px] hidden h-[2px] bg-[repeating-linear-gradient(90deg,var(--p-gold-500)_0_10px,transparent_10px_18px)] md:block" aria-hidden="true" />
-          <span className="absolute inset-y-[38px] start-[38px] w-[2px] bg-[repeating-linear-gradient(180deg,var(--p-gold-500)_0_10px,transparent_10px_18px)] md:hidden" aria-hidden="true" />
-          {STEPS.map(({ icon: I, t, d }, i) => (
-            <Reveal as="li" key={t} delay={i * 120} className="relative flex items-center gap-4 md:flex-col md:text-center">
-              <span className="relative grid size-[76px] shrink-0 place-items-center rounded-full bg-white shadow-[0_16px_30px_-18px_rgb(125_63_76/0.6)] ring-[6px] ring-[var(--p-cream-100)]">
-                <I className="size-7 text-primary" strokeWidth={1.6} />
-                <span className="tabular absolute -top-1 -end-1 grid size-6 place-items-center rounded-full bg-primary text-[11px] font-bold text-white">{i + 1}</span>
-              </span>
-              <span className="md:mt-3">
-                <b className="block text-[15px] text-primary">{t}</b>
-                <span className="mt-0.5 block text-[13px] leading-6 text-muted-foreground">{d}</span>
-              </span>
-            </Reveal>
-          ))}
-        </ol>
+        <div ref={box} className="mx-auto mt-10 max-w-[980px] rounded-[28px] bg-white/75 px-3 py-8 shadow-[0_24px_50px_-38px_rgb(125_63_76/0.55)] ring-1 ring-white sm:px-8 sm:py-10">
+          <ol className="relative grid grid-cols-4">
+            {/* the chain, and the light filling it up to the current step (from the right: the reading direction) */}
+            <span className="absolute inset-x-[12.5%] top-[27px] h-[3px] rounded-full bg-[var(--p-cream-200)] sm:top-[35px]" aria-hidden="true" />
+            <span className="absolute inset-x-[12.5%] top-[27px] h-[3px] origin-right rounded-full bg-[linear-gradient(to_left,var(--p-gold-500),var(--primary))] transition-[scale] duration-700 ease-[cubic-bezier(.16,1,.3,1)] sm:top-[35px]"
+              style={{ scale: `${step / (STEPS.length - 1)} 1` }} aria-hidden="true" />
+            {STEPS.map(({ icon: I, t, d }, n) => {
+              const state = n < step ? 'done' : n === step ? 'now' : 'next'
+              return (
+                <li key={t} className="relative flex flex-col items-center text-center">
+                  <button type="button" onClick={() => setStep(n)} aria-current={state === 'now' ? 'step' : undefined} aria-label={`${n + 1}. ${t}`}
+                    className={cn('relative grid size-[56px] place-items-center rounded-full ring-[5px] transition-[background-color,color,scale,box-shadow] duration-500 sm:size-[72px]',
+                      state === 'next' ? 'bg-white text-primary/70 ring-[var(--p-cream-100)] shadow-[0_10px_20px_-14px_rgb(125_63_76/0.5)]'
+                        : 'bg-primary text-white ring-[var(--p-gold-100)] shadow-[0_14px_26px_-12px_rgb(125_63_76/0.75)]',
+                      state === 'now' && 'scale-110')}>
+                    {state === 'now' && <span className="absolute -inset-2 rounded-full border border-[var(--p-gold-500)]/60 motion-safe:animate-[ping-soft_2s_ease-out_infinite]" aria-hidden="true" />}
+                    <I className="size-6 sm:size-7" strokeWidth={1.6} />
+                  </button>
+                  <b className={cn('mt-3 block text-[12.5px] leading-5 transition-colors duration-500 sm:mt-4 sm:text-[15px]', state === 'next' ? 'text-primary/60' : 'text-primary')}>{t}</b>
+                  <span className="mt-1 hidden text-[13px] leading-6 text-muted-foreground sm:block">{d}</span>
+                </li>
+              )
+            })}
+          </ol>
+          {/* on phones, the current step's line under the chain */}
+          <p key={step} className="mt-6 text-center text-[14px] text-foreground/80 motion-safe:animate-[rise-in_.4s_var(--p-ease-emphasized)_both] sm:hidden" aria-live="polite">{STEPS[step].d}</p>
+        </div>
       </div>
     </section>
   )

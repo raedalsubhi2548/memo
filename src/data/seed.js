@@ -16,7 +16,7 @@ export const seedCategories = [
 const RAW_PRODUCTS = [
   {
     id: 'hair-oil', name: 'زيت الشعر', price: 130, salePrice: null, categoryId: 'hair-care',
-    image: '/brand/products/hair-oil-v4.webp', badge: '', featured: true, sort: 1,
+    image: '/brand/products/hair-oil-v5.webp', badge: '', featured: true, sort: 1,
     summary: 'زيت للشعر تستخدمينه ثلاث مرات بالأسبوع على فروة الشعر وأطرافه، لروتين عناية يدلّع شعرك.',
     description: `زيت الشعر من عناية ميمي، رفيقك في روتين العناية بشعرك. تدليك فروة الشعر بالزيت عادة جميلة توارثناها من أمهاتنا وجداتنا، ولحظة هدوء تعطين فيها شعرك وقته. وزّعيه على الفروة بأطراف أصابعك ومرّريه على الأطراف، وخلي شعرك يحس بالفرق مع الاستمرار.
 ## طريقة الاستخدام

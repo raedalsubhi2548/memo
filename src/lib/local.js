@@ -3,7 +3,9 @@
 import { seedCategories, seedProducts } from '../data/seed.js'
 
 const K = (k) => `mimi:${k}`
-const SEED_VERSION = '2026-10-26'
+// the product pictures are part of the version: a renamed picture (new file name for the 30-day cache) re-seeds the demo
+// catalog, so a browser that saw an older one never asks for a file that no longer exists
+const SEED_VERSION = '2026-10-27|' + seedProducts.map((p) => p.image).join('|')
 
 function read(key, fallback) {
   try {
