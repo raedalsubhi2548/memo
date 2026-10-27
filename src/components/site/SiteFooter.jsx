@@ -4,7 +4,6 @@ import Social from '@/components/Social.jsx'
 import PayIcons from '@/components/brand/PayIcons.jsx'
 import { useApp } from '@/state.jsx'
 import { DEFAULT_FOOTER_LINKS as FOOTER_LINKS } from '@/lib/theme.js'
-import { PICTURE_CREDITS } from '@/data/world.js'
 import { EMAIL, waLink, localPhone } from '@/lib/format.js'
 
 /** A soft rose-wine close with rounded shoulders: the logo and a line about the store, four short columns, payments. */
@@ -72,7 +71,6 @@ export default function SiteFooter() {
           {settings.footer.payments && <PayIcons size="sm" className="w-full max-w-[260px]" />}
           <div className="text-center text-[12px] leading-6 text-white/55 lg:text-start">
             <p>جميع الحقوق محفوظة لـ{settings.store.name} <span dir="ltr" className="tabular" suppressHydrationWarning>© {new Date().getFullYear()}</span></p>
-            <p>صور المكونات: {PICTURE_CREDITS.join(' · ')}</p>
           </div>
         </div>
       </div>

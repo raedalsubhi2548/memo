@@ -1,7 +1,6 @@
 import { ArrowLeft } from 'lucide-react'
 import { socialLinks, BrandIcon } from '@/components/Social.jsx'
 import { EMAIL, waLink, localPhone } from '@/lib/format.js'
-import { HERO_PICTURE } from '@/data/world.js'
 import { useApp } from '@/state.jsx'
 import Reveal from '@/components/Reveal.jsx'
 import { PageHead } from '@/components/ui/kit.jsx'
@@ -31,7 +30,7 @@ export default function Contact() {
           </div>
         </Reveal>
         <Reveal delay={90} className="min-h-[320px] overflow-hidden rounded-[30px] bg-white p-2.5 shadow-[0_30px_60px_-36px_rgb(125_63_76/0.5)]">
-          <img src={HERO_PICTURE.src} alt={HERO_PICTURE.alt} width="2400" height="1400" loading="lazy" className="size-full rounded-[22px] object-cover" />
+          <img src="/brand/banner-all-v3.webp" alt="منتجات عناية ميمي" width="1600" height="900" loading="lazy" className="size-full rounded-[22px] object-cover" />
         </Reveal>
       </div>
     </div>

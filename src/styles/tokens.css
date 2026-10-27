@@ -44,9 +44,9 @@
   --p-teal-100: #e3f1e8;
 
   /* Type */
-  --p-font-display: 'El Messiri', 'Tajawal', system-ui, sans-serif;
-  --p-font-script: 'El Messiri', 'Tajawal', sans-serif;
-  --p-font-text: 'Tajawal', system-ui, -apple-system, 'Segoe UI', Tahoma, sans-serif;
+  --p-font-display: 'Reem Kufi', 'IBM Plex Sans Arabic', system-ui, sans-serif;
+  --p-font-script: 'Reem Kufi', 'IBM Plex Sans Arabic', sans-serif;
+  --p-font-text: 'IBM Plex Sans Arabic', system-ui, -apple-system, 'Segoe UI', Tahoma, sans-serif;
   /* Major-third scale, 16px base */
   --p-size-12: 0.75rem;
   --p-size-14: 0.875rem;

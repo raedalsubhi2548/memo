@@ -15,7 +15,7 @@
   }
   h1, h2, h3, h4 { font-family: var(--font-display); font-weight: 600; letter-spacing: 0; line-height: 1.4; }
   h3, h4 { font-family: var(--font-text); font-weight: 700; }
-  /* storefront headings in El Messiri */
+  /* storefront headings in Reem Kufi */
   .site-main :is(h1, h2), .font-script { font-family: var(--p-font-script) !important; font-weight: 600; }
   /* the store's soft background: blush glows and rose-gold light, fixed behind every page */
   body {
