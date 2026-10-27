@@ -8,7 +8,8 @@ import { themeCss } from '@/lib/theme.js'
 // fonts the owner can pick (the original two are always loaded by fonts.css); each loads only when chosen
 const FONT_CSS = {
   cairo: () => [import('@fontsource/cairo/arabic-400.css'), import('@fontsource/cairo/arabic-500.css'), import('@fontsource/cairo/arabic-700.css')],
-  almarai: () => [import('@fontsource/almarai/arabic-400.css'), import('@fontsource/almarai/arabic-700.css'), import('@fontsource/almarai/arabic-800.css')],
+  almarai: () => [import('@fontsource/almarai/arabic-400.css')], // 700/800 come with fonts.css (the headings)
+  reemkufi: () => [import('@fontsource/reem-kufi/arabic-500.css'), import('@fontsource/reem-kufi/arabic-700.css')],
   elmessiri: () => [import('@fontsource/el-messiri/arabic-500.css'), import('@fontsource/el-messiri/arabic-600.css'), import('@fontsource/el-messiri/arabic-700.css')],
   tajawal: () => [import('@fontsource/tajawal/arabic-400.css'), import('@fontsource/tajawal/arabic-500.css'), import('@fontsource/tajawal/arabic-700.css')],
   marhey: () => [import('@fontsource/marhey/arabic-500.css'), import('@fontsource/marhey/arabic-700.css')],

@@ -27,7 +27,7 @@ A custom-coded store for hair and skin care products, forked (Oct 2026) from Rae
 
 ## Key places
 - Brand: `src/styles/tokens.css` (rose wine #7d3f4c, blush #e7c2bb, rose-gold #b98572, soft blush ground #fbf6f4), `src/lib/theme.js` (defaults, home blocks, shipping settings, `mergeSettings`).
-- Design (27 Oct 2026, from Raed's own reference screenshot of a store he likes): formal and soft. Reem Kufi for headings, IBM Plex Sans Arabic for text,
+- Design (27 Oct 2026, from Raed's own reference screenshot of a store he likes): formal and soft. Almarai for headings (soft and formal — Raed: «ناعم ورسمي»; Reem Kufi was too hard), IBM Plex Sans Arabic for text,
   modest sizes, rounded corners, soft wine-tinted shadows, a fixed blush background (`body` in `src/index.css`).
   Raed rejected a big-type «name as a monument» design (26 Oct) — don't go back to it. When he sends a reference, build from it.
 - Home: `src/pages/Home.jsx` — hero = three wide banners that take turns, with marketing copy (the first is the owner's hero block, the other two show the sections);
