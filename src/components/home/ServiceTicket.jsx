@@ -52,7 +52,7 @@ export default function ServiceTicket({ p, className }) {
       <Link to={productPath(p.id)} className="relative block overflow-hidden rounded-[18px] bg-[radial-gradient(120%_90%_at_50%_20%,#fff,var(--p-cream-100))]" tabIndex={-1} aria-hidden="true">
         <img src={p.image} sizes="(max-width: 640px) 46vw, (max-width: 1024px) 30vw, 300px" alt="" loading="lazy" decoding="async" width="900" height="1125"
           onError={(e) => { if (!e.currentTarget.dataset.fb) { e.currentTarget.dataset.fb = 1; e.currentTarget.src = coverFor(p) } }}
-          className="aspect-[4/5] w-full object-cover transition-transform duration-[1.4s] ease-[cubic-bezier(.16,1,.3,1)] group-hover:scale-[1.06]" />
+          className="aspect-square w-full object-cover object-[50%_55%] transition-transform duration-[1.4s] ease-[cubic-bezier(.16,1,.3,1)] group-hover:scale-[1.06]" />
       </Link>
       <button type="button" onClick={() => toggleWish(p.id)} aria-pressed={wished} aria-label={wished ? `إزالة ${p.name} من المفضلة` : `إضافة ${p.name} إلى المفضلة`}
         className={cn('absolute top-4 end-4 z-10 grid size-9 place-items-center rounded-full bg-white/90 shadow-sm backdrop-blur transition-[color,scale] duration-200 active:scale-90', wished ? 'text-danger' : 'text-primary/60 hover:text-primary')}>

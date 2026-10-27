@@ -105,17 +105,10 @@
   .hero-bar[data-run='true'] { animation: hero-bar var(--t) linear forwards; }
   /* the product cards are dealt onto the banner one after another and settle at their tilt */
   .hero-slide[data-on='true'] .hero-card { animation: hero-card 1s cubic-bezier(.16,1,.3,1) calc(var(--k) * 110ms + 150ms) both; }
-  /* the thread between parts of the store draws itself as it scrolls in */
-  .thread .thread-line { transition: scale 1s cubic-bezier(.16,1,.3,1); }
-  .thread .thread-bead { transition: scale .5s cubic-bezier(.16,1,.3,1) .35s, opacity .5s ease .35s; }
-  .thread[data-on='false'] .thread-line { scale: 1 0; }
-  .thread[data-on='false'] .thread-bead { scale: 0; opacity: 0; }
 }
 /* the first banner's headline is the page's largest paint: never hidden at load */
 .hero-slide:first-child .hero-mask > span { animation-name: none; }
 .hero-bar { scale: 0 1; }
-/* a part of the home page with nothing to show (no reviews yet) takes its thread with it */
-[data-block]:has(> .thread:only-child) { display: none; }
 @media (prefers-reduced-motion: reduce) { button[aria-current='true'] .hero-bar { scale: 1 1; } }
 /* the hero headline is the page's largest paint: it moves in but is visible from the first frame */
 @keyframes rise-in-solid { from { transform: translateY(10px); } }

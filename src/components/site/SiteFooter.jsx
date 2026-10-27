@@ -6,14 +6,42 @@ import { useApp } from '@/state.jsx'
 import { DEFAULT_FOOTER_LINKS as FOOTER_LINKS } from '@/lib/theme.js'
 import { EMAIL, waLink, localPhone } from '@/lib/format.js'
 
-/** A soft rose-wine close with rounded shoulders: the logo and a line about the store, four short columns, payments. */
+const LEAVES = [[104, 214, -50], [112, 176, 40], [100, 140, -58], [108, 104, 34], [96, 74, -64], [101, 44, 30]]
+/** A sprig drawn in fine rose-gold lines: a stem, its leaves and a small flower, like the herbs in the store's blends. */
+function Sprig({ className }) {
+  return (
+    <svg viewBox="0 0 220 270" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" className={className} aria-hidden="true">
+      <path d="M110 268C98 205 122 150 100 84C94 62 96 36 108 18" />
+      {LEAVES.map(([x, y, r]) => (
+        <g key={y} transform={`translate(${x} ${y}) rotate(${r})`}>
+          <path d="M0 0C12-16 38-16 52 0C38 16 12 16 0 0Z" />
+          <path d="M4 0H44" strokeWidth=".8" />
+        </g>
+      ))}
+      <g transform="translate(108 16)">
+        {[0, 72, 144, 216, 288].map((r) => <ellipse key={r} cx="0" cy="-11" rx="6" ry="11" transform={`rotate(${r})`} />)}
+        <circle r="3.5" fill="currentColor" />
+      </g>
+    </svg>
+  )
+}
+
+/** The close of every page: silk waves rise from the blush ground into rose wine, with sprigs drawn in rose-gold at its sides. */
 export default function SiteFooter() {
   const { categories, settings } = useApp()
   const col = 'mb-3 text-[13.5px] font-bold text-white'
   const item = 'flex min-h-8 items-center text-[13.5px] text-white/75 transition-colors hover:text-white'
   return (
-    <footer className="mt-16 rounded-t-[40px] bg-primary text-white sm:rounded-t-[56px]">
-      <div className="container-w pt-12 sm:pt-16">
+    <footer className="relative mt-24 text-white">
+      {/* two waves, like folds of silk: a light blush one behind the wine one */}
+      <svg viewBox="0 0 1440 120" preserveAspectRatio="none" className="absolute bottom-[calc(100%-1px)] h-[70px] w-full sm:h-[110px]" aria-hidden="true">
+        <path d="M0 64C220 8 420 8 640 46S1100 112 1440 30V120H0Z" fill="var(--p-gold-400)" opacity=".55" />
+        <path d="M0 96C260 40 470 40 720 74S1180 120 1440 64V120H0Z" fill="var(--primary)" />
+      </svg>
+      <div className="relative overflow-hidden bg-primary">
+      <Sprig className="pointer-events-none absolute -bottom-6 -start-6 hidden w-[220px] text-[var(--p-gold-400)] opacity-20 sm:block" />
+      <Sprig className="pointer-events-none absolute -bottom-6 -end-6 w-[150px] -scale-x-100 text-[var(--p-gold-400)] opacity-20 sm:w-[220px]" />
+      <div className="container-w relative pt-8 sm:pt-10">
         {settings.footer.cta && (
           <div className="mx-auto mb-12 max-w-xl text-center">
             <h2 className="font-display text-[1.7rem] font-semibold leading-[1.4]">{settings.footer.ctaTitle}</h2>
@@ -73,6 +101,7 @@ export default function SiteFooter() {
             <p>جميع الحقوق محفوظة لـ{settings.store.name} <span dir="ltr" className="tabular" suppressHydrationWarning>© {new Date().getFullYear()}</span></p>
           </div>
         </div>
+      </div>
       </div>
     </footer>
   )
