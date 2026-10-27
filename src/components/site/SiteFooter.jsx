@@ -99,6 +99,7 @@ export default function SiteFooter() {
           {settings.footer.payments && <PayIcons size="sm" className="w-full max-w-[260px]" />}
           <div className="text-center text-[12px] leading-6 text-white/55 lg:text-start">
             <p>جميع الحقوق محفوظة لـ{settings.store.name} <span dir="ltr" className="tabular" suppressHydrationWarning>© {new Date().getFullYear()}</span></p>
+            <p>تصميم وتنفيذ <a href="https://rraed.com" target="_blank" rel="noopener" className="font-bold text-white/85 underline decoration-white/30 underline-offset-4 transition-colors hover:text-white hover:decoration-white">منصة رائد</a></p>
           </div>
         </div>
       </div>

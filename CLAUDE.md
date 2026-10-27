@@ -33,10 +33,11 @@ A custom-coded store for hair and skin care products, forked (Oct 2026) from Rae
 - Home: `src/pages/Home.jsx` — the hero: three banners, marketing words over soft pictures (`hero-*-v4.webp`) with the store's own product photos
   fanned on them like cards (`HeroProducts`, the logo is on the labels). Raed wants his real products (with the logo) in the hero, never staged look-alikes. Motion: slow zoom, headline unmask, progress line per banner.
   Under them: round section pictures (`categories`), then each section as one frame (`shelf`): its banner, joined to its products.
-  A rose-gold thread with a bead (`Thread`) draws itself between the parts of the page, so the store reads as one chain. Then the order steps as one chain across (a light runs step to step while on screen; on phones the current step's line shows under it) and questions.
+  The parts melt into each other (no thread or dividers, see below). Then the order steps as one chain across (a light runs step to step while on screen; on phones the current step's line shows under it) and questions.
   «أسرار العطارة» was removed from the home page (`src/data/world.js` kept for the blog later).
-  Product card: `src/components/home/ServiceTicket.jsx` (4:5 photo on blush, name, a line, price, full-width «أضيفي للسلة» that turns into «تمت الإضافة»;
-  `useAddToCart` / `AddButton` are shared). A section with one product shows it wide (`FeaturedProduct`).
+  Product card: `src/components/home/ServiceTicket.jsx` — small and calm (square photo on blush, section, name, price, «أضيفي للسلة» → «تمت الإضافة»).
+  Cards are one fixed width (188px, half the row on phones) in a centred wrapping row, so products the owner adds later line up beside the others.
+  Footer bottom line: «تصميم وتنفيذ منصة رائد» linking to https://rraed.com (Raed asked, 27 Oct).
 - Catalog seed: `src/data/seed.js` → `node scripts/seed-sql.mjs` writes `supabase/seed.sql`.
 - Checkout + address: `src/pages/Checkout.jsx`, `src/lib/address.js`. Admin order sheet shows the address + «نسخ العنوان للشحن».
 - Policies: `src/data/terms.js` (DRAFT — the owner reviews returns/shipping wording and adds her CR / freelance number).

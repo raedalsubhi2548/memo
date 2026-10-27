@@ -11,7 +11,7 @@ import { cn } from '@/lib/utils'
 import Reveal from '@/components/Reveal.jsx'
 import { Button } from '@/components/ui/button'
 import { Ornament } from '@/components/ui/kit.jsx'
-import ServiceTicket, { useAddToCart, AddButton } from '@/components/home/ServiceTicket.jsx'
+import ServiceTicket from '@/components/home/ServiceTicket.jsx'
 
 /** A centred section title with the rose-gold ornament under it. */
 function Title({ title, lead, className }) {
@@ -153,38 +153,17 @@ function ShelfBlock({ b }) {
         </Reveal>
       </Link>
       <div className="container-w relative -mt-14 md:-mt-20">
-        <div className="mx-auto max-w-[780px]">
+        <div className="mx-auto max-w-[1000px]">
           <div className="flex items-center justify-between gap-3 px-1 pb-4">
             <h2 className="font-display text-[1.15rem] font-bold text-primary sm:text-[1.3rem]">منتجات {cat.name}</h2>
             <Link to={to} className="inline-flex items-center gap-1 text-[13.5px] font-bold text-primary/80 hover:text-primary">عرض الكل<ChevronLeft className="size-4" /></Link>
           </div>
-          <ul className={cn('grid gap-3 sm:gap-5', list.length === 1 ? 'grid-cols-1' : list.length === 3 ? 'grid-cols-2 md:grid-cols-3' : 'grid-cols-2 md:grid-cols-3 lg:grid-cols-4')}>
-            {list.map((p, n) => <Reveal as="li" key={p.id} delay={(n % 4) * 70} className={cn('min-w-0', list.length === 3 && n === 2 && 'col-span-2 mx-auto w-[calc(50%-6px)] md:col-span-1 md:w-auto')}>{list.length === 1 ? <FeaturedProduct p={p} /> : <ServiceTicket p={p} />}</Reveal>)}
+          <ul className="flex flex-wrap justify-center gap-3 sm:gap-4">
+            {list.map((p, n) => <Reveal as="li" key={p.id} delay={(n % 5) * 60} className="w-[calc(50%-6px)] min-w-0 sm:w-[188px]"><ServiceTicket p={p} /></Reveal>)}
           </ul>
         </div>
       </div>
     </section>
-  )
-}
-
-/** A section with one product shows it wide: the picture, a line about it, the price and the add button. */
-function FeaturedProduct({ p }) {
-  const add = useAddToCart(p)
-  return (
-    <article className="group grid items-center gap-5 overflow-hidden rounded-[22px] bg-white p-2.5 ring-1 ring-[var(--p-cream-200)] sm:grid-cols-[minmax(0,210px)_1fr] sm:gap-9 sm:p-3 shadow-[0_20px_40px_-32px_rgb(125_63_76/0.55)]">
-      <Link to={productPath(p.id)} className="mx-auto block w-full max-w-[190px] overflow-hidden rounded-[18px] bg-[var(--p-cream-100)] sm:max-w-none">
-        <img src={p.image} alt={p.name} width="900" height="1125" loading="lazy" className="aspect-[4/5] w-full object-cover transition-transform duration-[1.2s] ease-[cubic-bezier(.16,1,.3,1)] group-hover:scale-[1.04]" />
-      </Link>
-      <div className="px-3 pb-4 text-center sm:px-0 sm:pb-0 sm:text-start">
-        <h3 className="font-display text-[1.4rem] font-bold text-primary"><Link to={productPath(p.id)}>{p.name}</Link></h3>
-        {p.summary && <p className="mt-2 max-w-[48ch] text-[15px] leading-8 text-foreground/80">{p.summary}</p>}
-        <p className="tabular mt-4 text-[1.3rem] font-bold text-primary">{money(effectivePrice(p))}</p>
-        <div className="mt-4 flex flex-wrap items-center justify-center gap-3 sm:justify-start">
-          <AddButton add={add} p={p} />
-          <Button asChild variant="outline"><Link to={productPath(p.id)}>التفاصيل</Link></Button>
-        </div>
-      </div>
-    </article>
   )
 }
 
@@ -210,8 +189,8 @@ function ProductsBlock({ b }) {
             {tabs.map((c) => <button key={c.id} type="button" role="tab" aria-selected={tab === c.id} onClick={() => setTab(c.id)} className={pill(tab === c.id)}>{c.name}</button>)}
           </Reveal>
         )}
-        <ul className="mx-auto mt-9 grid max-w-[1080px] grid-cols-2 gap-x-3.5 gap-y-7 sm:gap-x-5 md:grid-cols-3 lg:grid-cols-4">
-          {list.map((p, i) => <Reveal as="li" key={p.id} delay={(i % 4) * 80} className="min-w-0"><ServiceTicket p={p} /></Reveal>)}
+        <ul className="mx-auto mt-9 flex max-w-[1000px] flex-wrap justify-center gap-3 sm:gap-4">
+          {list.map((p, i) => <Reveal as="li" key={p.id} delay={(i % 5) * 60} className="w-[calc(50%-6px)] min-w-0 sm:w-[188px]"><ServiceTicket p={p} /></Reveal>)}
         </ul>
         {b.viewAll && <div className="mt-10 text-center"><Button asChild variant="outline"><Link to={b.source === 'category' && b.category ? `/${b.category}` : '/shop'}>كل المنتجات<ArrowLeft /></Link></Button></div>}
       </div>
