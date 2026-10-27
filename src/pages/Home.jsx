@@ -1,18 +1,18 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { ArrowLeft, ChevronDown, ChevronLeft, Leaf, ShoppingBag, ShoppingCart, CreditCard, Gift, Truck, ShieldCheck, MessageCircle } from 'lucide-react'
+import { ArrowLeft, ChevronDown, ChevronLeft, ShoppingBag, CreditCard, Gift, Truck, ShieldCheck, MessageCircle } from 'lucide-react'
 import { useApp } from '@/state.jsx'
 import { FAQ } from '@/data/content.js'
 import { ALL_REVIEWS } from '@/data/reviews.js'
 import { testimonials } from '@/lib/feedback.js'
 import { money, effectivePrice, liveWa } from '@/lib/format.js'
-import { trackAddToCart } from '@/lib/analytics.js'
 import { productPath } from '@/lib/slug.js'
 import { cn } from '@/lib/utils'
 import Reveal from '@/components/Reveal.jsx'
+import { useInView } from '@/lib/useInView.js'
 import { Button } from '@/components/ui/button'
 import { Ornament } from '@/components/ui/kit.jsx'
-import ServiceTicket from '@/components/home/ServiceTicket.jsx'
+import ServiceTicket, { useAddToCart, AddButton } from '@/components/home/ServiceTicket.jsx'
 
 /** A centred section title with the rose-gold ornament under it. */
 function Title({ title, lead, className }) {
@@ -33,59 +33,68 @@ const Go = ({ link, className, children }) => {
   return <Link to={link} className={className}>{children}</Link>
 }
 
-/* ---------------- Hero: wide banners that take turns, each with its own words and button ---------------- */
-// the first banner is the owner's (store designer → الواجهة الرئيسية); the other two show the two sections
+/* ---------------- Hero: marketing banners that take turns — words first, a soft picture behind them ---------------- */
+// the first banner is the owner's (store designer → الواجهة الرئيسية); the other two speak for the two sections
 const MORE_SLIDES = [
-  { eyebrow: 'العناية بالشعر', title1: 'زيت الشعر', title2: 'روتين أسبوعي يدلّع شعرك', text: 'ثلاث مرات بالأسبوع على فروة الشعر وأطرافه.', cta: 'اطلبيه الآن', ctaLink: '/hair-oil', image: '/brand/banner-oil-v3.webp', price: 'hair-oil' },
-  { eyebrow: 'العناية بالبشرة', title1: 'الصابونيات التقليدية', title2: 'كركم · عكر فارسي · نيلة مغربية', text: 'ثلاث خلطات تختارين منها اللي يناسب بشرتك.', cta: 'تسوّقي الصابونيات', ctaLink: '/skin-care', image: '/brand/banner-soap-v3.webp' },
+  { title1: 'شعرك يستاهل دلع أكثر', title2: 'زيت الشعر من عناية ميمي', text: 'دقائق ثلاث مرات بالأسبوع على فروة الشعر وأطرافه، وخلّي شعرك يحس بالفرق مع الاستمرار.', cta: 'اطلبي زيت الشعر', ctaLink: '/hair-oil', image: '/brand/hero-hair-v4.webp' },
+  { title1: 'خلطات جداتنا بلمسة اليوم', title2: 'صابونيات تقليدية لبشرتك', text: 'الكركم والعكر الفارسي والنيلة المغربية، في صابونيات ناعمة تخلي وقت الاستحمام لحظة عناية.', cta: 'تسوّقي الصابونيات', ctaLink: '/skin-care', image: '/brand/hero-herbs-v4.webp' },
 ]
+const SLIDE_MS = 7000
 function Hero({ b: h, first }) {
-  const { settings, byId } = useApp()
-  const slides = [{ ...h, image: h.image || '/brand/banner-all-v3.webp' }, ...MORE_SLIDES]
+  const { settings } = useApp()
+  const slides = [{ ...h, image: h.image || '/brand/hero-silk-v4.webp' }, ...MORE_SLIDES]
   const [i, setI] = useState(0)
   const [paused, setPaused] = useState(false)
   useEffect(() => {
     if (paused || matchMedia('(prefers-reduced-motion: reduce)').matches) return
-    const t = setTimeout(() => setI((x) => (x + 1) % slides.length), 6500)
+    const t = setTimeout(() => setI((x) => (x + 1) % slides.length), SLIDE_MS)
     return () => clearTimeout(t)
   }, [i, paused, slides.length])
   return (
-    <section className="container-w pt-5 sm:pt-7" aria-roledescription="carousel" aria-label="عروض عناية ميمي"
+    <section className="container-w pt-4 sm:pt-6" aria-roledescription="carousel" aria-label="عناية ميمي"
       onMouseEnter={() => setPaused(true)} onMouseLeave={() => setPaused(false)} onFocus={() => setPaused(true)} onBlur={() => setPaused(false)}>
-      <div className="relative overflow-hidden rounded-[22px] bg-[var(--p-cream-100)] shadow-[0_24px_50px_-34px_rgb(125_63_76/0.55)] ring-1 ring-white">
+      <div className="relative isolate grid overflow-hidden rounded-[28px] bg-[var(--p-cream-100)] shadow-[0_30px_60px_-40px_rgb(125_63_76/0.6)]">
         {slides.map((x, n) => {
           const H = first && n === 0 ? 'h1' : 'h2'
-          const p = x.price && byId[x.price]
+          const on = n === i
           return (
-            <div key={n} aria-roledescription="slide" aria-label={`${n + 1} من ${slides.length}`} aria-hidden={n !== i} inert={n !== i ? '' : undefined}
-              className={cn('transition-opacity duration-700 ease-out', n === i ? 'relative opacity-100' : 'absolute inset-0 opacity-0')}>
+            <div key={n} data-on={on} aria-roledescription="slide" aria-label={`${n + 1} من ${slides.length}`} aria-hidden={!on} inert={on ? undefined : ''}
+              className="hero-slide relative col-start-1 row-start-1 min-h-[560px] transition-opacity duration-700 ease-out data-[on=false]:opacity-0 md:min-h-[520px] lg:min-h-[560px]">
               <picture>
                 {x.imageMobile && <source media="(max-width: 767px)" srcSet={x.imageMobile} />}
                 <img src={x.image} alt="" width="1600" height="900" fetchpriority={n === 0 ? 'high' : undefined} loading={n === 0 ? 'eager' : 'lazy'}
-                  className="aspect-[16/10] w-full object-cover object-left md:aspect-[16/7.6] lg:aspect-[16/7]" />
+                  className="hero-pic absolute inset-0 size-full object-cover object-[30%_50%]" />
               </picture>
-              {/* the words sit on the calm right side of the picture, over a soft wash (under it on phones) */}
-              <div className="relative bg-[var(--p-cream-50)] px-6 pt-6 pb-12 text-center md:absolute md:inset-y-0 md:start-0 md:flex md:w-[52%] md:flex-col md:justify-center md:bg-[linear-gradient(to_left,rgb(253_247_244/0.96)_45%,rgb(253_247_244/0.75)_75%,transparent)] md:px-14 md:pb-6 md:text-start lg:px-20">
-                <p className="text-[13px] font-semibold text-[var(--p-gold-700)]">{x.eyebrow}</p>
-                <H className="mt-2 font-display text-[2rem] font-semibold leading-[1.35] text-primary sm:text-[2.5rem] lg:text-[2.9rem]">{x.title1 || settings.store.name}</H>
-                {x.title2 && <p className="mt-1 font-display text-[1.15rem] text-primary/80 sm:text-[1.3rem]">{x.title2}</p>}
-                {x.text && <p className="mx-auto mt-3 max-w-[40ch] text-[15px] leading-7 text-foreground/75 md:mx-0">{x.text}</p>}
-                <div className="mt-6 flex flex-wrap items-center justify-center gap-4 md:justify-start">
+              {/* the wash the words stand on: from the right edge on wide screens, from the bottom on phones */}
+              <span className="absolute inset-0 bg-[linear-gradient(to_top,rgb(253_247_244)_42%,rgb(253_247_244/0.85)_60%,transparent_85%)] md:bg-[linear-gradient(to_left,rgb(253_247_244)_30%,rgb(253_247_244/0.82)_52%,transparent_75%)]" aria-hidden="true" />
+              <div className="relative flex h-full min-h-[inherit] flex-col justify-end px-6 pt-10 pb-20 text-center md:w-[58%] md:justify-center md:px-14 md:pb-16 md:text-start lg:px-20">
+                <H className="hero-line font-display text-[2.15rem] font-extrabold leading-[1.3] text-primary sm:text-[2.7rem] lg:text-[3.3rem]">
+                  <span className="hero-mask"><span>{x.title1 || settings.store.name}</span></span>
+                </H>
+                {x.title2 && <p className="hero-line mt-2 text-[1.1rem] font-medium text-[var(--p-gold-700)] sm:text-[1.25rem]" style={{ '--d': '120ms' }}>{x.title2}</p>}
+                {x.text && <p className="hero-line mx-auto mt-4 max-w-[44ch] text-[15.5px] leading-8 text-foreground/80 md:mx-0" style={{ '--d': '220ms' }}>{x.text}</p>}
+                <div className="hero-line mt-7 flex flex-wrap items-center justify-center gap-3 md:justify-start" style={{ '--d': '320ms' }}>
                   {x.cta && <Button asChild size="lg"><Go link={x.ctaLink}>{x.cta}<ArrowLeft /></Go></Button>}
-                  {p && <span className="tabular text-[15px] font-bold text-primary">{money(effectivePrice(p))}</span>}
+                  <Button asChild size="lg" variant="outline" className="bg-white/70"><Link to="/shop">كل المنتجات</Link></Button>
                 </div>
               </div>
             </div>
           )
         })}
-        <div className="absolute bottom-4 left-1/2 z-10 flex -translate-x-1/2 gap-2 md:bottom-6 md:right-14 md:left-auto md:translate-x-0 lg:right-20">
+        {/* which banner: numbered marks whose line fills while it shows */}
+        <div className="absolute inset-x-0 bottom-5 z-10 flex justify-center gap-3 md:start-14 md:end-auto md:justify-start lg:start-20">
           {slides.map((_, n) => (
             <button key={n} type="button" onClick={() => setI(n)} aria-label={`البانر ${n + 1}`} aria-current={n === i}
-              className={cn('h-2 rounded-full transition-all duration-300', n === i ? 'w-7 bg-primary' : 'w-2 bg-primary/25 hover:bg-primary/45')} />
+              className="group flex w-14 flex-col items-start gap-1.5 py-1 text-[11px] font-bold text-primary/50 aria-[current=true]:text-primary">
+              <span className="tabular">{String(n + 1).padStart(2, '0')}</span>
+              <span className="relative h-[2px] w-full overflow-hidden rounded-full bg-primary/15">
+                <span key={n === i ? `on-${i}` : 'off'} data-run={n === i && !paused} className="hero-bar absolute inset-0 origin-right rounded-full bg-primary" style={{ '--t': `${SLIDE_MS}ms` }} />
+              </span>
+            </button>
           ))}
         </div>
       </div>
-      <ul className="mt-4 grid grid-cols-3 gap-2 rounded-[18px] bg-white/80 px-3 py-3.5 text-center text-[12.5px] text-foreground/80 ring-1 ring-white sm:text-[13.5px]">
+      <ul className="mt-4 grid grid-cols-3 gap-2 rounded-[20px] bg-white/80 px-3 py-3.5 text-center text-[12.5px] text-foreground/80 ring-1 ring-white sm:text-[13.5px]">
         <li className="flex flex-col items-center gap-1 sm:flex-row sm:justify-center sm:gap-2"><Truck className="size-[18px] text-[var(--p-gold-600)]" />شحن لباب بيتك</li>
         <li className="flex flex-col items-center gap-1 sm:flex-row sm:justify-center sm:gap-2"><ShieldCheck className="size-[18px] text-[var(--p-gold-600)]" />دفع آمن</li>
         <li className="flex flex-col items-center gap-1 sm:flex-row sm:justify-center sm:gap-2"><MessageCircle className="size-[18px] text-[var(--p-gold-600)]" />خدمة عملاء واتساب</li>
@@ -94,8 +103,8 @@ function Hero({ b: h, first }) {
   )
 }
 
-/* ---------------- A section of the store: its banner, joined to its own products in one frame ---------------- */
-const SHELF_ART = { 'hair-care': '/brand/banner-oil-v3.webp', 'skin-care': '/brand/banner-soap-v3.webp' }
+/* ---------------- A section of the store: its banner (words on a soft picture), joined to its own products ---------------- */
+const SHELF_ART = { 'hair-care': '/brand/hero-hair-v4.webp', 'skin-care': '/brand/hero-herbs-v4.webp' }
 function ShelfBlock({ b }) {
   const { products, categories, catalogReady } = useApp()
   const cat = categories.find((c) => c.id === b.category)
@@ -103,24 +112,25 @@ function ShelfBlock({ b }) {
   if (!catalogReady || !cat || !list.length) return null
   const to = `/${cat.id}`
   return (
-    <section id={b.id} className="scroll-mt-[var(--header-height)] py-5 sm:py-7" aria-labelledby={`h-${b.id}`}>
+    <section id={b.id} className="scroll-mt-[var(--header-height)] py-2" aria-labelledby={`h-${b.id}`}>
       <div className="container-w">
-        <Reveal className="overflow-hidden rounded-[24px] bg-white/75 p-2.5 shadow-[0_24px_50px_-38px_rgb(125_63_76/0.55)] ring-1 ring-white sm:p-3.5">
-          <Link to={to} className="group relative block overflow-hidden rounded-[18px] bg-[var(--p-cream-100)]">
-            <img src={b.image || SHELF_ART[cat.id] || '/brand/banner-all-v3.webp'} alt="" width="1600" height="900" loading="lazy"
-              className="aspect-[16/8] w-full object-cover object-left transition-transform duration-[1.4s] ease-[cubic-bezier(.16,1,.3,1)] group-hover:scale-[1.03] md:aspect-[16/6]" />
-            <span className="relative block bg-[var(--p-cream-50)] px-5 py-5 text-center md:absolute md:inset-y-0 md:start-0 md:flex md:w-1/2 md:flex-col md:justify-center md:bg-[linear-gradient(to_left,rgb(253_247_244/0.96)_50%,transparent)] md:px-12 md:text-start">
-              <span id={`h-${b.id}`} className="block font-display text-[1.75rem] font-semibold leading-[1.4] text-primary sm:text-[2.1rem]">{b.title || cat.name}</span>
-              {b.text && <span className="mx-auto mt-1.5 block max-w-[38ch] text-[14.5px] leading-7 text-foreground/75 md:mx-0">{b.text}</span>}
-              <span className="mx-auto mt-4 inline-flex h-10 items-center gap-2 self-start rounded-full bg-primary px-5 text-[14px] font-bold text-white shadow-[0_10px_20px_-12px_rgb(125_63_76/0.9)] md:mx-0">{b.cta || 'تسوّقي الآن'}<ArrowLeft className="size-4" /></span>
+        <Reveal className="rounded-[28px] bg-white/75 p-2.5 shadow-[0_24px_50px_-38px_rgb(125_63_76/0.55)] ring-1 ring-white sm:p-3">
+          <Link to={to} className="group relative isolate grid min-h-[260px] overflow-hidden rounded-[22px] bg-[var(--p-cream-100)] md:min-h-[300px]">
+            <img src={b.image || SHELF_ART[cat.id] || '/brand/hero-silk-v4.webp'} alt="" width="1600" height="900" loading="lazy"
+              className="absolute inset-0 -z-10 size-full object-cover object-[30%_50%] transition-transform duration-[1.6s] ease-[cubic-bezier(.16,1,.3,1)] group-hover:scale-[1.04]" />
+            <span className="absolute inset-0 -z-10 bg-[linear-gradient(to_top,rgb(253_247_244)_40%,rgb(253_247_244/0.7)_65%,transparent)] md:bg-[linear-gradient(to_left,rgb(253_247_244)_30%,rgb(253_247_244/0.75)_55%,transparent_78%)]" aria-hidden="true" />
+            <span className="flex flex-col justify-end px-6 pt-24 pb-6 text-center md:w-[55%] md:justify-center md:px-12 md:pt-6 md:text-start">
+              <span id={`h-${b.id}`} className="block font-display text-[1.8rem] font-extrabold leading-[1.35] text-primary sm:text-[2.2rem]">{b.title || cat.name}</span>
+              {b.text && <span className="mx-auto mt-2 block max-w-[40ch] text-[15px] leading-7 text-foreground/80 md:mx-0">{b.text}</span>}
+              <span className="mx-auto mt-5 inline-flex h-11 items-center gap-2 rounded-full bg-primary px-6 text-[14px] font-bold text-white shadow-[0_12px_22px_-12px_rgb(125_63_76/0.9)] transition-[gap] duration-300 group-hover:gap-3 md:mx-0 md:self-start">{b.cta || 'تسوّقي الآن'}<ArrowLeft className="size-4" /></span>
             </span>
           </Link>
-          <div className="flex items-center justify-between gap-3 px-2 pt-6 pb-3">
-            <h2 className="flex items-center gap-2 font-display text-[1.25rem] font-semibold text-primary sm:text-[1.4rem]"><Leaf className="size-5 text-[var(--p-gold-600)]" />منتجات {cat.name}</h2>
+          <div className="flex items-center justify-between gap-3 px-2 pt-6 pb-4">
+            <h2 className="font-display text-[1.25rem] font-bold text-primary sm:text-[1.4rem]">منتجات {cat.name}</h2>
             <Link to={to} className="inline-flex items-center gap-1 text-[13.5px] font-bold text-primary/80 hover:text-primary">عرض الكل<ChevronLeft className="size-4" /></Link>
           </div>
-          <ul className={cn('grid gap-3 px-1 pb-1 sm:gap-4', list.length === 1 ? 'grid-cols-1' : list.length === 3 ? 'grid-cols-2 md:grid-cols-3' : 'grid-cols-2 md:grid-cols-3 lg:grid-cols-4')}>
-            {list.map((p, n) => <Reveal as="li" key={p.id} delay={(n % 4) * 70} className="min-w-0">{list.length === 1 ? <FeaturedProduct p={p} /> : <ServiceTicket p={p} />}</Reveal>)}
+          <ul className={cn('grid gap-3 px-0.5 pb-0.5 sm:gap-4', list.length === 1 ? 'grid-cols-1' : list.length === 3 ? 'grid-cols-2 md:grid-cols-3' : 'grid-cols-2 md:grid-cols-3 lg:grid-cols-4')}>
+            {list.map((p, n) => <Reveal as="li" key={p.id} delay={(n % 4) * 70} className={cn('min-w-0', list.length === 3 && n === 2 && 'col-span-2 mx-auto w-[calc(50%-6px)] md:col-span-1 md:w-auto')}>{list.length === 1 ? <FeaturedProduct p={p} /> : <ServiceTicket p={p} />}</Reveal>)}
           </ul>
         </Reveal>
       </div>
@@ -130,22 +140,34 @@ function ShelfBlock({ b }) {
 
 /** A section with one product shows it wide: the picture, a line about it, the price and the add button. */
 function FeaturedProduct({ p }) {
-  const { addToCart } = useApp()
+  const add = useAddToCart(p)
   return (
-    <article className="grid items-center gap-5 rounded-[18px] bg-white p-3 ring-1 ring-[var(--p-cream-200)] sm:grid-cols-[minmax(0,280px)_1fr] sm:gap-8 sm:p-4">
-      <Link to={productPath(p.id)} className="block overflow-hidden rounded-[14px] bg-[var(--p-cream-100)]">
-        <img src={p.image} alt={p.name} width="600" height="750" loading="lazy" className="aspect-square w-full object-cover" />
+    <article className="group grid items-center gap-5 overflow-hidden rounded-[22px] bg-white p-2.5 ring-1 ring-[var(--p-cream-200)] sm:grid-cols-[minmax(0,320px)_1fr] sm:gap-10 sm:p-3">
+      <Link to={productPath(p.id)} className="block overflow-hidden rounded-[18px] bg-[var(--p-cream-100)]">
+        <img src={p.image} alt={p.name} width="900" height="1125" loading="lazy" className="aspect-[4/5] w-full object-cover transition-transform duration-[1.2s] ease-[cubic-bezier(.16,1,.3,1)] group-hover:scale-[1.04]" />
       </Link>
-      <div className="px-2 pb-3 text-center sm:px-0 sm:pb-0 sm:text-start">
-        <h3 className="font-display text-[1.5rem] font-semibold text-primary"><Link to={productPath(p.id)}>{p.name}</Link></h3>
-        {p.summary && <p className="mt-2 max-w-[52ch] text-[14.5px] leading-7 text-foreground/75">{p.summary}</p>}
-        <div className="mt-5 flex flex-wrap items-center justify-center gap-4 sm:justify-start">
-          <span className="tabular text-[1.35rem] font-bold text-primary">{money(effectivePrice(p))}</span>
-          <Button onClick={() => { addToCart(p.id); trackAddToCart(p, 1, effectivePrice(p)) }}><ShoppingCart />أضيفي للسلة</Button>
-          <Link to={productPath(p.id)} className="text-[13.5px] font-bold text-primary/80 underline-offset-4 hover:underline">التفاصيل</Link>
+      <div className="px-3 pb-4 text-center sm:px-0 sm:pb-0 sm:text-start">
+        <h3 className="font-display text-[1.6rem] font-bold text-primary"><Link to={productPath(p.id)}>{p.name}</Link></h3>
+        {p.summary && <p className="mt-2 max-w-[48ch] text-[15px] leading-8 text-foreground/80">{p.summary}</p>}
+        <p className="tabular mt-5 text-[1.5rem] font-bold text-primary">{money(effectivePrice(p))}</p>
+        <div className="mt-4 flex flex-wrap items-center justify-center gap-3 sm:justify-start">
+          <AddButton add={add} p={p} />
+          <Button asChild variant="outline"><Link to={productPath(p.id)}>التفاصيل</Link></Button>
         </div>
       </div>
     </article>
+  )
+}
+
+/** The thread that ties one part of the store to the next: a rose-gold line and a bead, drawn as it comes into view. */
+function Thread() {
+  const [ref, on] = useInView()
+  return (
+    <div ref={ref} data-on={on} className="thread mx-auto flex h-16 w-6 flex-col items-center" aria-hidden="true">
+      <span className="thread-line w-px flex-1 origin-top bg-[linear-gradient(to_bottom,transparent,var(--p-gold-500))]" />
+      <span className="thread-bead my-1 size-2.5 rotate-45 rounded-[2px] bg-[var(--p-gold-500)] ring-4 ring-[var(--p-cream-50)]" />
+      <span className="thread-line w-px flex-1 origin-top bg-[linear-gradient(to_top,transparent,var(--p-gold-500))]" />
+    </div>
   )
 }
 
@@ -162,7 +184,7 @@ function ProductsBlock({ b }) {
   const pill = (on) => cn('h-9 rounded-full px-4 text-[13px] font-bold transition-colors', on ? 'bg-primary text-white shadow-[0_8px_16px_-10px_rgb(125_63_76/0.9)]' : 'bg-white/80 text-primary ring-1 ring-[var(--p-cream-200)] hover:bg-white')
   if (!base.length) return null
   return (
-    <section id={b.id === 'products' ? 'products' : undefined} className="scroll-mt-[var(--header-height)] py-14 sm:py-20">
+    <section id={b.id === 'products' ? 'products' : undefined} className="scroll-mt-[var(--header-height)] py-6 sm:py-8">
       <div className="container-w">
         <Title title={b.title} lead="صابونيات تقليدية وزيت للشعر، تختارينها وتوصلك لباب بيتك." />
         {tabs.length > 1 && (
@@ -191,7 +213,7 @@ function JourneyBlock({ b }) {
     { icon: Truck, t: 'يوصلك لباب بيتك', d: fee > 0 ? `شحن ${money(fee)} لعنوانك الوطني` : 'شحن مجاني لعنوانك' },
   ]
   return (
-    <section className="py-14 sm:py-20" aria-labelledby={`h-${b.id}`}>
+    <section className="py-6 sm:py-8" aria-labelledby={`h-${b.id}`}>
       <div className="container-w">
         <Title title={<span id={`h-${b.id}`}>{b.title}</span>} lead={b.text} />
         <ol className="relative mx-auto mt-12 grid max-w-[1000px] gap-8 md:grid-cols-4 md:gap-4">
@@ -222,7 +244,7 @@ function Reviews({ b }) {
   const all = testimonials(ALL_REVIEWS, feedback.reviews)
   if (!all.length) return null
   return (
-    <section className="py-14 sm:py-20">
+    <section className="py-6 sm:py-8">
       <div className="container-w">
         <Title title={b.title} />
         <ul className="mx-auto mt-10 grid max-w-[1000px] gap-5 md:grid-cols-3">
@@ -244,7 +266,7 @@ function FaqBlock({ b }) {
   const fee = settings.shipping.fee
   const list = FAQ.map((q) => (q.q === 'كم رسوم الشحن؟' ? { ...q, a: fee > 0 ? `رسوم الشحن ${money(fee)} للطلب${settings.shipping.freeOver > 0 ? `، ومجاني للطلبات من ${money(settings.shipping.freeOver)}` : ''}، وتظهر لك في صفحة الدفع قبل ما تدفعين.` : 'الشحن مجاني.' } : q))
   return (
-    <section className="py-14 sm:py-20">
+    <section className="py-6 sm:py-8">
       <div className="container-w">
         <Title title={b.title} />
         <div className="mx-auto mt-9 grid max-w-2xl gap-3">
@@ -299,16 +321,16 @@ const countLabel = (n) => (n === 1 ? 'منتج واحد' : n === 2 ? 'منتجا
 function CategoriesBlock({ b }) {
   const { categories, products } = useApp()
   if (!categories.length) return null
-  const ART = { 'hair-care': '/brand/cat-hair-care-v2.webp', 'skin-care': '/brand/cat-skin-care-v2.webp' }
-  const items = [...categories.map((c) => ({ to: `/${c.id}`, name: c.name, img: ART[c.id] || c.image, n: products.filter((p) => p.categoryId === c.id).length })),
-    { to: '/shop', name: 'كل المنتجات', img: '/brand/banner-all-v3.webp', n: products.length }]
+  // each circle shows the section's own first product; «كل المنتجات» shows the soft silk of the first banner
+  const items = [...categories.map((c) => { const mine = products.filter((p) => p.categoryId === c.id); return { to: `/${c.id}`, name: c.name, img: mine[0]?.image || c.image, n: mine.length } }),
+    { to: '/shop', name: 'كل المنتجات', img: '/brand/hero-silk-v4.webp', n: products.length }]
   return (
-    <section className="py-8 sm:py-10" aria-label={b.title}>
+    <section className="py-2" aria-label={b.title}>
       <ul className="container-w mx-auto flex max-w-[760px] justify-center gap-5 sm:gap-12">
         {items.map((x) => (
           <li key={x.to} className="w-[30%] max-w-[150px]"><Link to={x.to} className="group block text-center">
             <span className="mx-auto block aspect-square w-full max-w-[120px] overflow-hidden rounded-full bg-white p-1.5 shadow-[0_14px_28px_-18px_rgb(125_63_76/0.7)] ring-1 ring-[var(--p-gold-200)] transition-transform duration-500 group-hover:-translate-y-1">
-              <img src={x.img} alt="" width="240" height="240" loading="lazy" className="size-full rounded-full object-cover" />
+              <img src={x.img} alt="" width="240" height="240" loading="lazy" className="size-full rounded-full object-cover transition-transform duration-700 ease-[cubic-bezier(.16,1,.3,1)] group-hover:scale-110" />
             </span>
             <b className="mt-3 block text-[14px] text-primary sm:text-[15px]">{x.name}</b>
             <span className="tabular text-[12px] text-muted-foreground">{countLabel(x.n)}</span>
@@ -345,7 +367,7 @@ export default function Home() {
       {top ? <div data-block={top.id}><Hero b={top} first /></div> : <h1 className="sr-only">{settings.store.name}</h1>}
       {rest.map((b) => {
         const C = RENDER[b.type]
-        return C ? <div key={b.id} data-block={b.id}><C b={b} /></div> : null
+        return C ? <div key={b.id} data-block={b.id}><Thread /><C b={b} /></div> : null
       })}
     </>
   )

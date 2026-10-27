@@ -38,7 +38,7 @@ const EARLY = [
   ...(S0.fonts.heading === 'almarai' ? [font(/^almarai-arabic-700-normal-.*\.woff2$/)] : []),
   ...(S0.fonts.body === 'plex' ? [font(/^ibm-plex-sans-arabic-arabic-400-normal-.*\.woff2$/)] : []),
 ].filter(Boolean).map((x) => (x.startsWith('<') ? x : `<link rel="preload" as="font" type="font/woff2" href="/assets/${x}" crossorigin />`)).join('\n    ')
-const HERO_PRELOAD = `    <link rel="preload" as="image" href="${attr(hero.image || '/brand/banner-all-v3.webp')}" fetchpriority="high" />
+const HERO_PRELOAD = `    <link rel="preload" as="image" href="${attr(hero.image || '/brand/hero-silk-v4.webp')}" fetchpriority="high" />
 `
 
 // categories and products share the top level with the fixed pages: a clash would hide one of them

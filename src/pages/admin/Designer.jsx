@@ -141,7 +141,7 @@ function BlockForm({ block, onChange, catImages, setCatImage }) {
         if (kind === 'text') control = <Input value={v} maxLength={opt} onChange={(e) => set(key, e.target.value)} />
         else if (kind === 'textarea') control = <Textarea value={v} maxLength={opt} onChange={(e) => set(key, e.target.value)} />
         else if (kind === 'link') control = <LinkInput value={v} onChange={(x) => set(key, x)} />
-        else if (kind === 'image') return <div key={key} className="sm:col-span-2"><ImageSlot tall label={label} value={v} fallback={block.type === 'hero' ? (key === 'image' ? '/brand/banner-all-v3.webp' : '') : ''} onChange={(x) => set(key, x)} /></div>
+        else if (kind === 'image') return <div key={key} className="sm:col-span-2"><ImageSlot tall label={label} value={v} fallback={block.type === 'hero' ? (key === 'image' ? '/brand/hero-silk-v4.webp' : '') : ''} onChange={(x) => set(key, x)} /></div>
         else if (kind === 'switch') return <div key={key} className="sm:col-span-2"><Switch checked={!!v} onChange={(x) => set(key, x)} label={label} /></div>
         else if (kind === 'select') control = <Select value={v} onChange={(e) => set(key, e.target.value)}>{opt.map(([x, t]) => <option key={x} value={x}>{t}</option>)}</Select>
         else if (kind === 'number') control = <Input type="number" min={opt[0]} max={opt[1]} value={v} onChange={(e) => set(key, Number(e.target.value))} dir="ltr" className="tabular" />
