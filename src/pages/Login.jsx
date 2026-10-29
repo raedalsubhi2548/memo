@@ -39,7 +39,7 @@ export default function Login() {
   const submit = async (e) => {
     e.preventDefault(); setErr('')
     const needsHuman = TURNSTILE_KEY && (mode === 'in' || mode === 'up' || mode === 'forgot')
-    if (needsHuman && !captcha) { setErr('انتظري لين يكتمل «تأكيد إنك إنسان»'); return }
+    if (needsHuman && !captcha) { setErr('انتظري لين يكتمل «تأكيد إنكِ إنسانة»'); return }
     setBusy(true)
     try {
       if (mode === 'in') { await api.loginStart(form.email, form.password, captcha); setMode('otp'); setForm((x) => ({ ...x, code: '' })); setInfo(`كلمة المرور صحيحة. أرسلنا رمز التحقق إلى ${maskEmail(form.email)}`); startWait() }
@@ -56,7 +56,7 @@ export default function Login() {
   const resend = async () => {
     setErr('')
     if (wait > 0) return
-    if (TURNSTILE_KEY && !captcha) { setErr('انتظري لين يكتمل «تأكيد إنك إنسان» تحت'); return }
+    if (TURNSTILE_KEY && !captcha) { setErr('انتظري لين يكتمل «تأكيد إنكِ إنسانة» تحت'); return }
     try { mode === 'otp' ? await api.loginStart(form.email, form.password, captcha) : mode === 'code' ? await api.resendSignup(form.email, captcha) : await api.sendResetCode(form.email, captcha); setInfo('أرسلنا رمز جديد، شيّك بريدك (والرسائل غير المهمة)'); startWait() } catch (e2) { setErr(e2.message) } finally { if (TURNSTILE_KEY) human.current?.reset() }
   }
   const f = (k) => ({ value: form[k], onChange: (e) => setForm({ ...form, [k]: e.target.value }) })

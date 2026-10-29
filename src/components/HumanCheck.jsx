@@ -39,8 +39,8 @@ const HumanCheck = forwardRef(function HumanCheck({ onToken }, ref) {
     <div className="rounded-xl bg-sunken p-4 ring-1 ring-border">
       <div className="mb-3 flex items-start justify-between gap-3">
         <div>
-          <p className="flex items-center gap-2 font-display font-semibold text-primary"><ShieldCheck className="size-5" />تأكيد إنك إنسان</p>
-          <p className="mt-1 text-xs leading-5 text-muted-foreground">يتم التحقق تلقائياً خلال ثواني، وإذا طُلب منك اضغط على المربع.</p>
+          <p className="flex items-center gap-2 font-display font-semibold text-primary"><ShieldCheck className="size-5" />تأكيد إنكِ إنسانة</p>
+          <p className="mt-1 text-xs leading-5 text-muted-foreground">يتم التحقق تلقائياً خلال ثواني، وإذا طُلب منكِ اضغطي على المربع.</p>
         </div>
         <span className={`mt-0.5 flex shrink-0 items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-bold ${state === 'ok' ? 'bg-success-soft text-success' : state === 'error' ? 'bg-danger-soft text-danger' : 'bg-surface text-muted-foreground'}`}>
           <span className={`size-1.5 rounded-full ${state === 'ok' ? 'bg-success' : state === 'error' ? 'bg-danger' : 'animate-pulse bg-muted-foreground'}`} />
