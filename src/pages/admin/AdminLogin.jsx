@@ -83,7 +83,7 @@ export default function AdminLogin() {
           </button>
           {sent ? <div className="flex justify-between text-sm text-white/55">
             <button type="button" onClick={() => { setSent(false); setErr('') }} className="underline-offset-4 hover:text-white hover:underline">رجوع</button>
-            {wait > 0 ? <span className="tabular">رمز جديد بعد {mmss(wait)}</span> : <button type="button" disabled={busy} onClick={() => { setErr(''); start() }} className="underline-offset-4 hover:text-white hover:underline">أرسل رمز جديد</button>}
+            {wait > 0 ? <span className="tabular">رمز جديد بعد {mmss(wait)}</span> : <button type="button" disabled={busy} onClick={() => { setErr(''); start() }} className="underline-offset-4 hover:text-white hover:underline">أرسلي رمز جديد</button>}
           </div>
           : <a href={`${STORE_ORIGIN}/login?mode=forgot`} className="justify-self-center text-sm text-white/55 underline-offset-4 hover:text-white hover:underline">نسيت كلمة المرور؟</a>}
         </form>

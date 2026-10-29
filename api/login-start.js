@@ -37,17 +37,17 @@ export default async function handler(req, res) {
   // 2) one code a minute per account (the page waits the same minute before offering «أرسل رمز جديد»)
   const { count: recentCodes } = await admin.from('login_checks').select('*', { count: 'exact', head: true })
     .eq('user_id', data.user.id).gte('at', new Date(Date.now() - 55_000).toISOString())
-  if (recentCodes) return res.status(429).json({ error: 'أرسلنا لك رمز قبل أقل من دقيقة، شيّك بريدك أو انتظر شوي' })
+  if (recentCodes) return res.status(429).json({ error: 'أرسلنا لك رمز قبل أقل من دقيقة، شيّك بريدك أو انتظري شوي' })
 
   // 3) remember the correct password for the dashboard gate, then send the code
   const { error: e1 } = await admin.from('login_checks').insert({ user_id: data.user.id })
-  if (e1) { console.error('login_checks insert', e1.message); return res.status(500).json({ error: 'تعذّر تسجيل الدخول الحين، حاول بعد شوي' }) }
+  if (e1) { console.error('login_checks insert', e1.message); return res.status(500).json({ error: 'تعذّر تسجيل الدخول الحين، حاولي بعد شوي' }) }
   const { data: link, error: e2 } = await admin.auth.admin.generateLink({ type: 'magiclink', email: mail })
   const code = link?.properties?.email_otp
-  if (e2 || !code) return res.status(500).json({ error: 'تعذّر تجهيز رمز التحقق، حاول بعد شوي' })
+  if (e2 || !code) return res.status(500).json({ error: 'تعذّر تجهيز رمز التحقق، حاولي بعد شوي' })
   try { await sendLoginCodeEmail(mail, code) } catch (err) {
     console.error('login code mail', err?.message)
-    return res.status(502).json({ error: 'تعذّر إرسال رمز التحقق الحين، حاول بعد شوي أو تواصل معنا على واتساب' })
+    return res.status(502).json({ error: 'تعذّر إرسال رمز التحقق الحين، حاولي بعد شوي أو تواصلي معنا على واتساب' })
   }
   return res.status(200).json({ ok: true })
 }

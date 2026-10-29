@@ -5,7 +5,7 @@ import { admin, TAP, tapHeaders, siteUrl, userFromRequest, confirmCharge } from 
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' })
-  if (!process.env.TAP_SECRET_KEY) return res.status(503).json({ error: 'بوابة الدفع غير متاحة الحين، حاول بعد شوي أو تواصل معنا.' })
+  if (!process.env.TAP_SECRET_KEY) return res.status(503).json({ error: 'بوابة الدفع غير متاحة الحين، حاولي بعد شوي أو تواصلي معنا.' })
   const user = await userFromRequest(req)
   if (!user) return res.status(401).json({ error: 'سجّلي دخولك أولاً' })
 

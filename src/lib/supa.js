@@ -65,7 +65,7 @@ function translateAuthError(msg) {
   if (/already registered/i.test(msg)) return 'هذا البريد مسجّل مسبقاً، سجّلي دخولك بدلاً من ذلك'
   if (/Email not confirmed/i.test(msg)) return 'فعّل بريدك من الرسالة اللي وصلتك ثم سجّلي دخولك'
   if (/Password should be/i.test(msg)) return 'كلمة المرور لازم تكون 6 أحرف على الأقل'
-  if (/Error sending|sending (confirmation|recovery|magic)/i.test(msg)) return 'تعذّر إرسال رمز التحقق الحين، حاول بعد شوي أو تواصل معنا على واتساب'
+  if (/Error sending|sending (confirmation|recovery|magic)/i.test(msg)) return 'تعذّر إرسال رمز التحقق الحين، حاولي بعد شوي أو تواصلي معنا على واتساب'
   if (/rate limit|too many|security purposes/i.test(msg)) return 'طلبت رموز كثير، انتظر دقيقة وحاول مرة ثانية'
   return msg
 }
