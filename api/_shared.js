@@ -11,8 +11,9 @@ export const siteUrl = () => (process.env.SITE_URL || (process.env.VERCEL_PROJEC
 
 export async function userFromRequest(req) {
   const token = (req.headers.authorization || '').replace(/^Bearer\s+/i, '')
-  if (!token) return null
-  const { data } = await admin.auth.getUser(token)
+  if (!token || token === 'undefined') return ((req.userWhy = 'no-token'), null)
+  const { data, error } = await admin.auth.getUser(token)
+  if (!data?.user) req.userWhy = String(error?.status || '') + ':' + String(error?.message || 'none').slice(0, 80)
   return data?.user || null
 }
 
@@ -30,7 +31,7 @@ export const PERMS = ['orders', 'reports', 'products', 'categories', 'customers'
 export async function staffFromRequest(req) {
   // req.staffWhy says which check failed (no secrets), so a refused dashboard action can name its reason
   const user = await userFromRequest(req)
-  if (!user) return ((req.staffWhy = 'no-user'), null)
+  if (!user) return ((req.staffWhy = 'no-user ' + (req.userWhy || '')), null)
   const amr = signIns(req)
   if (!amr.length || amr.some((a) => a.method === 'password')) return ((req.staffWhy = 'amr:' + amr.map((a) => a.method).join('+')), null)
   const at = Math.max(...amr.map((a) => Number(a.timestamp) || 0)) * 1000
