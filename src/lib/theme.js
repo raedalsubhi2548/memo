@@ -120,7 +120,7 @@ export const DEFAULT_FOOTER_LINKS = [{ label: 'كل المنتجات', to: '/sho
 export const DEFAULT_SHIPPING = { fee: 35, freeOver: 0 }
 export const shippingFor = (shipping, subtotal) => (shipping.freeOver > 0 && subtotal >= shipping.freeOver ? 0 : shipping.fee)
 export const DEFAULT_CTA = ['محتارة وش يناسبك؟', 'كلمينا على واتساب ونساعدك تختارين.']
-export const DEFAULT_ABOUT = 'عناية ميمي: صابونيات تقليدية وزيت للشعر، لروتين عناية يدلّعك.'
+export const DEFAULT_ABOUT = 'في عناية ميمي رجّعنا لك خلطات الجدات بلمسة اليوم: صابونيات تقليدية بالكركم والعكر الفارسي والنيلة المغربية، وزيت يدلّع شعرك. لحظة عناية تستاهلينها، توصلك لين باب بيتك.'
 
 /** Ready-made palettes the owner can start from. */
 export const PRESETS = [

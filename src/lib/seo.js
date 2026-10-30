@@ -22,13 +22,17 @@ export const SITE = {
   email: '',
   sameAs: [],
   logo: '/logo.png',
-  ogImage: '/og.jpg',
+  ogImage: '/brand/og/home-v1.jpg',
   tagline: 'صابونيات تقليدية وزيت للشعر',
   keywords: 'عناية ميمي، صابونية الكركم، صابونية العكر الفارسي، صابونية النيلة المغربية، زيت الشعر، صابونيات، العناية بالبشرة، العناية بالشعر',
-  description: 'عناية ميمي: صابونية الكركم، صابونية العكر الفارسي، صابونية النيلة المغربية وزيت الشعر. اطلبيها أونلاين وتوصلك لباب بيتك.',
+  description: 'عناية ميمي متجر سعودي يرجّع لك خلطات الجدات بلمسة اليوم: صابونية الكركم والعكر الفارسي والنيلة المغربية، وزيت يدلّع شعرك. اطلبيها وتوصلك لباب بيتك.',
 }
 
 const CAT_ART = { 'hair-care': '/brand/cat-hair-care-v2.webp', 'skin-care': '/brand/cat-skin-care-v2.webp' }
+// Link-preview cards drawn by scripts/og-cards.mjs (1200×630 JPEG). Bump OG_V when they are redrawn: previews are cached by address.
+export const OG_V = 1
+const OG_CARDS = new Set(['home', 'hair-care', 'skin-care', 'hair-oil', 'turmeric-soap', 'persian-akar-soap', 'moroccan-nila-soap'])
+const ogCard = (id) => (OG_CARDS.has(id) ? `/brand/og/${id}-v${OG_V}.jpg` : null)
 
 // Search titles/descriptions per section and product (blank = built from the catalog).
 const SEO_CAT = {
@@ -114,7 +118,7 @@ export function seoFor(path, data = {}) {
       ...base,
       title: t(SEO_CAT[c.id]?.[0] || c.name),
       description: clip(SEO_CAT[c.id]?.[1] || `${c.name} من ${SITE.name}: ${c.blurb || ''} ${list.slice(0, 4).map((p) => p.name).join('، ')}.`),
-      image: abs(CAT_ART[c.id] || SITE.ogImage),
+      image: abs(ogCard(c.id) || CAT_ART[c.id] || SITE.ogImage),
       jsonLd: [crumbs([['الرئيسية', '/'], ['كل المنتجات', '/shop'], [c.name, `/${c.id}`]]), itemList(list)],
     }
   }
@@ -124,13 +128,14 @@ export function seoFor(path, data = {}) {
     if (!p) return { ...base, title: t('المنتج غير موجود'), description: SITE.description, robots: 'noindex' }
     const c = categories.find((x) => x.id === p.categoryId)
     const img = abs(p.image && !p.image.startsWith('data:') ? p.image : CAT_ART[p.categoryId] || SITE.ogImage)
+    const card = ogCard(p.id)
     const fee = Number(data.settings?.shipping?.fee ?? 35)
     return {
       ...base,
       type: 'product',
       title: t(SEO_PRODUCT[p.id]?.[0] || p.name),
-      description: clip(SEO_PRODUCT[p.id]?.[1] || p.summary || p.description || `${p.name} من ${SITE.name}.`),
-      image: img,
+      description: clip(`${price(p)} ر.س · ${SEO_PRODUCT[p.id]?.[1] || p.summary || p.description || `${p.name} من ${SITE.name}.`}`),
+      image: card ? abs(card) : img,
       price: price(p),
       jsonLd: [
         crumbs([['الرئيسية', '/'], ...(c ? [[c.name, `/${c.id}`]] : []), [p.name, productPath(p.id)]]),
@@ -159,7 +164,7 @@ export function seoFor(path, data = {}) {
       ].filter(Boolean),
     }
   }
-  if (path === '/reviews') return { ...base, title: t('آراء العميلات'), description: clip(`${reviews.length} رأي مكتوب من عميلات ${SITE.name} بعد استلام طلباتهن.`), jsonLd: [crumbs([['الرئيسية', '/'], ['آراء العميلات', '/reviews']])] }
+  if (path === '/reviews') return { ...base, ...(!reviews.length && { robots: 'noindex,follow' }), title: t('آراء العميلات'), description: clip(reviews.length ? `${reviews.length} رأي مكتوب من عميلات ${SITE.name} بعد استلام طلباتهن.` : `آراء عميلات ${SITE.name}، يكتبنها بعد استلام طلباتهن.`), jsonLd: [crumbs([['الرئيسية', '/'], ['آراء العميلات', '/reviews']])] }
   if (path === '/contact') return { ...base, title: t('تواصلي معنا'), description: clip(`تواصلي مع ${SITE.name} على واتساب خدمة العملاء ${SITE.phone.replace(/^\+966/, '0')}.`), jsonLd: [ORG(), crumbs([['الرئيسية', '/'], ['تواصلي معنا', '/contact']])] }
   if (path === '/policies') return { ...base, title: t('السياسات والشروط'), description: clip(`سياسة الاستخدام والشحن والإلغاء والاسترجاع والخصوصية في ${SITE.name}.`) }
   // private or transactional pages
@@ -191,7 +196,7 @@ export function headHtml(s) {
     `<meta property="og:url" content="${e(s.canonical)}" />`,
     `<meta property="og:image" content="${e(s.image)}" />`,
     `<meta property="og:image:secure_url" content="${e(s.image)}" />`,
-    ...(/\/og\.jpg$/.test(s.image) ? [`<meta property="og:image:type" content="image/jpeg" />`, `<meta property="og:image:width" content="1200" />`, `<meta property="og:image:height" content="630" />`] : []),
+    ...(/\/brand\/og\/[\w-]+\.jpg$/.test(s.image) ? [`<meta property="og:image:type" content="image/jpeg" />`, `<meta property="og:image:width" content="1200" />`, `<meta property="og:image:height" content="630" />`] : []),
     `<meta property="og:image:alt" content="${e(s.title)}" />`,
     `<meta name="twitter:card" content="summary_large_image" />`,
     `<meta name="twitter:title" content="${e(s.title)}" />`,

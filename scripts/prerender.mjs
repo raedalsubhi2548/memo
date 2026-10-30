@@ -88,9 +88,18 @@ writeFileSync(join(DIST, '404.html'), template
 
 const today = new Date().toISOString().slice(0, 10)
 const url = (p) => SITE.url.replace(/\/$/, '') + p
+// Google Images: each product page lists its photo, each section the photos of its products
+const photo = (p) => (p.image && !p.image.startsWith('data:') ? [p.image.startsWith('http') ? p.image : url(p.image)] : [])
+const live = products.filter((p) => p.active !== false)
+const pics = {
+  '/': [url(SITE.ogImage)],
+  ...Object.fromEntries(live.map((p) => [productPath(p.id), photo(p)])),
+  ...Object.fromEntries(categories.map((c) => [categoryPath(c.id), live.filter((p) => p.categoryId === c.id).flatMap(photo)])),
+}
+const indexed = routes.filter((r) => !/noindex/.test(seoFor(r, data).robots))
 writeFileSync(join(DIST, 'sitemap.xml'), `<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-${routes.map((r) => `  <url><loc>${xml(url(r === '/' ? '/' : r))}</loc><lastmod>${today}</lastmod><changefreq>${r === '/' ? 'weekly' : 'monthly'}</changefreq><priority>${r === '/' ? '1.0' : productSet.has(r) ? '0.8' : '0.6'}</priority></url>`).join('\n')}
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
+${indexed.map((r) => `  <url><loc>${xml(url(r === '/' ? '/' : r))}</loc><lastmod>${today}</lastmod><changefreq>${r === '/' ? 'weekly' : 'monthly'}</changefreq><priority>${r === '/' ? '1.0' : productSet.has(r) ? '0.8' : '0.6'}</priority>${(pics[r] || []).map((src) => `<image:image><image:loc>${xml(src)}</image:loc></image:image>`).join('')}</url>`).join('\n')}
 </urlset>
 `)
 writeFileSync(join(DIST, 'robots.txt'), `User-agent: *

@@ -2,6 +2,10 @@
   "cleanUrls": true,
   "rewrites": [
     {
+      "source": "/merchant.xml",
+      "destination": "/api/rebuild?op=feed"
+    },
+    {
       "source": "/(cart|checkout|login|account|admin)",
       "destination": "/200"
     },

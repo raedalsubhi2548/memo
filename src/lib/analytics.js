@@ -1,11 +1,12 @@
-// Google Analytics 4 (id from VITE_GA_ID). Loaded from a file, not an inline <script>, so the strict CSP stays on.
+// Google Analytics 4 (G-ZBE23JK8SD, or VITE_GA_ID). Loaded from a file, not an inline <script>, so the strict CSP stays on.
 // Page views are sent on every route change (the store is a single-page app); admin pages are left out.
 import { useEffect } from 'react'
 import { useLocation } from 'react-router-dom'
 import { isDemo, api } from './api.js'
 import { LIVE_STORE } from './host.js'
 
-export const GA_ID = (import.meta.env.VITE_GA_ID || '').trim()
+// the store's own GA4 property (memecare1.com, Oct 2026); VITE_GA_ID overrides it
+export const GA_ID = (import.meta.env.VITE_GA_ID || 'G-ZBE23JK8SD').trim()
 const on = LIVE_STORE && /^G-[A-Z0-9]+$/.test(GA_ID)
 
 if (on) {
