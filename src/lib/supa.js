@@ -39,7 +39,7 @@ const order = (r) => r && ({
   subtotal: Number(r.subtotal), discount: Number(r.discount), coupon: r.coupon, total: Number(r.total),
   shippingFee: Number(r.shipping_fee || 0), shipping: r.shipping || null,
   status: r.status, notes: r.notes, paymentMethod: r.payment_method, paymentRef: r.payment_ref || null, history: r.history || [], createdAt: r.created_at,
-  reviewToken: r.review_token || null,
+  reviewToken: r.review_token || null, shipment: r.shipment || null,
 })
 const coupon = (r) => ({ code: r.code, type: r.type, value: Number(r.value), active: r.active, expiresAt: r.expires_at })
 
@@ -352,6 +352,21 @@ export const supa = {
     const { data } = await sb.auth.getSession()
     const r = await fetch('/api/order-email', { method: 'POST', headers: { 'content-type': 'application/json', authorization: 'Bearer ' + data.session?.access_token }, body: JSON.stringify({ test: true }) })
     return r.json().catch(() => ({ sent: false, reason: 'server' }))
+  },
+  // the shipping waybill through OTO (api/invoice.js ?op=ship|awb)
+  async createShipment(orderId, weight, count) {
+    const { data } = await sb.auth.getSession()
+    const r = await fetch('/api/invoice?op=ship', { method: 'POST', headers: { 'content-type': 'application/json', authorization: 'Bearer ' + data.session?.access_token }, body: JSON.stringify({ orderId, weight, count }) })
+    const b = await r.json().catch(() => ({}))
+    if (!r.ok) throw new Error(b.error || 'تعذّر إنشاء البوليصة')
+    return b
+  },
+  async shipmentLabel(orderId) {
+    const { data } = await sb.auth.getSession()
+    const r = await fetch(`/api/invoice?op=awb&order=${encodeURIComponent(orderId)}`, { headers: { authorization: 'Bearer ' + data.session?.access_token } })
+    const b = await r.json().catch(() => ({}))
+    if (!r.ok) throw new Error(b.error || 'تعذّر جلب البوليصة')
+    return b.shipment
   },
   async downloadInvoice(order) {
     const { data } = await sb.auth.getSession()

@@ -396,6 +396,8 @@ export const local = {
   async startPayment(order) { return { redirect: null, order } },
   async notifyOrder() {},
   async testOrderNotice() { return { sent: false, reason: 'demo' } },
+  async createShipment() { throw new Error('البوليصة متاحة في المتجر الحقيقي فقط') },
+  async shipmentLabel() { throw new Error('البوليصة متاحة في المتجر الحقيقي فقط') },
   async downloadInvoice() { throw new Error('الفاتورة متاحة في المتجر الحقيقي فقط') },
   async verifySignup() { throw new Error('غير متاح في وضع العرض') },
   async resendSignup() {},

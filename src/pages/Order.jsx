@@ -94,6 +94,12 @@ export default function Order() {
       <div className="grid items-start gap-6 lg:grid-cols-[1fr_400px]">
         <Panel title="حالة الطلب" action={<StatusPill status={order.status} />}>
           <OrderTracker status={order.status} />
+          {['review', 'completed'].includes(order.status) && order.shipment?.trackingNumber && (
+            <p className="mt-5 flex flex-wrap items-center gap-x-3 gap-y-2 rounded-2xl bg-sunken/60 p-4 text-sm ring-1 ring-border">
+              <Truck className="size-4 text-primary" />رقم الشحنة <span className="font-mono font-semibold text-primary" dir="ltr">{order.shipment.trackingNumber}</span>
+              {/^https?:\/\//.test(order.shipment.trackingUrl || '') && <a href={order.shipment.trackingUrl} target="_blank" rel="noreferrer" className="ms-auto font-bold text-primary underline underline-offset-4">تتبّعي شحنتك</a>}
+            </p>
+          )}
           {(paid || (order.status === 'completed' && order.reviewToken)) && <div className="mt-5 flex flex-wrap gap-2">{paid && <InvoiceButton order={order} />}{order.status === 'completed' && order.reviewToken && <Button asChild variant="accent"><Link to={reviewPath(order.id, order.reviewToken)}><Star />قيّمي طلبك</Link></Button>}</div>}
           {order.status === 'pending' && order.paymentMethod === 'card' && (
             <div className="mt-6 rounded-2xl bg-sunken/60 p-4 ring-1 ring-border sm:p-5">

@@ -40,6 +40,7 @@ A custom-coded store for hair and skin care products, forked (Oct 2026) from Rae
   Footer bottom line: «تصميم وتنفيذ منصة رائد» linking to https://rraed.com (Raed asked, 27 Oct).
 - Catalog seed: `src/data/seed.js` → `node scripts/seed-sql.mjs` writes `supabase/seed.sql`.
 - Checkout + address: `src/pages/Checkout.jsx`, `src/lib/address.js`. Admin order sheet shows the address + «نسخ العنوان للشحن».
+- Shipping waybills (OTO, free plan, 30 Oct 2026): `api/_oto.js`, routed through `api/invoice.js?op=ship|awb|oto`. The owner types the parcel weight and presses «إنشاء بوليصة» in the order sheet (never auto, never a guessed weight). OTO picks the carrier. The webhook (registered automatically, key in the URL) moves orders to تم الشحن / تم التوصيل. Env `OTO_REFRESH_TOKEN` (Secret), optional `OTO_PICKUP_CODE`. Column `orders.shipment` from `supabase/shipping-2026-10.sql`.
 - Policies: `src/data/terms.js` (DRAFT — the owner reviews returns/shipping wording and adds her CR / freelance number).
 - Images: `public/brand/` (`hero-silk|hair|herbs-v4.webp`, `products/*-v4.webp`; `cat-*-v2.webp` still used by SEO and the dashboard). `/brand/*` is cached 30 days: a new image = a new file name.
   Generated with Codex (gpt-image) on 27 Oct 2026. Products copy Raed's real containers: the saboonia jar (clear PET, only a little taller than wide, smooth flat cream — never swirled «ice cream») and the oil (PET bottle, white screw cap, dark brown oil, label = the woman drawn large with no ring and no text, green leaves on the left — exactly his photo), soap labels: logo and the name, on a travertine pedestal over blush. Hero pictures keep the right half empty for the words. Recipe: scene with the exact Arabic label text and no reference image, then an edit pass with the HD logo as reference.
@@ -56,7 +57,7 @@ A custom-coded store for hair and skin care products, forked (Oct 2026) from Rae
 - Later changes: a new SQL file in `supabase/`, add it to `scripts/install-sql.mjs`, test it locally (PGlite with stubbed auth works), and Raed runs it. Never run SQL on production yourself.
 
 ## Env vars (names only; see .env.example)
-`VITE_SITE_URL`, `SITE_URL`, `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `TAP_SECRET_KEY`, `VITE_TAP_PUBLIC_KEY` (optional), `VITE_TAP_MERCHANT_ID` (optional, Apple Pay), `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `MAIL_FROM`, `ORDER_NOTIFY_TO`, `STORE_EMAIL`, `VERCEL_DEPLOY_HOOK`, optional `VITE_GA_ID`, `VITE_SNAP_PIXEL`, `VITE_TURNSTILE_SITE_KEY`.
+`VITE_SITE_URL`, `SITE_URL`, `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `TAP_SECRET_KEY`, `VITE_TAP_PUBLIC_KEY` (optional), `VITE_TAP_MERCHANT_ID` (optional, Apple Pay), `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `MAIL_FROM`, `ORDER_NOTIFY_TO`, `STORE_EMAIL`, `VERCEL_DEPLOY_HOOK`, `OTO_REFRESH_TOKEN`, optional `OTO_PICKUP_CODE`, `VITE_GA_ID`, `VITE_SNAP_PIXEL`, `VITE_TURNSTILE_SITE_KEY`.
 
 ## Rules that broke things before (inherited)
 - The server is the only place prices and totals are computed (`place_order`). Test the demo checkout after touching checkout/payments.

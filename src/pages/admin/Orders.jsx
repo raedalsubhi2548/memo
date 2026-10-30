@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useOutletContext, useSearchParams } from 'react-router-dom'
-import { MessageCircle, Mail, Phone, CreditCard, Landmark, Inbox, ChevronLeft, Copy, FileText, Link2, Plus, Trash2 } from 'lucide-react'
+import { MessageCircle, Mail, Phone, CreditCard, Landmark, Inbox, ChevronLeft, Copy, FileText, Link2, Plus, Trash2, Truck, Printer, ExternalLink } from 'lucide-react'
 import { api } from '@/lib/api.js'
 import { useApp } from '@/state.jsx'
 import { ORDER_STATUSES } from '@/data/seed.js'
@@ -8,7 +8,7 @@ import { money, dateTime } from '@/lib/format.js'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { Sheet, SheetContent, SheetTitle, SheetDescription } from '@/components/ui/sheet'
-import { Field, Select, Textarea, Skeleton, StatusPill, OrderTracker, statusLabel } from '@/components/ui/kit.jsx'
+import { Field, Input, Select, Textarea, Skeleton, StatusPill, OrderTracker, statusLabel } from '@/components/ui/kit.jsx'
 import { AdminHead, SearchBox, Segments, TableCard, Table, Th, Td, useConfirm } from '@/components/admin/ui.jsx'
 import NewOrder from '@/components/admin/NewOrder.jsx'
 import { can } from '@/lib/perms.js'
@@ -18,6 +18,63 @@ const payLabel = (o) => (o.paymentRef === 'manual' ? 'طلب يدوي' : o.payme
 import OptionList from '@/components/OptionList.jsx'
 
 const waPhone = (p) => (p || '').replace(/\D/g, '').replace(/^0/, '966')
+
+// OTO's shipment statuses, in the owner's words (anything else shows as OTO sent it)
+const SHIP_STATUS = { requested: 'تتجهّز البوليصة', new: 'تتجهّز البوليصة', shipmentProcessing: 'تتجهّز البوليصة', searchingDriver: 'بانتظار المندوب', goingToPickup: 'المندوب في الطريق للاستلام', pickedUp: 'استلمها المندوب', inTransit: 'في الطريق', shipmentInProgress: 'في الطريق', arrivedTerminal: 'وصلت مركز الشحن', outForDelivery: 'خرجت للتوصيل', delivered: 'تم التوصيل', undelivered: 'ما تم التوصيل', returned: 'رجعت للمتجر', shipmentOnHold: 'موقوفة', error: 'ما انشحنت' }
+const WEIGHT_KEY = 'mimi:oto:weight'
+
+// the shipping waybill through OTO: the owner types the parcel's real weight, OTO picks the delivery company
+function Shipment({ order, onSaved }) {
+  const { notify } = useApp()
+  const sh = order.shipment
+  const [weight, setWeight] = useState(() => { try { return localStorage.getItem(WEIGHT_KEY) || '' } catch { return '' } })
+  const [count, setCount] = useState('1')
+  const [busy, setBusy] = useState(false)
+  const ready = ['paid', 'in_progress'].includes(order.status)
+  const create = async (e) => {
+    e.preventDefault(); setBusy(true)
+    try {
+      await api.createShipment(order.id, Number(weight), Number(count))
+      try { localStorage.setItem(WEIGHT_KEY, weight) } catch { /* private mode */ }
+      notify('أُرسلت البوليصة لأوتو، تجهز خلال دقيقة'); onSaved()
+    } catch (err) { notify(err.message, 'err') } finally { setBusy(false) }
+  }
+  const print = async () => {
+    const w = window.open('', '_blank') // opened on the click itself, so the browser doesn't block it
+    setBusy(true)
+    try { const s = await api.shipmentLabel(order.id); if (w) w.location.href = s.awbUrl; else window.location.href = s.awbUrl; onSaved() }
+    catch (err) { w?.close(); notify(err.message, 'err') } finally { setBusy(false) }
+  }
+  return (
+    <section className="rounded-lg bg-surface p-4 ring-1 ring-border">
+      <h3 className="mb-3 flex items-center gap-2 text-xs font-bold text-muted-foreground"><Truck className="size-4" />بوليصة الشحن (أوتو)</h3>
+      {sh && !sh.error ? (
+        <div className="grid gap-3">
+          <dl className="grid gap-1.5 text-sm">
+            <div className="flex justify-between gap-3"><dt className="text-muted-foreground">الحالة</dt><dd className="font-semibold text-primary">{SHIP_STATUS[sh.status] || sh.status}</dd></div>
+            {sh.company && <div className="flex justify-between gap-3"><dt className="text-muted-foreground">شركة الشحن</dt><dd dir="ltr">{sh.company}</dd></div>}
+            {sh.trackingNumber && <div className="flex justify-between gap-3"><dt className="text-muted-foreground">رقم الشحنة</dt><dd className="font-mono" dir="ltr">{sh.trackingNumber}</dd></div>}
+            <div className="flex justify-between gap-3"><dt className="text-muted-foreground">الوزن</dt><dd className="tabular">{sh.weight} كجم{sh.count > 1 ? ` · ${sh.count} طرود` : ''}</dd></div>
+          </dl>
+          <Button size="sm" onClick={print} disabled={busy}><Printer className="size-4" />{busy ? 'جاري التجهيز…' : 'طباعة البوليصة'}</Button>
+          {/^https?:\/\//.test(sh.trackingUrl || '') && <Button asChild variant="outline" size="sm"><a href={sh.trackingUrl} target="_blank" rel="noreferrer"><ExternalLink className="size-4" />رابط التتبع</a></Button>}
+        </div>
+      ) : ready ? (
+        <form onSubmit={create} className="grid gap-3">
+          {sh?.error && <p className="rounded-md bg-danger-soft p-3 text-sm leading-7 text-danger" role="alert">ما انشحنت المرة الماضية: {sh.error}</p>}
+          <div className="grid grid-cols-2 gap-3">
+            <Field label="وزن الطرد (كجم)"><Input required type="number" inputMode="decimal" min="0.05" max="100" step="0.05" dir="ltr" value={weight} onChange={(e) => setWeight(e.target.value)} /></Field>
+            <Field label="عدد الطرود"><Input required type="number" inputMode="numeric" min="1" max="20" step="1" dir="ltr" value={count} onChange={(e) => setCount(e.target.value)} /></Field>
+          </div>
+          <Button type="submit" disabled={busy}><Truck className="size-4" />{busy ? 'جاري الإنشاء…' : sh?.error ? 'إعادة إنشاء البوليصة' : 'إنشاء بوليصة'}</Button>
+          <p className="text-xs leading-6 text-muted-foreground">تنخصم قيمة الشحن من رصيد محفظة أوتو، وأوتو يختار شركة الشحن. لما يستلم المندوب الطلب يصير «تم الشحن»، ولما يوصل يصير «تم التوصيل»، وتوصل العميلة رسالة بكل حالة.</p>
+        </form>
+      ) : (
+        <p className="text-sm leading-7 text-muted-foreground">{order.status === 'cancelled' ? 'الطلب ملغي.' : order.status === 'pending' ? 'تنسوّى البوليصة بعد ما يندفع الطلب.' : 'الطلب انشحن من خارج أوتو.'}</p>
+      )}
+    </section>
+  )
+}
 
 function OrderDetail({ order, onSaved, owner, onDeleted }) {
   const { notify } = useApp()
@@ -65,6 +122,8 @@ ${order.customer?.phone || ''}
 ${addressLine(order.shipping)}`)}><Copy className="size-4" />نسخ العنوان للشحن</Button>
         </section>
       )}
+
+      {order.shipping && <Shipment order={order} onSaved={onSaved} />}
 
       <section className="rounded-lg bg-surface p-4 ring-1 ring-border">
         <h3 className="mb-3 text-xs font-bold text-muted-foreground">المنتجات</h3>
