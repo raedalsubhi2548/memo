@@ -49,9 +49,9 @@ const price = (p) => (p.salePrice && p.salePrice < p.price ? p.salePrice : p.pri
 
 const ORG = () => ({
   '@context': 'https://schema.org',
-  '@type': 'Store',
+  '@type': 'OnlineStore', // sells online only, no shop to visit
   '@id': abs('/#org'),
-  name: `${SITE.name} | ${SITE.nameEn}`,
+  name: SITE.name,
   alternateName: [SITE.name, SITE.nameEn],
   url: abs('/'),
   logo: abs(SITE.logo),
@@ -60,7 +60,6 @@ const ORG = () => ({
   telephone: SITE.phone,
   ...(SITE.email && { email: SITE.email }),
   areaServed: { '@type': 'Country', name: 'المملكة العربية السعودية' },
-  priceRange: 'SAR',
   contactPoint: [{ '@type': 'ContactPoint', telephone: SITE.phone, contactType: 'customer service', availableLanguage: ['ar'] }],
   ...(SITE.sameAs.length && { sameAs: SITE.sameAs }),
 })

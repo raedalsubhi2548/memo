@@ -50,7 +50,7 @@ export default function ServiceTicket({ p, className }) {
   return (
     <article className={cn('group relative flex h-full flex-col rounded-[20px] bg-white p-1.5 shadow-[0_1px_2px_rgb(125_63_76/0.05),0_20px_40px_-30px_rgb(125_63_76/0.5)] ring-1 ring-[var(--p-cream-200)] transition-[translate,box-shadow] duration-500 ease-[cubic-bezier(.16,1,.3,1)] hover:-translate-y-1 hover:shadow-[0_2px_4px_rgb(125_63_76/0.06),0_30px_50px_-28px_rgb(125_63_76/0.55)] hover:ring-[var(--p-gold-200)]', className)}>
       <Link to={productPath(p.id)} className="relative block overflow-hidden rounded-[15px] bg-[radial-gradient(120%_90%_at_50%_20%,#fff,var(--p-cream-100))]" tabIndex={-1} aria-hidden="true">
-        <img src={p.image} sizes="(max-width: 640px) 46vw, 190px" alt="" loading="lazy" decoding="async" width="900" height="1125"
+        <img src={p.image} sizes="(max-width: 640px) 46vw, 190px" alt={p.name} loading="lazy" decoding="async" width="900" height="1125"
           onError={(e) => { if (!e.currentTarget.dataset.fb) { e.currentTarget.dataset.fb = 1; e.currentTarget.src = coverFor(p) } }}
           className="aspect-square w-full object-cover object-[50%_55%] transition-transform duration-[1.4s] ease-[cubic-bezier(.16,1,.3,1)] group-hover:scale-[1.06]" />
       </Link>
