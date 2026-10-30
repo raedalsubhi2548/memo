@@ -39,6 +39,7 @@ A custom-coded store for hair and skin care products, forked (Oct 2026) from Rae
   Product card: `src/components/home/ServiceTicket.jsx` — small and calm (square photo on blush, section, name, price, «أضيفي للسلة» → «تمت الإضافة»).
   Cards are one fixed width (188px, half the row on phones) in a centred wrapping row, so products the owner adds later line up beside the others.
   Footer bottom line: «تصميم وتنفيذ منصة رائد» linking to https://rraed.com (Raed asked, 27 Oct).
+- Section pages (`src/pages/Shop.jsx`) end with a guide from `src/data/category-guide.js` (what the section is + links to its products, for SEO). Its facts come only from the product descriptions. Payment badges are our own files in `public/brand/pay/`.
 - Catalog seed: `src/data/seed.js` → `node scripts/seed-sql.mjs` writes `supabase/seed.sql`.
 - Checkout + address: `src/pages/Checkout.jsx`, `src/lib/address.js`. Admin order sheet shows the address + «نسخ العنوان للشحن».
 - Shipping waybills (OTO, free plan, 30 Oct 2026): `api/_oto.js`, routed through `api/invoice.js?op=ship|awb|oto`. The owner types the parcel weight and presses «إنشاء بوليصة» in the order sheet (never auto, never a guessed weight). OTO picks the carrier. The webhook (registered automatically, key in the URL) moves orders to تم الشحن / تم التوصيل. Env `OTO_REFRESH_TOKEN` (Secret), optional `OTO_PICKUP_CODE` (without it: the first active location in OTO «مواقع المرسل»). Column `orders.shipment` from `supabase/shipping-2026-10.sql`.
