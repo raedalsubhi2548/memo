@@ -1,7 +1,8 @@
 // OTO shipping (tryoto.com, «أوتو API» sales channel): the waybill for a paid order, its print link, and the status
 // updates OTO pushes back. Docs: https://apis.tryoto.com — works on OTO's free plan (no getDeliveryOptions there, so
 // OTO picks the delivery company itself).
-// Env: OTO_REFRESH_TOKEN (Secret, from «ربط القناة» in OTO), optional OTO_PICKUP_CODE (the pickup location's code).
+// Env: OTO_REFRESH_TOKEN (Secret, from «ربط القناة» in OTO), optional OTO_PICKUP_CODE (the pickup location's code;
+// without it the first active location in OTO is used).
 import { createHmac, timingSafeEqual } from 'node:crypto'
 import { admin, siteUrl } from './_shared.js'
 import { sendOrderEmail, sendAdminAlert, loadSeller } from './_mail.js'
@@ -60,6 +61,16 @@ async function ensureWebhook() {
   for (const webhookType of ['orderStatus', 'shipmentError']) await call('/webhook', { method: 'POST', body: { method: 'post', url: hookUrl(), webhookType } })
 }
 
+// where the courier collects: OTO_PICKUP_CODE, else the first active pickup location in OTO («مواقع المرسل»)
+async function pickupCode() {
+  const set = (process.env.OTO_PICKUP_CODE || '').trim()
+  if (set) return set
+  const { ok, b } = await call('/getPickupLocationList?status=active')
+  const code = ok && [...(b.warehouses || []), ...(b.branches || [])].find((l) => l.code)?.code
+  if (!code) throw new Error('أضيفي موقع استلام في أوتو (الإعدادات ← مواقع المرسل) وجربي مرة ثانية')
+  return String(code)
+}
+
 /** Creates the OTO order with its shipment. { weight (kg), count } come from the owner, never guessed. */
 export async function createShipment(order, { weight, count }) {
   if (!otoReady()) throw new Error('أوتو مو مربوط: أضف OTO_REFRESH_TOKEN في Vercel')
@@ -70,7 +81,7 @@ export async function createShipment(order, { weight, count }) {
   await ensureWebhook().catch((e) => console.error('oto webhook', e?.message))
   const s = order.shipping, c = order.customer || {}
   const seller = await loadSeller()
-  const pickup = (process.env.OTO_PICKUP_CODE || '').trim()
+  const pickup = await pickupCode()
   const d = new Date(new Date(order.created_at).getTime() + 3 * 3600_000), p = (n) => String(n).padStart(2, '0') // Saudi time
   const items = (order.items || []).map((it) => ({
     productId: it.productId, name: String(it.name || '').slice(0, 120), price: Number(it.price), quantity: Number(it.qty) || 1,
@@ -81,7 +92,7 @@ export async function createShipment(order, { weight, count }) {
     orderId: ref(order), createShipment: true, payment_method: 'paid', amount: Number(order.total), amount_due: 0, currency: 'SAR',
     packageCount: count, packageWeight: weight, senderName: seller.name,
     orderDate: `${p(d.getUTCDate())}/${p(d.getUTCMonth() + 1)}/${d.getUTCFullYear()} ${p(d.getUTCHours())}:${p(d.getUTCMinutes())}`,
-    ...(pickup ? { pickupLocationCode: pickup } : {}),
+    pickupLocationCode: pickup,
     customer: {
       name: c.name, email: c.email, mobile: String(c.phone || '').replace(/\D/g, '').replace(/^(966|0)/, ''),
       address: [s.street, s.district, s.city, s.details].filter((x) => String(x || '').trim()).join('، ') || s.shortAddress,
