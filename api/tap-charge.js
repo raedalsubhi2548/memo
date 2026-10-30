@@ -5,7 +5,6 @@ import { admin, TAP, tapHeaders, siteUrl, userFromRequest, confirmCharge } from 
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' })
-  if (!process.env.TAP_SECRET_KEY) return res.status(503).json({ error: 'بوابة الدفع غير متاحة الحين، حاولي بعد شوي أو تواصلي معنا.' })
   const user = await userFromRequest(req)
   if (!user) return res.status(401).json({ error: 'سجّلي دخولك أولاً' })
 
@@ -27,6 +26,8 @@ export default async function handler(req, res) {
     return res.status(200).json({ free: true })
   }
   if (!(Number(order.total) > 0)) return res.status(400).json({ error: 'مبلغ الطلب غير صالح' })
+  // a free order (above) needs no gateway; a paid one does
+  if (!process.env.TAP_SECRET_KEY) return res.status(503).json({ error: 'بوابة الدفع غير متاحة الحين، حاولي بعد شوي أو تواصلي معنا.' })
 
   // a retry (second tab, back button) reuses the open charge instead of creating a second one for the same order
   if (order.payment_ref && !token) {
