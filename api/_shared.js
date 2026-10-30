@@ -28,17 +28,19 @@ export const PERMS = ['orders', 'reports', 'products', 'categories', 'customers'
  *  it (the same rule as public.strong_session() in supabase/staff-2026-10.sql).
  *  → { user, owner, perms } for the owner or a staff member, otherwise null. */
 export async function staffFromRequest(req) {
+  // req.staffWhy says which check failed (no secrets), so a refused dashboard action can name its reason
   const user = await userFromRequest(req)
-  if (!user) return null
+  if (!user) return ((req.staffWhy = 'no-user'), null)
   const amr = signIns(req)
-  if (!amr.length || amr.some((a) => a.method === 'password')) return null
+  if (!amr.length || amr.some((a) => a.method === 'password')) return ((req.staffWhy = 'amr:' + amr.map((a) => a.method).join('+')), null)
   const at = Math.max(...amr.map((a) => Number(a.timestamp) || 0)) * 1000
   const { count } = await admin.from('login_checks').select('*', { count: 'exact', head: true }).eq('user_id', user.id)
     .gte('at', new Date(at - 15 * 60_000).toISOString()).lte('at', new Date(at + 60_000).toISOString())
-  if (!count) return null
+  if (!count) return ((req.staffWhy = 'no-login-check'), null)
   const { data: me } = await admin.from('profiles').select('role').eq('id', user.id).single()
   if (me?.role === 'admin') return { user, owner: true, perms: [...PERMS, 'team'] }
   const { data: st } = await admin.from('staff').select('perms').eq('email', (user.email || '').toLowerCase()).maybeSingle()
+  if (!st?.perms?.length) req.staffWhy = 'not-staff:' + (me?.role || 'none')
   return st?.perms?.length ? { user, owner: false, perms: st.perms } : null
 }
 

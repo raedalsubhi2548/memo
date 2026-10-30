@@ -13,7 +13,7 @@ const ORDER_ID = /^[0-9a-f-]{36}$/i
 async function shipping(req, res, op) {
   res.setHeader('Cache-Control', 'no-store')
   if (op === 'oto') return req.method === 'POST' ? otoWebhook(req, res) : res.status(405).json({ ok: false })
-  if (!(await adminFromRequest(req, 'orders'))) return res.status(403).json({ error: 'غير مسموح' })
+  if (!(await adminFromRequest(req, 'orders'))) return res.status(403).json({ error: `غير مسموح (${req.staffWhy || 'perm'})` })
   const id = String(op === 'ship' ? req.body?.orderId || '' : req.query.order || '')
   if (!ORDER_ID.test(id)) return res.status(400).json({ error: 'طلب غير صالح' })
   const { data: order } = await admin.from('orders').select('*').eq('id', id).single()
