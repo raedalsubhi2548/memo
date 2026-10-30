@@ -26,7 +26,9 @@ async function call(path, { method = 'GET', body } = {}) {
 }
 const otoError = (b) => {
   if (b.otoErrorCode === 'OTO1006') return 'رصيد محفظة أوتو ما يكفي، اشحني الرصيد وجربي مرة ثانية'
-  return `أوتو رفض الطلب: ${String(b.otoErrorMessage || b.message || 'خطأ غير معروف').slice(0, 160)}`
+  // OTO's code and any field list it sends, so a refusal names what is missing
+  const extra = Object.entries(b).filter(([k]) => !/^(success|otoErrorMessage|message)$/.test(k)).map(([k, v]) => `${k}=${typeof v === 'string' ? v : JSON.stringify(v)}`).join(' ')
+  return `أوتو رفض الطلب: ${String(b.otoErrorMessage || b.message || 'خطأ غير معروف').slice(0, 120)}${extra ? ` (${extra.slice(0, 200)})` : ''}`
 }
 
 // OTO knows the order by the store's order number
