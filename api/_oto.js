@@ -84,7 +84,8 @@ export async function createShipment(order, { weight, count }) {
   const pickup = await pickupCode()
   const d = new Date(new Date(order.created_at).getTime() + 3 * 3600_000), p = (n) => String(n).padStart(2, '0') // Saudi time
   const items = (order.items || []).map((it) => ({
-    productId: it.productId, name: String(it.name || '').slice(0, 120), price: Number(it.price), quantity: Number(it.qty) || 1,
+    // OTO takes a numeric productId only (the store's ids are text: it rides in the sku instead)
+    ...(/^\d+$/.test(String(it.productId || '')) ? { productId: Number(it.productId) } : {}), name: String(it.name || '').slice(0, 120), price: Number(it.price), quantity: Number(it.qty) || 1,
     rowTotal: Number(it.price) * (Number(it.qty) || 1), sku: String(it.productId || it.name || '').slice(0, 60),
     ...(it.image && /^https?:/.test(it.image) ? { image: it.image } : it.image ? { image: siteUrl() + it.image } : {}),
   }))
