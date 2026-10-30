@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Field, Input, Select, Panel, Skeleton, Switch } from '@/components/ui/kit.jsx'
 import { AdminHead, IconBtn, useConfirm } from '@/components/admin/ui.jsx'
 
-const BLANK = { code: '', type: 'percent', value: '', expiresAt: '' }
+const BLANK = { code: '', type: 'percent', value: '', expiresAt: '', freeShipping: false }
 
 export default function Coupons() {
   const { notify } = useApp()
@@ -19,7 +19,7 @@ export default function Coupons() {
   useEffect(() => { load() }, [])
   const add = async (e) => {
     e.preventDefault()
-    try { await api.saveCoupon({ ...f, value: Number(f.value), active: true, expiresAt: f.expiresAt ? `${f.expiresAt}T23:59:59+03:00` : null }); setF(BLANK); load(); notify('أُضيف الكود') } catch (er) { notify(er.message, 'err') }
+    try { await api.saveCoupon({ ...f, value: Number(f.value) || 0, active: true, expiresAt: f.expiresAt ? `${f.expiresAt}T23:59:59+03:00` : null }); setF(BLANK); load(); notify('أُضيف الكود') } catch (er) { notify(er.message, 'err') }
   }
   const toggle = async (c) => { try { await api.saveCoupon({ ...c, active: !c.active }); load() } catch (e) { notify(e.message, 'err') } }
   const del = async (c) => {
@@ -36,9 +36,10 @@ export default function Coupons() {
         <form onSubmit={add} className="grid gap-3 sm:grid-cols-2 lg:grid-cols-[1.2fr_1fr_1fr_1fr_auto] lg:items-end">
           <Field label="الكود"><Input required value={f.code} onChange={(e) => setF({ ...f, code: e.target.value.toUpperCase().replace(/\s/g, '') })} dir="ltr" placeholder="RAMADAN" className="font-mono" /></Field>
           <Field label="النوع"><Select value={f.type} onChange={(e) => setF({ ...f, type: e.target.value })}><option value="percent">نسبة %</option><option value="fixed">مبلغ ثابت (ر.س)</option></Select></Field>
-          <Field label="القيمة"><Input required type="number" min="1" max={f.type === 'percent' ? 100 : undefined} value={f.value} onChange={(e) => setF({ ...f, value: e.target.value })} dir="ltr" className="tabular" /></Field>
+          <Field label={f.freeShipping ? 'الخصم (اختياري)' : 'القيمة'}><Input required={!f.freeShipping} type="number" min={f.freeShipping ? 0 : 1} max={f.type === 'percent' ? 100 : undefined} value={f.value} onChange={(e) => setF({ ...f, value: e.target.value })} dir="ltr" className="tabular" /></Field>
           <Field label="ينتهي (اختياري)"><Input type="date" value={f.expiresAt} onChange={(e) => setF({ ...f, expiresAt: e.target.value })} className="w-full min-w-0 max-w-full appearance-none text-start [&::-webkit-date-and-time-value]:text-start" /></Field>
           <Button className="sm:col-span-2 lg:col-span-1"><Plus className="size-4" />أضف</Button>
+          <div className="sm:col-span-2 lg:col-span-5"><Switch checked={f.freeShipping} onChange={() => setF({ ...f, freeShipping: !f.freeShipping })} label="مع شحن مجاني" /></div>
         </form>
       </Panel>
 
@@ -49,8 +50,10 @@ export default function Coupons() {
           {list.map((c) => (
             <li key={c.code} className={cn('relative flex overflow-hidden rounded-lg bg-surface shadow-hairline ring-1 ring-border', (!c.active || expired(c)) && 'opacity-70')}>
               <div className="grid w-28 shrink-0 place-items-center bg-primary p-4 text-center text-accent">
-                <span className="tabular font-display text-2xl font-semibold leading-none">{c.type === 'percent' ? `${c.value}%` : c.value}</span>
-                <span className="text-xs text-on-inverse/80">{c.type === 'percent' ? 'خصم' : 'ر.س خصم'}</span>
+                {c.value > 0 ? (<>
+                  <span className="tabular font-display text-2xl font-semibold leading-none">{c.type === 'percent' ? `${c.value}%` : c.value}</span>
+                  <span className="text-xs text-on-inverse/80">{c.type === 'percent' ? 'خصم' : 'ر.س خصم'}{c.freeShipping && ' + شحن مجاني'}</span>
+                </>) : <span className="font-display text-lg font-semibold leading-tight">شحن مجاني</span>}
               </div>
               <span className="absolute start-[104px] -top-2.5 size-5 rounded-full bg-background" aria-hidden="true" />
               <span className="absolute start-[104px] -bottom-2.5 size-5 rounded-full bg-background" aria-hidden="true" />

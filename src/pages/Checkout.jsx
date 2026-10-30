@@ -65,12 +65,12 @@ export default function Checkout() {
   if (lines.length === 0) return <Navigate to="/cart" replace />
 
   const discount = coupon ? Math.min(subtotal, coupon.type === 'percent' ? (subtotal * coupon.value) / 100 : coupon.value) : 0
-  const shippingFee = shippingFor(settings.shipping, subtotal)
+  const shippingFee = coupon?.freeShipping ? 0 : shippingFor(settings.shipping, subtotal) // the server applies the same rule
   const total = Math.max(0, subtotal - discount) + shippingFee
 
   const applyCoupon = async () => {
     setCouponErr('')
-    try { setCoupon(await api.validateCoupon(code)); notify('تم تطبيق الخصم') } catch (e) { setCoupon(null); setCouponErr(e.message) }
+    try { const c = await api.validateCoupon(code); setCoupon(c); notify(c.freeShipping && !(c.value > 0) ? 'تم تطبيق الشحن المجاني' : c.freeShipping ? 'تم تطبيق الخصم والشحن المجاني' : 'تم تطبيق الخصم') } catch (e) { setCoupon(null); setCouponErr(e.message) }
   }
 
   const addressErrors = (a) => ({
@@ -158,7 +158,7 @@ export default function Checkout() {
           <dl className="mt-5 grid gap-2 border-t border-border pt-4 text-[15px]">
             <div className="flex justify-between"><dt className="text-muted-foreground">المجموع</dt><dd className="tabular">{money(subtotal)}</dd></div>
             {discount > 0 && <div className="flex justify-between text-success"><dt>خصم {coupon.code}</dt><dd className="tabular">− {money(discount)}</dd></div>}
-            <div className="flex justify-between"><dt className="text-muted-foreground">الشحن</dt><dd className="tabular">{shippingFee > 0 ? money(shippingFee) : 'مجاني'}</dd></div>
+            <div className="flex justify-between"><dt className="text-muted-foreground">الشحن</dt><dd className="tabular">{shippingFee > 0 ? money(shippingFee) : coupon?.freeShipping ? <span className="text-success">مجاني بكود {coupon.code}</span> : 'مجاني'}</dd></div>
             <div className="flex items-baseline justify-between border-t border-border pt-3"><dt className="font-bold">الإجمالي</dt><dd className="tabular font-display text-2xl font-semibold text-primary">{money(total)}</dd></div>
           </dl>
         </Panel>

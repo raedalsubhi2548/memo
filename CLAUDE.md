@@ -14,6 +14,7 @@ A custom-coded store for hair and skin care products, forked (Oct 2026) from Rae
 - Physical products with shipping: checkout asks for the national short address (4 letters + 4 digits), city, district, street, details.
 - Shipping fee: owner-editable in لوحة التحكم ← مصمم المتجر ← معلومات المتجر ← «الشحن» (fee, free-over amount). Default 35 SAR.
   The database computes it (`shipping_fee_for` in `supabase/store-2026-10.sql`) — the browser never sets totals.
+  A coupon can also give free shipping (`coupons.free_shipping`, switch «مع شحن مجاني» in كوبونات الخصم; a free-shipping code may have no discount). `place_order` lives in `supabase/coupons-shipping-2026-10.sql` now.
 - Removed from the fork: blog, portfolio, Tamara, Snap Conversions API, the old services catalog, the business-verification seal.
 - Order statuses keep the database ids, with store labels: pending بانتظار الدفع → paid تم الدفع → in_progress قيد التجهيز → review تم الشحن → completed تم التوصيل (+ cancelled).
 - Reviews: only real ones, written by customers through the private link in the «تم التوصيل» email. No made-up reviews anywhere.

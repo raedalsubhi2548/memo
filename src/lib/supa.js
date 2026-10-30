@@ -41,7 +41,7 @@ const order = (r) => r && ({
   status: r.status, notes: r.notes, paymentMethod: r.payment_method, paymentRef: r.payment_ref || null, history: r.history || [], createdAt: r.created_at,
   reviewToken: r.review_token || null, shipment: r.shipment || null,
 })
-const coupon = (r) => ({ code: r.code, type: r.type, value: Number(r.value), active: r.active, expiresAt: r.expires_at })
+const coupon = (r) => ({ code: r.code, type: r.type, value: Number(r.value), active: r.active, expiresAt: r.expires_at, freeShipping: r.free_shipping })
 
 function check({ data, error }) { if (error) throw new Error(error.message); return data }
 
@@ -259,7 +259,9 @@ export const supa = {
   async restoreDesign(id) { check(await sb.rpc('owner_restore_design', { p_id: id })) },
   async listCoupons() { return check(await sb.from('coupons').select('*')).map(coupon) },
   async saveCoupon(c) {
-    check(await sb.from('coupons').upsert({ code: c.code.toUpperCase(), type: c.type, value: c.value, active: c.active, expires_at: c.expiresAt || null }))
+    // free_shipping only once its column exists (supabase/coupons-shipping-2026-10.sql)
+    const { error } = await sb.from('coupons').upsert({ code: c.code.toUpperCase(), type: c.type, value: c.value, active: c.active, expires_at: c.expiresAt || null, ...(typeof c.freeShipping === 'boolean' ? { free_shipping: c.freeShipping } : {}) })
+    if (error) throw new Error(/free_shipping/.test(error.message) ? 'شغّل ملف supabase/coupons-shipping-2026-10.sql في Supabase أولاً' : error.message)
   },
   async deleteCoupon(code) { check(await sb.from('coupons').delete().eq('code', code)) },
   async validateCoupon(code) {
