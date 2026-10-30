@@ -89,7 +89,10 @@ export async function createShipment(order, { weight, count }) {
     rowTotal: Number(it.price) * (Number(it.qty) || 1), sku: String(it.productId || it.name || '').slice(0, 60),
     ...(it.image && /^https?:/.test(it.image) ? { image: it.image } : it.image ? { image: siteUrl() + it.image } : {}),
   }))
-  let res = await call('/createOrder', { method: 'POST', body: {
+  // a retry: the OTO order is there already, only its shipment failed
+  let res = order.shipment?.otoId
+    ? await call('/createShipment', { method: 'POST', body: { orderId: ref(order), packageWeight: weight, packageCount: count } })
+    : await call('/createOrder', { method: 'POST', body: {
     orderId: ref(order), createShipment: true, payment_method: 'paid', amount: Number(order.total), amount_due: 0, currency: 'SAR',
     packageCount: count, packageWeight: weight, senderName: seller.name,
     orderDate: `${p(d.getUTCDate())}/${p(d.getUTCMonth() + 1)}/${d.getUTCFullYear()} ${p(d.getUTCHours())}:${p(d.getUTCMinutes())}`,
@@ -101,8 +104,8 @@ export async function createShipment(order, { weight, count }) {
     },
     items,
   } })
-  // the OTO order is there from an earlier try (its shipment failed): ask for the shipment again
-  if (!res.ok && /exist/i.test(res.b.otoErrorMessage || '') && order.shipment?.otoId) res = await call('/createShipment', { method: 'POST', body: { orderId: ref(order) } })
+  // the OTO order is there from an earlier try that wasn't saved: ask for the shipment only
+  if (!res.ok && /exist/i.test(res.b.otoErrorMessage || '')) res = await call('/createShipment', { method: 'POST', body: { orderId: ref(order), packageWeight: weight, packageCount: count } })
   if (!res.ok) throw new Error(otoError(res.b))
   const saved = await saveShipment(order, { ref: ref(order), otoId: res.b.otoId || order.shipment?.otoId || null, weight, count, requestedAt: new Date().toISOString(), status: 'requested', error: null })
   return advance(saved, 'in_progress', 'أُنشئت بوليصة الشحن في أوتو').then((o) => ({ ...o, shipment: saved.shipment }))
@@ -112,6 +115,12 @@ export async function createShipment(order, { weight, count }) {
 export async function shipmentLabel(order) {
   if (!order.shipment?.ref) throw new Error('ما فيه بوليصة لهذا الطلب')
   const { ok, b } = await call(`/print/${encodeURIComponent(order.shipment.ref)}`)
+  // OTO has the order but no carrier took the shipment (an empty wallet, or no delivery company active)
+  if (b.otoErrorCode === 'OTO1113') {
+    const error = 'أوتو استلم الطلب بس شركة الشحن ما أنشأت الشحنة. الغالب إن رصيد محفظة أوتو ما يكفي أو ما فيه شركة شحن مفعّلة، صحّحيها وأعيدي الإنشاء'
+    await saveShipment(order, { status: 'error', error })
+    throw new Error(error)
+  }
   if (!ok || !b.printAWBURL) throw new Error(ok ? 'البوليصة لسا تتجهّز عند شركة الشحن، جربي بعد دقيقة' : otoError(b))
   const saved = await saveShipment(order, { awbUrl: b.printAWBURL, trackingNumber: b.trackingNumber || order.shipment.trackingNumber || null, company: b.deliveryCompany || order.shipment.company || null })
   return saved.shipment

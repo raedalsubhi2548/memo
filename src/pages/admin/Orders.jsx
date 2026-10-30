@@ -20,7 +20,7 @@ import OptionList from '@/components/OptionList.jsx'
 const waPhone = (p) => (p || '').replace(/\D/g, '').replace(/^0/, '966')
 
 // OTO's shipment statuses, in the owner's words (anything else shows as OTO sent it)
-const SHIP_STATUS = { requested: 'تتجهّز البوليصة', new: 'تتجهّز البوليصة', shipmentProcessing: 'تتجهّز البوليصة', searchingDriver: 'بانتظار المندوب', goingToPickup: 'المندوب في الطريق للاستلام', pickedUp: 'استلمها المندوب', inTransit: 'في الطريق', shipmentInProgress: 'في الطريق', arrivedTerminal: 'وصلت مركز الشحن', outForDelivery: 'خرجت للتوصيل', delivered: 'تم التوصيل', undelivered: 'ما تم التوصيل', returned: 'رجعت للمتجر', shipmentOnHold: 'موقوفة', error: 'ما انشحنت' }
+const SHIP_STATUS = { requested: 'تتجهّز البوليصة', new: 'تتجهّز البوليصة', shipmentProcessing: 'تتجهّز البوليصة', assignedToWarehouse: 'بانتظار شركة الشحن', searchingDriver: 'بانتظار المندوب', goingToPickup: 'المندوب في الطريق للاستلام', pickedUp: 'استلمها المندوب', inTransit: 'في الطريق', shipmentInProgress: 'في الطريق', arrivedTerminal: 'وصلت مركز الشحن', outForDelivery: 'خرجت للتوصيل', delivered: 'تم التوصيل', undelivered: 'ما تم التوصيل', returned: 'رجعت للمتجر', shipmentOnHold: 'موقوفة', error: 'ما انشحنت' }
 const WEIGHT_KEY = 'mimi:oto:weight'
 
 // the shipping waybill through OTO: the owner types the parcel's real weight, OTO picks the delivery company
@@ -43,7 +43,7 @@ function Shipment({ order, onSaved }) {
     const w = window.open('', '_blank') // opened on the click itself, so the browser doesn't block it
     setBusy(true)
     try { const s = await api.shipmentLabel(order.id); if (w) w.location.href = s.awbUrl; else window.location.href = s.awbUrl; onSaved() }
-    catch (err) { w?.close(); notify(err.message, 'err') } finally { setBusy(false) }
+    catch (err) { w?.close(); notify(err.message, 'err'); onSaved() } finally { setBusy(false) }
   }
   return (
     <section className="rounded-lg bg-surface p-4 ring-1 ring-border">
