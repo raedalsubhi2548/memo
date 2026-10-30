@@ -13,8 +13,8 @@ export const EMBED = !!TAP_PUBLIC_KEY && !isDemo
 
 const BRANDS = [
   { name: 'مدى', src: '/brand/pay/mada.webp' },
-  { name: 'Visa', src: 'https://cdn.salla.network/images/payment/visa.png' },
-  { name: 'Mastercard', src: 'https://cdn.salla.network/images/payment/mastercard.png' },
+  { name: 'Visa', src: '/brand/pay/visa.webp' },
+  { name: 'Mastercard', src: '/brand/pay/mastercard.webp' },
 ]
 const Brands = () => (
   <span className="flex items-center gap-1.5" aria-label="مدى، فيزا، ماستركارد">

@@ -7,7 +7,36 @@ import ServiceTicket from '@/components/home/ServiceTicket.jsx'
 import { PageHead, Empty, Input, Select, Skeleton } from '@/components/ui/kit.jsx'
 import { Button } from '@/components/ui/button'
 import { SEO_H1 } from '@/lib/seo.js'
-import { effectivePrice } from '@/lib/format.js'
+import { effectivePrice, money } from '@/lib/format.js'
+import { CATEGORY_GUIDE } from '@/data/category-guide.js'
+
+// what the section is and how its products are used, with a link to each product: read by customers and search engines
+function Guide({ guide, items }) {
+  return (
+    <section className="mx-auto mt-16 grid max-w-[1040px] items-start gap-8 sm:mt-24 md:grid-cols-[1.15fr_1fr] md:gap-14" aria-labelledby="guide-title">
+      <div>
+        <h2 id="guide-title" className="font-display text-[22px] leading-snug font-bold text-primary sm:text-[26px]">{guide.title}</h2>
+        {guide.body.map((t, i) => <p key={i} className="mt-4 text-[15px] leading-8 text-foreground/85">{t}</p>)}
+      </div>
+      {items.length > 0 && (
+        <ul className="grid gap-3" aria-label="المنتجات">
+          {items.map((p) => (
+            <li key={p.id}>
+              <Link to={`/${p.id}`} className="group flex items-center gap-4 rounded-2xl bg-white/70 p-3 shadow-[0_14px_30px_-24px_rgb(125_63_76/0.7)] ring-1 ring-[var(--p-cream-200)] transition-all duration-300 hover:-translate-y-0.5 hover:bg-white">
+                <img src={p.image} alt="" width="64" height="80" loading="lazy" className="h-20 w-16 shrink-0 rounded-xl bg-[var(--p-cream-100)] object-cover" />
+                <span className="min-w-0 flex-1">
+                  <b className="block text-[15px] text-primary">{p.name}</b>
+                  <span className="mt-1 line-clamp-2 block text-[13px] leading-6 text-muted-foreground">{p.summary}</span>
+                </span>
+                <span className="tabular shrink-0 text-[14px] font-bold text-primary">{money(effectivePrice(p))}</span>
+              </Link>
+            </li>
+          ))}
+        </ul>
+      )}
+    </section>
+  )
+}
 
 const SORTS = [
   { id: 'featured', label: 'المقترح' },
@@ -76,6 +105,7 @@ export default function Shop({ categoryId: fromProps }) {
         <><h2 className="sr-only">{cat?.name || 'المنتجات'}</h2>
         <div className="grid grid-cols-2 gap-x-3.5 gap-y-7 sm:gap-x-5 md:grid-cols-3 lg:grid-cols-4">{list.map((p) => <ServiceTicket key={p.id} p={p} />)}</div></>
       )}
+      {!q && CATEGORY_GUIDE[categoryId || 'all'] && <Guide guide={CATEGORY_GUIDE[categoryId || 'all']} items={categoryId ? products.filter((p) => p.categoryId === categoryId) : products} />}
     </div>
   )
 }

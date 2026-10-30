@@ -1,12 +1,12 @@
 import { Landmark } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
-// Official badges served by each provider / Salla's CDN (not redrawn).
+// Official badges (not redrawn), served from our own files in public/brand/pay.
 export const PAY_METHODS = [
   // Apple's file is a white mark: shown inverted (black) so it matches the other white badges
-  { name: 'Apple Pay', src: 'https://cdn.salla.network/images/payment/applepay.png', invert: true },
-  { name: 'Visa', src: 'https://cdn.salla.network/images/payment/visa.png' },
-  { name: 'Mastercard', src: 'https://cdn.salla.network/images/payment/mastercard.png' },
+  { name: 'Apple Pay', src: '/brand/pay/applepay.webp', invert: true },
+  { name: 'Visa', src: '/brand/pay/visa.webp' },
+  { name: 'Mastercard', src: '/brand/pay/mastercard.webp' },
   // mada: official mark (CC0, Wikimedia Commons «Mada Only»), cropped to the logo and served from our own files
   { name: 'مدى', src: '/brand/pay/mada.webp' },
 ]
