@@ -82,6 +82,15 @@ async function staffCall(method, query = '', body) {
 // which collapses quick changes into one), so a new service gets its page and an old one returns a real 404.
 const republish = () => { supa.rebuildSite().catch(() => {}) }
 
+// the shipping endpoints (api/invoice.js ?op=…), with the signed-in user's token
+async function shipCall(op, { method = 'GET', body } = {}, fail) {
+  const { data } = await sb.auth.getSession()
+  const r = await fetch(`/api/invoice?op=${op}`, { method, headers: { ...(body && { 'content-type': 'application/json' }), authorization: 'Bearer ' + data.session?.access_token }, body: body && JSON.stringify(body) })
+  const b = await r.json().catch(() => ({}))
+  if (!r.ok) throw new Error(b.error || fail)
+  return b
+}
+
 export const supa = {
   mode: 'live',
   ready: Promise.resolve(),
@@ -356,19 +365,24 @@ export const supa = {
     return r.json().catch(() => ({ sent: false, reason: 'server' }))
   },
   // the shipping waybill through OTO (api/invoice.js ?op=ship|awb)
-  async createShipment(orderId, weight, count) {
-    const { data } = await sb.auth.getSession()
-    const r = await fetch('/api/invoice?op=ship', { method: 'POST', headers: { 'content-type': 'application/json', authorization: 'Bearer ' + data.session?.access_token }, body: JSON.stringify({ orderId, weight, count }) })
-    const b = await r.json().catch(() => ({}))
-    if (!r.ok) throw new Error(b.error || 'تعذّر إنشاء البوليصة')
-    return b
+  async createShipment(orderId, weight, count, option) {
+    return shipCall('ship', { method: 'POST', body: { orderId, weight, count, optionId: option?.id, optionName: option?.name } }, 'تعذّر إنشاء البوليصة')
   },
-  async shipmentLabel(orderId) {
-    const { data } = await sb.auth.getSession()
-    const r = await fetch(`/api/invoice?op=awb&order=${encodeURIComponent(orderId)}`, { headers: { authorization: 'Bearer ' + data.session?.access_token } })
-    const b = await r.json().catch(() => ({}))
-    if (!r.ok) throw new Error(b.error || 'تعذّر جلب البوليصة')
-    return b.shipment
+  async shipmentLabel(orderId, ret = false) {
+    return (await shipCall(`awb&order=${encodeURIComponent(orderId)}${ret ? '&ret=1' : ''}`, {}, 'تعذّر جلب البوليصة')).shipment
+  },
+  async shippingQuotes(orderId, weight) {
+    return shipCall(`quotes&order=${encodeURIComponent(orderId)}&weight=${encodeURIComponent(weight)}`, {}, 'تعذّر جلب أسعار الشحن')
+  },
+  async cancelShipment(orderId) {
+    return (await shipCall('cancel', { method: 'POST', body: { orderId } }, 'تعذّر إلغاء الشحنة')).shipment
+  },
+  async returnShipment(orderId) {
+    return (await shipCall('return', { method: 'POST', body: { orderId } }, 'تعذّر إنشاء شحنة الإرجاع')).shipment
+  },
+  // the national address behind a short code (checkout); null when it can't be found
+  async lookupAddress(code) {
+    try { return (await shipCall(`addr&code=${encodeURIComponent(code)}`, {}, '')).address || null } catch { return null }
   },
   async downloadInvoice(order) {
     const { data } = await sb.auth.getSession()

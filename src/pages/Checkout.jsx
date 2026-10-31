@@ -35,6 +35,21 @@ export default function Checkout() {
   const [phoneErr, setPhoneErr] = useState('') // every hook sits above the early returns below, so each render runs the same hooks
   const [apple, setApple] = useState(false) // Apple Pay is known only in the browser, after hydration
   useEffect(() => { setApple(canApplePay()); const a = loadAddress(); if (a) setAddr((x) => ({ ...x, ...a })) }, [])
+  // her short code → the full national address (through OTO): fills the city, district and street she left empty
+  const [found, setFound] = useState(null)
+  const shortCode = cleanShortAddress(addr.shortAddress)
+  useEffect(() => {
+    setFound(null)
+    if (!SHORT_ADDRESS_OK(shortCode) || !user) return
+    let alive = true
+    const t = setTimeout(() => api.lookupAddress(shortCode).then((v) => {
+      if (!alive || !v) return
+      setFound(v)
+      setAddr((x) => ({ ...x, city: x.city.trim() ? x.city : v.city, district: x.district.trim() ? x.district : v.district, street: x.street.trim() ? x.street : v.street }))
+      setAddrErr((e) => ({ ...e, city: '', district: '' }))
+    }), 400)
+    return () => { alive = false; clearTimeout(t) }
+  }, [shortCode, user])
   // an order whose payment didn't finish (failed to start, or the customer came back from the bank) is reused, not duplicated
   const pending = useRef(null)
   if (pending.current === null) { try { pending.current = JSON.parse(sessionStorage.getItem('mimi:pending-order') || 'false') || undefined } catch { pending.current = undefined } }
@@ -165,7 +180,7 @@ export default function Checkout() {
 
         <Panel title={<span className="flex items-center gap-2"><Truck className="size-5" />عنوان الشحن</span>} className="lg:col-start-1">
           <div className="grid gap-4 sm:grid-cols-2">
-            <Field label="العنوان الوطني المختصر" hint="4 حروف و4 أرقام، تلقينه في تطبيق سبل أو موقع العنوان الوطني" error={addrErr.shortAddress} className="sm:col-span-2">
+            <Field label="العنوان الوطني المختصر" hint={found ? <span className="text-success" dir="auto">✓ {[found.building, found.street, found.district, found.city].filter(Boolean).join('، ')}</span> : '4 حروف و4 أرقام، تلقينه في تطبيق سبل أو موقع العنوان الوطني'} error={addrErr.shortAddress} className="sm:col-span-2">
               <Input required {...a('shortAddress')} dir="ltr" placeholder="RRRD2929" maxLength={9} autoCapitalize="characters" autoComplete="off" spellCheck={false} className="text-end uppercase tracking-[0.2em]" />
             </Field>
             <Field label="المدينة" error={addrErr.city}><Input required {...a('city')} autoComplete="address-level2" maxLength={60} /></Field>

@@ -75,36 +75,42 @@ async function pickupLocation() {
 // setting, so the store asks OTO's own price list for that company's option and names it on every shipment.
 // The option id belongs to the company's service, not the route: asked once with the pickup city on both ends.
 let carrierCache = { key: '', v: null }
+async function deliveryFees(originCity, destinationCity, weight) {
+  const { ok, b } = await call('/checkOTODeliveryFee', { method: 'POST', body: { originCity, destinationCity, weight: Math.max(1, Math.ceil(weight)) } })
+  if (!ok) throw new Error(otoError(b))
+  return (b.deliveryCompany || []).filter((o) => o.deliveryOptionId)
+}
+// the company's ordinary service to her door first (not same-day, locker or branch pickup), then the cheapest
+function preferred(list, want) {
+  const mine = list.filter((o) => `${o.deliveryCompanyName || ''} ${o.deliveryOptionName || ''}`.toLowerCase().includes(want))
+  const plain = mine.filter((o) => (!o.deliveryType || o.deliveryType === 'toCustomerDoorstep') && !/sameDay|bullet|pudo|locker/i.test(`${o.serviceType} ${o.deliveryOptionName}`))
+  return [...(plain.length ? plain : mine)].sort((x, y) => Number(x.price) - Number(y.price))[0] || null
+}
 async function carrierOption(city, weight) {
   const want = (process.env.OTO_CARRIER || 'smsa').trim().toLowerCase()
   if (want === 'auto') return null
   if (carrierCache.key === want + city && carrierCache.v) return carrierCache.v
   if (!city) throw new Error('ما عرفنا مدينة موقع الاستلام في أوتو، تأكد منها في «مواقع المرسل»')
-  const { ok, b } = await call('/checkOTODeliveryFee', { method: 'POST', body: { originCity: city, destinationCity: city, weight: Math.max(1, Math.ceil(weight)) } })
-  if (!ok) throw new Error(otoError(b))
-  const list = b.deliveryCompany || []
-  const name = (o) => `${o.deliveryCompanyName || ''} ${o.deliveryOptionName || ''}`.toLowerCase()
-  const mine = list.filter((o) => name(o).includes(want) && o.deliveryOptionId)
-  // to her door, the ordinary service first (not same-day, locker or branch pickup), then the cheapest
-  const plain = mine.filter((o) => (!o.deliveryType || o.deliveryType === 'toCustomerDoorstep') && !/sameDay|bullet|pudo|locker/i.test(`${o.serviceType} ${o.deliveryOptionName}`))
-  const pick = (plain.length ? plain : mine).sort((x, y) => Number(x.price) - Number(y.price))[0]
+  const list = await deliveryFees(city, city, weight)
+  const pick = preferred(list, want)
   if (!pick) throw new Error(`شركة «${want}» مو ضمن شركات أوتو المتاحة لك: ${[...new Set(list.map((o) => o.deliveryCompanyName))].join('، ') || 'ما رجعت أي شركة'}`)
   carrierCache = { key: want + city, v: { id: pick.deliveryOptionId, name: pick.deliveryOptionName || pick.deliveryCompanyName } }
   return carrierCache.v
 }
 
 /** Creates the OTO order with its shipment. { weight (kg), count } come from the owner, never guessed. */
-export async function createShipment(order, { weight, count }) {
+export async function createShipment(order, { weight, count, option }) {
   if (!otoReady()) throw new Error('أوتو مو مربوط: أضف OTO_REFRESH_TOKEN في Vercel')
   if (!('shipment' in order)) throw new Error('شغّل ملف supabase/shipping-2026-10.sql في Supabase أولاً')
   if (!order.shipping) throw new Error('الطلب ما فيه عنوان شحن')
   if (!['paid', 'in_progress'].includes(order.status)) throw new Error('البوليصة تنسوّى للطلبات المدفوعة فقط')
-  if (order.shipment?.otoId && !order.shipment.error) throw new Error('البوليصة منشأة من قبل')
+  if (order.shipment?.otoId && !order.shipment.error && order.shipment.status !== 'cancelled') throw new Error('البوليصة منشأة من قبل')
   await ensureWebhook().catch((e) => console.error('oto webhook', e?.message))
   const s = order.shipping, c = order.customer || {}
   const seller = await loadSeller()
   const pickup = await pickupLocation()
-  const carrier = await carrierOption(pickup.city, weight)
+  // the company the owner picked from the price list, else the default one (OTO_CARRIER)
+  const carrier = option?.id ? option : await carrierOption(pickup.city, weight)
   const dc = carrier ? { deliveryOptionId: carrier.id } : {}
   const d = new Date(new Date(order.created_at).getTime() + 3 * 3600_000), p = (n) => String(n).padStart(2, '0') // Saudi time
   const items = (order.items || []).map((it) => ({
@@ -131,7 +137,7 @@ export async function createShipment(order, { weight, count }) {
   // the OTO order is there from an earlier try that wasn't saved: ask for the shipment only
   if (!res.ok && /exist/i.test(res.b.otoErrorMessage || '')) res = await call('/createShipment', { method: 'POST', body: { orderId: ref(order), packageWeight: weight, packageCount: count, ...dc } })
   if (!res.ok) throw new Error(otoError(res.b))
-  const saved = await saveShipment(order, { ref: ref(order), otoId: res.b.otoId || order.shipment?.otoId || null, weight, count, requestedAt: new Date().toISOString(), status: 'requested', error: null, ...(carrier ? { company: carrier.name } : {}) })
+  const saved = await saveShipment(order, { ref: ref(order), otoId: res.b.otoId || order.shipment?.otoId || null, weight, count, requestedAt: new Date().toISOString(), status: 'requested', error: null, trackingNumber: null, awbUrl: null, trackingUrl: null, ...(carrier ? { company: carrier.name || null } : {}) })
   return advance(saved, 'in_progress', 'أُنشئت بوليصة الشحن في أوتو').then((o) => ({ ...o, shipment: saved.shipment }))
 }
 
@@ -150,6 +156,83 @@ export async function shipmentLabel(order) {
   return saved.shipment
 }
 
+/** The delivery companies for this order's route with OTO's prices (free plan: OTO's own rates). */
+export async function shippingQuotes(order, weight) {
+  if (!otoReady()) throw new Error('أوتو مو مربوط: أضف OTO_REFRESH_TOKEN في Vercel')
+  const pickup = await pickupLocation()
+  // OTO's price list knows English city names: the national address gives hers, else the city she typed
+  const to = (await nationalAddress(order.shipping?.shortAddress).catch(() => null))?.city || order.shipping?.city || pickup.city
+  const list = await deliveryFees(pickup.city, to, weight)
+  const want = (process.env.OTO_CARRIER || 'smsa').trim().toLowerCase()
+  const best = preferred(list, want)
+  return {
+    from: pickup.city, to,
+    options: list.map((o) => ({
+      id: o.deliveryOptionId, name: o.deliveryOptionName || o.deliveryCompanyName, company: o.deliveryCompanyName,
+      price: Number(o.price) || 0, days: o.avgDeliveryTime || '', logo: /^https:\/\//.test(o.logo || '') ? o.logo : '',
+      door: !o.deliveryType || o.deliveryType === 'toCustomerDoorstep', preferred: best?.deliveryOptionId === o.deliveryOptionId,
+    })).sort((x, y) => (y.preferred - x.preferred) || (x.price - y.price)),
+  }
+}
+
+/** Cancels the shipment at the delivery company (only before the courier picks it up). The order stays in OTO,
+ *  so a new waybill can be made for it. */
+export async function cancelShipment(order) {
+  const sh = order.shipment
+  if (!sh?.ref) throw new Error('ما فيه شحنة لهذا الطلب')
+  if (sh.status === 'cancelled') throw new Error('الشحنة ملغية من قبل')
+  if (MOVING.test(sh.status || '') || sh.status === 'delivered') throw new Error('ما تنلغي الشحنة بعد ما يستلمها المندوب')
+  let id = sh.trackingNumber
+  if (!id) id = (await shipmentLabel(order).catch(() => null))?.trackingNumber
+  if (!id) throw new Error('الشحنة ما لها رقم عند شركة الشحن للحين، فما فيه شي ينلغي')
+  const { ok, b } = await call('/cancelShipment', { method: 'POST', body: { orderId: sh.ref, shipmentId: String(id) } })
+  if (!ok) throw new Error(otoError(b).replace('أوتو رفض الطلب', 'ما انلغت الشحنة'))
+  return (await saveShipment(order, { status: 'cancelled', error: null, cancelledAt: new Date().toISOString() })).shipment
+}
+
+/** A return shipment for a delivered order: the delivery company collects the whole order from her and brings it
+ *  back to the pickup location. Its waybill is printed like the first one (ref «<number>-R1»). */
+export async function returnShipment(order) {
+  const sh = order.shipment
+  if (!sh?.ref) throw new Error('الطلب ما انشحن عن طريق أوتو')
+  if (!['review', 'completed'].includes(order.status)) throw new Error('شحنة الإرجاع للطلبات اللي انشحنت أو وصلت')
+  if (sh.ret?.ref) throw new Error('فيه شحنة إرجاع لهذا الطلب من قبل')
+  const pickup = await pickupLocation()
+  const carrier = await carrierOption(pickup.city, Number(sh.weight) || 1)
+  const { ok, b } = await call('/createReturnShipment', { method: 'POST', body: {
+    orderId: sh.ref, pickupLocationCode: pickup.code, pickingType: 'PICKUP_BY_DC', ...(carrier ? { deliveryOptionId: String(carrier.id) } : {}),
+    items: (order.items || []).map((it) => ({ quantity: Number(it.qty) || 1, sku: String(it.productId || it.name || '').slice(0, 60) })),
+  } })
+  if (!ok || !b.returnOrderId) throw new Error(otoError(b).replace('أوتو رفض الطلب', 'ما انسوّت شحنة الإرجاع'))
+  return (await saveShipment(order, { ret: { ref: String(b.returnOrderId), status: 'requested', at: new Date().toISOString() } })).shipment
+}
+
+/** The return shipment's waybill. */
+export async function returnLabel(order) {
+  const r = order.shipment?.ret
+  if (!r?.ref) throw new Error('ما فيه شحنة إرجاع لهذا الطلب')
+  const { ok, b } = await call(`/print/${encodeURIComponent(r.ref)}`)
+  if (!ok || !b.printAWBURL) throw new Error(ok || b.otoErrorCode === 'OTO1113' ? 'بوليصة الإرجاع لسا تتجهّز عند شركة الشحن، جربي بعد دقيقة' : otoError(b))
+  return (await saveShipment(order, { ret: { ...r, awbUrl: b.printAWBURL, trackingNumber: b.trackingNumber || r.trackingNumber || null } })).shipment
+}
+
+// the full national address behind a short code (English names, as the delivery companies use them)
+const addrCache = new Map()
+export async function nationalAddress(code) {
+  const c = String(code || '').toUpperCase().replace(/[\s-]/g, '')
+  if (!/^[A-Z]{4}\d{4}$/.test(c)) return null
+  if (addrCache.has(c)) return addrCache.get(c)
+  const { ok, b } = await call('/getNationalAddressFromShortCode', { method: 'POST', body: { shortAddressCode: c } })
+  const d = ok && b.data
+  const v = d && (d.cityName || d.city?.name) ? {
+    city: d.cityName || d.city?.name || '', district: d.districtName || d.district?.name || '', street: d.streetName || '',
+    building: d.buildingName || '', secondary: d.secondary || '', zip: d.zipCode || '', full: d.formattedFullAddress || '',
+  } : null
+  if (addrCache.size > 500) addrCache.clear()
+  addrCache.set(c, v)
+  return v
+}
+
 // OTO's statuses → the store's: on the road = «تم الشحن», delivered = «تم التوصيل»
 const MOVING = /^(pickedUp|inTransit|shipmentInProgress|outForDelivery|arrivedTerminal|arrivedDestinationTerminal)$/
 
@@ -158,10 +241,20 @@ export async function otoWebhook(req, res) {
   const k = String(req.query.k || ''), want = hookKey()
   if (k.length !== want.length || !timingSafeEqual(Buffer.from(k), Buffer.from(want))) return res.status(401).json({ ok: false })
   const b = req.body || {}
-  const number = Number(String(b.orderId || '').replace(/\D/g, ''))
+  // a return shipment reports as «<number>-R1»: it updates the return, not the order
+  const [main, retNo] = String(b.orderId || '').split(/-R(?=\d+$)/)
+  const number = Number(main.replace(/\D/g, ''))
   if (!number) return res.status(200).json({ ok: true, skipped: 'no-order' })
   const { data: order } = await admin.from('orders').select('*').eq('number', number).maybeSingle()
   if (!order) return res.status(200).json({ ok: true, skipped: 'unknown-order' })
+
+  if (retNo && order.shipment?.ret) {
+    const r = order.shipment.ret
+    await saveShipment(order, { ret: { ...r, status: b.errorMessage ? 'error' : String(b.status || r.status), error: b.errorMessage || null,
+      ...(b.dcTrackingNumber || b.trackingNumber ? { trackingNumber: b.dcTrackingNumber || b.trackingNumber } : {}),
+      ...(b.printAWBURL ? { awbUrl: b.printAWBURL } : {}) } })
+    return res.status(200).json({ ok: true })
+  }
 
   if (b.errorMessage || b.errorCode) {
     const error = [b.errorMessage, b.deliveryCompanyResponse].filter(Boolean).join(' · ').slice(0, 300)

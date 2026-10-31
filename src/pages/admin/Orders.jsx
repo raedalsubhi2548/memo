@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useOutletContext, useSearchParams } from 'react-router-dom'
-import { MessageCircle, Mail, Phone, CreditCard, Landmark, Inbox, ChevronLeft, Copy, FileText, Link2, Plus, Trash2, Truck, Printer, ExternalLink } from 'lucide-react'
+import { MessageCircle, Mail, Phone, CreditCard, Landmark, Inbox, ChevronLeft, Copy, FileText, Link2, Plus, Trash2, Truck, Printer, ExternalLink, XCircle, Undo2, ListChecks } from 'lucide-react'
 import { api } from '@/lib/api.js'
 import { useApp } from '@/state.jsx'
 import { ORDER_STATUSES } from '@/data/seed.js'
@@ -20,54 +20,122 @@ import OptionList from '@/components/OptionList.jsx'
 const waPhone = (p) => (p || '').replace(/\D/g, '').replace(/^0/, '966')
 
 // OTO's shipment statuses, in the owner's words (anything else shows as OTO sent it)
-const SHIP_STATUS = { requested: 'تتجهّز البوليصة', new: 'تتجهّز البوليصة', shipmentProcessing: 'تتجهّز البوليصة', assignedToWarehouse: 'بانتظار شركة الشحن', searchingDriver: 'بانتظار المندوب', goingToPickup: 'المندوب في الطريق للاستلام', pickedUp: 'استلمها المندوب', inTransit: 'في الطريق', shipmentInProgress: 'في الطريق', arrivedTerminal: 'وصلت مركز الشحن', outForDelivery: 'خرجت للتوصيل', delivered: 'تم التوصيل', undelivered: 'ما تم التوصيل', returned: 'رجعت للمتجر', shipmentOnHold: 'موقوفة', error: 'ما انشحنت' }
+const SHIP_STATUS = { requested: 'تتجهّز البوليصة', new: 'تتجهّز البوليصة', shipmentProcessing: 'تتجهّز البوليصة', assignedToWarehouse: 'بانتظار شركة الشحن', searchingDriver: 'بانتظار المندوب', goingToPickup: 'المندوب في الطريق للاستلام', pickedUp: 'استلمها المندوب', inTransit: 'في الطريق', shipmentInProgress: 'في الطريق', arrivedTerminal: 'وصلت مركز الشحن', outForDelivery: 'خرجت للتوصيل', delivered: 'تم التوصيل', undelivered: 'ما تم التوصيل', returned: 'رجعت للمتجر', shipmentOnHold: 'موقوفة', cancelled: 'ملغية', error: 'ما انشحنت' }
+// once the courier has it, the shipment can't be cancelled
+const SHIP_MOVING = /^(pickedUp|inTransit|shipmentInProgress|outForDelivery|arrivedTerminal|arrivedDestinationTerminal|delivered|returned)$/
 const WEIGHT_KEY = 'mimi:oto:weight'
+// OTO's delivery time words → hers («1to3WorkingDays» → «1–3 أيام عمل»)
+const shipDays = (d) => { const m = /(\d+)\s*to\s*(\d+)\s*WorkingDays/i.exec(d || ''); return m ? `${m[1]}–${m[2]} أيام عمل` : /same\s*day/i.test(d || '') ? 'نفس اليوم' : /next\s*day/i.test(d || '') ? 'اليوم التالي' : d || '' }
 
-// the shipping waybill through OTO: the owner types the parcel's real weight, OTO picks the delivery company
+const Row = ({ k, children, mono }) => <div className="flex justify-between gap-3"><dt className="text-muted-foreground">{k}</dt><dd className={cn('text-end', mono && 'font-mono')} dir={mono ? 'ltr' : undefined}>{children}</dd></div>
+
+// the shipping waybill through OTO: the owner types the parcel's real weight, sees the delivery companies and their
+// prices (the default one, OTO_CARRIER, comes first), and can cancel the shipment or send a return later
 function Shipment({ order, onSaved }) {
   const { notify } = useApp()
+  const confirm = useConfirm()
   const sh = order.shipment
   const [weight, setWeight] = useState(() => { try { return localStorage.getItem(WEIGHT_KEY) || '' } catch { return '' } })
   const [count, setCount] = useState('1')
-  const [busy, setBusy] = useState(false)
+  const [busy, setBusy] = useState('')
+  const [quotes, setQuotes] = useState(null)
+  const [pick, setPick] = useState(null)
   const ready = ['paid', 'in_progress'].includes(order.status)
-  const create = async (e) => {
-    e.preventDefault(); setBusy(true)
-    try {
-      await api.createShipment(order.id, Number(weight), Number(count))
+  const fresh = !sh || sh.error || sh.status === 'cancelled'
+  const run = async (what, fn) => { setBusy(what); try { await fn() } catch (err) { notify(err.message, 'err') } finally { setBusy('') } }
+
+  const loadQuotes = () => {
+    if (!(Number(weight) > 0)) return notify('اكتبي وزن الطرد أول', 'err')
+    run('quotes', async () => {
+      const q = await api.shippingQuotes(order.id, Number(weight))
+      if (!q.options?.length) throw new Error('ما رجعت أوتو أي شركة شحن لهالمسار')
+      setQuotes(q); setPick(q.options.find((o) => o.preferred) || q.options[0])
+    })
+  }
+  const create = (e) => {
+    e.preventDefault()
+    run('create', async () => {
+      await api.createShipment(order.id, Number(weight), Number(count), pick && { id: pick.id, name: pick.name })
       try { localStorage.setItem(WEIGHT_KEY, weight) } catch { /* private mode */ }
-      notify('أُرسلت البوليصة لأوتو، تجهز خلال دقيقة'); onSaved()
-    } catch (err) { notify(err.message, 'err') } finally { setBusy(false) }
+      notify('أُرسلت البوليصة لأوتو، تجهز خلال دقيقة'); setQuotes(null); onSaved()
+    })
   }
-  const print = async () => {
+  const print = (ret) => {
     const w = window.open('', '_blank') // opened on the click itself, so the browser doesn't block it
-    setBusy(true)
-    try { const s = await api.shipmentLabel(order.id); if (w) w.location.href = s.awbUrl; else window.location.href = s.awbUrl; onSaved() }
-    catch (err) { w?.close(); notify(err.message, 'err'); onSaved() } finally { setBusy(false) }
+    run(ret ? 'rprint' : 'print', async () => {
+      try { const s = await api.shipmentLabel(order.id, ret); const url = ret ? s.ret?.awbUrl : s.awbUrl; if (w) w.location.href = url; else window.location.href = url; onSaved() }
+      catch (err) { w?.close(); onSaved(); throw err }
+    })
   }
+  const cancel = async () => {
+    if (!(await confirm({ title: 'تلغين الشحنة؟', body: 'تنلغي عند شركة الشحن قبل ما يستلمها المندوب، وتقدرين تسوين بوليصة جديدة للطلب بعدها.', ok: 'إلغاء الشحنة' }))) return
+    run('cancel', async () => { await api.cancelShipment(order.id); notify('ألغيت الشحنة'); onSaved() })
+  }
+  const sendBack = async () => {
+    if (!(await confirm({ title: 'تسوين شحنة إرجاع؟', body: 'شركة الشحن تستلم الطلب كامل من العميلة وترجعه لموقع الاستلام، وتنخصم قيمتها من محفظة أوتو.', ok: 'إنشاء شحنة الإرجاع' }))) return
+    run('return', async () => { await api.returnShipment(order.id); notify('انسوّت شحنة الإرجاع، بوليصتها تجهز خلال دقيقة'); onSaved() })
+  }
+
   return (
     <section className="rounded-lg bg-surface p-4 ring-1 ring-border">
       <h3 className="mb-3 flex items-center gap-2 text-xs font-bold text-muted-foreground"><Truck className="size-4" />بوليصة الشحن (أوتو)</h3>
-      {sh && !sh.error ? (
+      {sh && !fresh ? (
         <div className="grid gap-3">
           <dl className="grid gap-1.5 text-sm">
-            <div className="flex justify-between gap-3"><dt className="text-muted-foreground">الحالة</dt><dd className="font-semibold text-primary">{SHIP_STATUS[sh.status] || sh.status}</dd></div>
-            {sh.company && <div className="flex justify-between gap-3"><dt className="text-muted-foreground">شركة الشحن</dt><dd dir="ltr">{sh.company}</dd></div>}
-            {sh.trackingNumber && <div className="flex justify-between gap-3"><dt className="text-muted-foreground">رقم الشحنة</dt><dd className="font-mono" dir="ltr">{sh.trackingNumber}</dd></div>}
-            <div className="flex justify-between gap-3"><dt className="text-muted-foreground">الوزن</dt><dd className="tabular">{sh.weight} كجم{sh.count > 1 ? ` · ${sh.count} طرود` : ''}</dd></div>
+            <Row k="الحالة"><b className="text-primary">{SHIP_STATUS[sh.status] || sh.status}</b></Row>
+            {sh.company && <Row k="شركة الشحن"><span dir="auto">{sh.company}</span></Row>}
+            {sh.trackingNumber && <Row k="رقم الشحنة" mono>{sh.trackingNumber}</Row>}
+            <Row k="الوزن"><span className="tabular">{sh.weight} كجم{sh.count > 1 ? ` · ${sh.count} طرود` : ''}</span></Row>
           </dl>
-          <Button size="sm" onClick={print} disabled={busy}><Printer className="size-4" />{busy ? 'جاري التجهيز…' : 'طباعة البوليصة'}</Button>
-          {/^https?:\/\//.test(sh.trackingUrl || '') && <Button asChild variant="outline" size="sm"><a href={sh.trackingUrl} target="_blank" rel="noreferrer"><ExternalLink className="size-4" />رابط التتبع</a></Button>}
+          <Button size="sm" onClick={() => print(false)} disabled={!!busy}><Printer className="size-4" />{busy === 'print' ? 'جاري التجهيز…' : 'طباعة البوليصة'}</Button>
+          <div className="flex flex-wrap gap-2 [&>*]:flex-1">
+            {/^https?:\/\//.test(sh.trackingUrl || '') && <Button asChild variant="outline" size="sm"><a href={sh.trackingUrl} target="_blank" rel="noreferrer"><ExternalLink className="size-4" />رابط التتبع</a></Button>}
+            {!SHIP_MOVING.test(sh.status || '') && <Button variant="outline" size="sm" className="text-danger hover:bg-danger-soft hover:text-danger" onClick={cancel} disabled={!!busy}><XCircle className="size-4" />{busy === 'cancel' ? 'جاري الإلغاء…' : 'إلغاء الشحنة'}</Button>}
+          </div>
+          {['review', 'completed'].includes(order.status) && (sh.ret?.ref ? (
+            <div className="grid gap-2 rounded-md bg-sunken/70 p-3 text-sm">
+              <p className="flex items-center gap-2 text-xs font-bold text-muted-foreground"><Undo2 className="size-4" />شحنة الإرجاع</p>
+              <dl className="grid gap-1.5">
+                <Row k="الحالة"><b className="text-primary">{SHIP_STATUS[sh.ret.status] || sh.ret.status}</b></Row>
+                {sh.ret.trackingNumber && <Row k="رقم الشحنة" mono>{sh.ret.trackingNumber}</Row>}
+              </dl>
+              {sh.ret.error && <p className="text-xs leading-6 text-danger">{sh.ret.error}</p>}
+              <Button size="sm" variant="outline" onClick={() => print(true)} disabled={!!busy}><Printer className="size-4" />{busy === 'rprint' ? 'جاري التجهيز…' : 'طباعة بوليصة الإرجاع'}</Button>
+            </div>
+          ) : (
+            <Button variant="outline" size="sm" onClick={sendBack} disabled={!!busy}><Undo2 className="size-4" />{busy === 'return' ? 'جاري الإنشاء…' : 'شحنة إرجاع'}</Button>
+          ))}
         </div>
       ) : ready ? (
         <form onSubmit={create} className="grid gap-3">
           {sh?.error && <p className="rounded-md bg-danger-soft p-3 text-sm leading-7 text-danger" role="alert">ما انشحنت المرة الماضية: {sh.error}</p>}
+          {sh?.status === 'cancelled' && <p className="rounded-md bg-sunken p-3 text-sm leading-7 text-muted-foreground">ألغيتي الشحنة السابقة. تقدرين تسوين بوليصة جديدة.</p>}
           <div className="grid grid-cols-2 gap-3">
-            <Field label="وزن الطرد (كجم)"><Input required type="number" inputMode="decimal" min="0.05" max="100" step="0.05" dir="ltr" value={weight} onChange={(e) => setWeight(e.target.value)} /></Field>
+            <Field label="وزن الطرد (كجم)"><Input required type="number" inputMode="decimal" min="0.05" max="100" step="0.05" dir="ltr" value={weight} onChange={(e) => { setWeight(e.target.value); setQuotes(null); setPick(null) }} /></Field>
             <Field label="عدد الطرود"><Input required type="number" inputMode="numeric" min="1" max="20" step="1" dir="ltr" value={count} onChange={(e) => setCount(e.target.value)} /></Field>
           </div>
-          <Button type="submit" disabled={busy}><Truck className="size-4" />{busy ? 'جاري الإنشاء…' : sh?.error ? 'إعادة إنشاء البوليصة' : 'إنشاء بوليصة'}</Button>
-          <p className="text-xs leading-6 text-muted-foreground">تنخصم قيمة الشحن من رصيد محفظة أوتو، وأوتو يختار شركة الشحن. لما يستلم المندوب الطلب يصير «تم الشحن»، ولما يوصل يصير «تم التوصيل»، وتوصل العميلة رسالة بكل حالة.</p>
+          {quotes ? (
+            <fieldset className="grid gap-2">
+              <legend className="mb-2 text-xs font-bold text-muted-foreground">شركة الشحن · <span dir="ltr">{quotes.from} → {quotes.to}</span></legend>
+              <div className="grid max-h-72 gap-2 overflow-y-auto pe-1">
+                {quotes.options.map((o) => (
+                  <label key={o.id} className={cn('flex cursor-pointer items-center gap-3 rounded-lg p-2.5 ring-1 transition-colors', pick?.id === o.id ? 'bg-primary/5 ring-2 ring-primary' : 'ring-border hover:bg-sunken')}>
+                    <input type="radio" name="carrier" className="sr-only" checked={pick?.id === o.id} onChange={() => setPick(o)} />
+                    {o.logo ? <img src={o.logo} alt="" className="size-9 shrink-0 rounded-md bg-white object-contain p-1 ring-1 ring-border" /> : <span className="grid size-9 shrink-0 place-items-center rounded-md bg-sunken"><Truck className="size-4 text-muted-foreground" /></span>}
+                    <span className="min-w-0 flex-1">
+                      <b className="flex items-center gap-2 text-sm" dir="auto">{o.name}{o.preferred && <span className="rounded-full bg-accent/15 px-2 py-0.5 text-[10px] font-bold text-accent-foreground">الافتراضية</span>}</b>
+                      <span className="block text-xs text-muted-foreground">{[shipDays(o.days), !o.door && 'استلام من فرع أو خزانة'].filter(Boolean).join(' · ')}</span>
+                    </span>
+                    <b className="tabular shrink-0 text-sm text-primary">{money(o.price)}</b>
+                  </label>
+                ))}
+              </div>
+            </fieldset>
+          ) : (
+            <Button type="button" variant="outline" size="sm" onClick={loadQuotes} disabled={!!busy}><ListChecks className="size-4" />{busy === 'quotes' ? 'نجيب الأسعار…' : 'أسعار شركات الشحن'}</Button>
+          )}
+          <Button type="submit" disabled={!!busy}><Truck className="size-4" />{busy === 'create' ? 'جاري الإنشاء…' : `${sh ? 'إعادة إنشاء البوليصة' : 'إنشاء بوليصة'}${pick ? ` مع ${pick.name}` : ''}`}</Button>
+          <p className="text-xs leading-6 text-muted-foreground">تنخصم قيمة الشحن من رصيد محفظة أوتو. بدون ما تختارين، تروح مع شركة الشحن الافتراضية. لما يستلم المندوب الطلب يصير «تم الشحن»، ولما يوصل يصير «تم التوصيل»، وتوصل العميلة رسالة بكل حالة.</p>
         </form>
       ) : (
         <p className="text-sm leading-7 text-muted-foreground">{order.status === 'cancelled' ? 'الطلب ملغي.' : order.status === 'pending' ? 'تنسوّى البوليصة بعد ما يندفع الطلب.' : 'الطلب انشحن من خارج أوتو.'}</p>
