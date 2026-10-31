@@ -75,7 +75,7 @@ export default function PaymentForm({ amount, customer, apple, validate, ready, 
         <div role="radiogroup" aria-label="طريقة الدفع" className="grid gap-2">
           {[
             { id: 'card', title: 'بطاقة أو Apple Pay', logo: <Brands /> },
-            { id: 'tabby', title: 'تابي: قسّميها على 4 دفعات', logo: <TabbyLogo />, off: !tabby.ok },
+            { id: 'tabby', title: 'تابي: قسّميها على دفعات', logo: <TabbyLogo />, off: !tabby.ok },
           ].map((m) => (
             <button key={m.id} type="button" role="radio" aria-checked={method === m.id} disabled={m.off} onClick={() => setMethod(m.id)}
               className={cn('flex min-h-13 items-center gap-3 rounded-2xl bg-surface px-4 py-3 text-start ring-1 transition-colors disabled:cursor-not-allowed disabled:opacity-60', method === m.id ? 'ring-2 ring-primary' : 'ring-border hover:ring-border-strong')}>

@@ -1,6 +1,6 @@
 // Tabby's own snippets: the promo under the price (product page) and the card under the Tabby option (checkout).
 // They need only the public key and the store's merchant code; payments go through api/_tabby.js.
-import { useEffect, useRef } from 'react'
+import { useEffect, useId } from 'react'
 
 export const TABBY_PUBLIC_KEY = (import.meta.env.VITE_TABBY_PUBLIC_KEY || '').trim()
 export const TABBY_MERCHANT = (import.meta.env.VITE_TABBY_MERCHANT_CODE || '').trim()
@@ -15,9 +15,10 @@ const load = (src, name) => (scripts[src] ||= new Promise((ok, no) => {
   document.head.appendChild(s)
 }))
 
-// one snippet in a container of its own (Tabby's rule: the id must not be the component's name), redrawn when the price changes
+// one snippet in a container of its own (Tabby's rule: the id must not be the component's name), redrawn when the price changes;
+// useId keeps the prerendered page's id and the browser's the same
 function Snippet({ kind, price, source, className }) {
-  const id = useRef('tabby-' + kind.toLowerCase() + '-' + Math.random().toString(36).slice(2, 8)).current
+  const id = 'tabby-' + kind.toLowerCase() + '-' + useId().replace(/[^\w-]/g, '')
   useEffect(() => {
     if (!TABBY_ON || !(Number(price) > 0)) return
     let gone = false

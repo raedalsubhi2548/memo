@@ -1,4 +1,4 @@
-// Tabby (pay in 4) through Tabby's own API, Saudi endpoint. The secret key stays here (server side); the browser only
+// Tabby (instalments) through Tabby's own API, Saudi endpoint. The secret key stays here (server side); the browser only
 // gets the hosted checkout link. Routed through api/tap-charge.js (?op=tabby, ?op=tabby-check), api/tap-verify.js
 // (?op=tabby) and api/tap-webhook.js (?op=tabby).
 // Env: TABBY_SECRET_KEY (Secret), VITE_TABBY_PUBLIC_KEY + VITE_TABBY_MERCHANT_CODE (the snippets and the store's code).
