@@ -17,6 +17,7 @@ import { SEO_H1 } from '@/lib/seo.js'
 import { SERVICE_FAQ } from '@/data/serviceFaq.js'
 import OptionNote from '@/components/OptionNote.jsx'
 import ServiceQuestions from '@/components/ServiceQuestions.jsx'
+import { TabbyPromo } from '@/components/Tabby.jsx'
 import { serviceScore } from '@/lib/feedback.js'
 import Reveal from '@/components/Reveal.jsx'
 
@@ -89,6 +90,7 @@ export default function Product({ slug: fromProps }) {
               <span className={cn('tabular text-[1.6rem] font-bold', onSale ? 'text-danger' : 'text-primary')}>{money(effectivePrice(p))}</span>
               {onSale && <s className="tabular text-lg text-muted-foreground">{money(p.price)}</s>}
             </div>
+            <TabbyPromo price={total} className="mt-3 max-w-[460px]" />
             <p className="mt-4 max-w-[46ch] text-[15.5px] leading-8 text-foreground/80 motion-safe:animate-[rise-in_.8s_var(--p-ease-emphasized)_180ms_both]">{p.summary}</p>
 
             <div className="mt-7 grid gap-5 rounded-[24px] bg-white/90 p-5 shadow-[0_20px_44px_-32px_rgb(125_63_76/0.55)] ring-1 ring-white motion-safe:animate-[rise-in_.8s_var(--p-ease-emphasized)_270ms_both] sm:p-6">

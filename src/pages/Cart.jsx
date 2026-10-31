@@ -5,6 +5,7 @@ import { money } from '@/lib/format.js'
 import { shippingFor } from '@/lib/theme.js'
 import { productPath } from '@/lib/slug.js'
 import OptionList from '@/components/OptionList.jsx'
+import { TabbyPromo } from '@/components/Tabby.jsx'
 import { Button } from '@/components/ui/button'
 import { PageHead, Empty, Qty, Panel } from '@/components/ui/kit.jsx'
 
@@ -43,6 +44,7 @@ export default function Cart() {
               <div className="flex items-center justify-between text-sm"><dt className="text-muted-foreground">الشحن</dt><dd className="tabular">{ship > 0 ? money(ship) : 'مجاني'}</dd></div>
               <div className="flex items-center justify-between pt-1"><dt className="font-bold">الإجمالي</dt><dd className="tabular font-display text-2xl text-primary">{money(subtotal + ship)}</dd></div>
             </dl>
+            <TabbyPromo price={subtotal + ship} source="cart" className="mt-4" />
             <p className="my-4 text-sm text-muted-foreground">عنوان الشحن وكود الخصم والدفع في الخطوة التالية.</p>
             <div className="grid gap-2">
               <Button asChild size="lg"><Link to="/checkout">إتمام الطلب</Link></Button>

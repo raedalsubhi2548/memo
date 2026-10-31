@@ -1,12 +1,23 @@
 // POST { orderId, token? }  →  { url } | { paid } | { free }
 // Without a token: Tap's hosted payment page. With a token from our card fields (TapCard.jsx) or Apple Pay (TapApplePay.jsx):
 // that card is charged directly, and the bank's 3-D Secure page comes back as { url } when it's needed.
+// POST ?op=tabby { orderId }               → Tabby's checkout link { url }, or { rejected: reason }
+// POST ?op=tabby-check { amount, phone }   → can she pay this with Tabby? { ok, reason } (before the option is shown)
 import { admin, TAP, tapHeaders, siteUrl, userFromRequest, confirmCharge } from './_shared.js'
+import { tabbyReady, tabbyCheck, tabbySession } from './_tabby.js'
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' })
   const user = await userFromRequest(req)
   if (!user) return res.status(401).json({ error: 'سجّلي دخولك أولاً' })
+
+  const op = String(req.query.op || '')
+  if (op === 'tabby-check') {
+    const amount = Number(req.body?.amount)
+    if (!(amount > 0) || !/^(\+?966|0)?5\d{8}$/.test(String(req.body?.phone || '').replace(/[\s-]/g, ''))) return res.status(200).json({ ok: false })
+    try { return res.status(200).json(await tabbyCheck({ amount, buyer: { name: req.body?.name, email: user.email, phone: req.body.phone, since: user.created_at } })) }
+    catch { return res.status(200).json({ ok: false }) }
+  }
 
   const { orderId, token } = req.body || {}
   if (token !== undefined && !/^tok_\w{6,80}$/.test(String(token))) return res.status(400).json({ error: 'بيانات البطاقة غير صالحة، حاول مرة ثانية' })
@@ -26,6 +37,10 @@ export default async function handler(req, res) {
     return res.status(200).json({ free: true })
   }
   if (!(Number(order.total) > 0)) return res.status(400).json({ error: 'مبلغ الطلب غير صالح' })
+  if (op === 'tabby') {
+    if (!tabbyReady()) return res.status(503).json({ error: 'تابي غير متاح الحين، ادفعي بالبطاقة.' })
+    try { return res.status(200).json(await tabbySession(order)) } catch (e) { return res.status(502).json({ error: e.message }) }
+  }
   // a free order (above) needs no gateway; a paid one does
   if (!process.env.TAP_SECRET_KEY) return res.status(503).json({ error: 'بوابة الدفع غير متاحة الحين، حاولي بعد شوي أو تواصلي معنا.' })
 

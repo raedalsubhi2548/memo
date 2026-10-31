@@ -14,7 +14,7 @@ import NewOrder from '@/components/admin/NewOrder.jsx'
 import { can } from '@/lib/perms.js'
 import { STORE_ORIGIN } from '@/lib/host.js'
 import { addressLine } from '@/lib/address.js'
-const payLabel = (o) => (o.paymentRef === 'manual' ? 'طلب يدوي' : o.paymentMethod === 'bank' ? 'تحويل بنكي' : 'دفع إلكتروني')
+const payLabel = (o) => (o.paymentRef === 'manual' ? 'طلب يدوي' : o.paymentMethod === 'bank' ? 'تحويل بنكي' : /^tabby:/.test(o.paymentRef || '') ? 'تابي' : 'دفع إلكتروني')
 import OptionList from '@/components/OptionList.jsx'
 
 const waPhone = (p) => (p || '').replace(/\D/g, '').replace(/^0/, '966')

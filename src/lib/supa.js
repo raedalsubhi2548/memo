@@ -291,6 +291,25 @@ export const supa = {
     if (!res.ok) throw new Error(body.error || 'تعذّر بدء الدفع، حاول مرة ثانية')
     return { redirect: body.url, free: !!body.free, paid: !!body.paid, order: o }
   },
+  // Tabby: a fresh checkout link for the order (api/tap-charge.js?op=tabby), the background check, and the return
+  async startTabby(o) {
+    const { data } = await sb.auth.getSession()
+    const res = await fetch('/api/tap-charge?op=tabby', { method: 'POST', headers: { 'content-type': 'application/json', authorization: 'Bearer ' + data.session?.access_token }, body: JSON.stringify({ orderId: o.id }) })
+    const body = await res.json().catch(() => ({}))
+    if (!res.ok) throw new Error(body.error || 'تعذّر فتح الدفع مع تابي')
+    if (body.rejected) throw new Error(body.rejected)
+    return { redirect: body.url, free: !!body.free, order: o }
+  },
+  async tabbyCheck(amount, customer) {
+    const { data } = await sb.auth.getSession()
+    if (!data.session) return { ok: false }
+    const res = await fetch('/api/tap-charge?op=tabby-check', { method: 'POST', headers: { 'content-type': 'application/json', authorization: 'Bearer ' + data.session.access_token }, body: JSON.stringify({ amount, phone: customer.phone, name: customer.name }) })
+    return res.json().catch(() => ({ ok: false }))
+  },
+  async verifyTabby(orderId) {
+    const res = await fetch(`/api/tap-verify?op=tabby&order=${encodeURIComponent(orderId)}`)
+    return res.json().catch(() => ({}))
+  },
   async downloadUrl(orderId, productId) {
     const { data } = await sb.auth.getSession()
     const res = await fetch(`/api/download?order=${encodeURIComponent(orderId)}&product=${encodeURIComponent(productId)}`, {
