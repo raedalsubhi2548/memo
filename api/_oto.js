@@ -2,7 +2,7 @@
 // updates OTO pushes back. Docs: https://apis.tryoto.com — works on OTO's free plan (no getDeliveryOptions there, so
 // OTO picks the delivery company itself).
 // Env: OTO_REFRESH_TOKEN (Secret, from «ربط القناة» in OTO), optional OTO_PICKUP_CODE (the pickup location's code;
-// without it the first active location in OTO is used).
+// without it the first active location in OTO is used), optional OTO_CARRIER (default smsa; auto = OTO picks).
 import { createHmac, timingSafeEqual } from 'node:crypto'
 import { admin, siteUrl } from './_shared.js'
 import { sendOrderEmail, sendAdminAlert, loadSeller } from './_mail.js'
@@ -62,13 +62,35 @@ async function ensureWebhook() {
 }
 
 // where the courier collects: OTO_PICKUP_CODE, else the first active pickup location in OTO («مواقع المرسل»)
-async function pickupCode() {
+async function pickupLocation() {
   const set = (process.env.OTO_PICKUP_CODE || '').trim()
-  if (set) return set
   const { ok, b } = await call('/getPickupLocationList?status=active')
-  const code = ok && [...(b.warehouses || []), ...(b.branches || [])].find((l) => l.code)?.code
-  if (!code) throw new Error('أضيفي موقع استلام في أوتو (الإعدادات ← مواقع المرسل) وجربي مرة ثانية')
-  return String(code)
+  const all = ok ? [...(b.warehouses || []), ...(b.branches || [])].filter((l) => l.code) : []
+  const loc = set ? all.find((l) => String(l.code) === set) || { code: set } : all[0]
+  if (!loc) throw new Error('أضيفي موقع استلام في أوتو (الإعدادات ← مواقع المرسل) وجربي مرة ثانية')
+  return { code: String(loc.code), city: loc.city || '' }
+}
+
+// the delivery company: OTO_CARRIER (default «smsa»; «auto» lets OTO pick). The free plan has no default-company
+// setting, so the store asks OTO's own price list for that company's option and names it on every shipment.
+// The option id belongs to the company's service, not the route: asked once with the pickup city on both ends.
+let carrierCache = { key: '', v: null }
+async function carrierOption(city, weight) {
+  const want = (process.env.OTO_CARRIER || 'smsa').trim().toLowerCase()
+  if (want === 'auto') return null
+  if (carrierCache.key === want + city && carrierCache.v) return carrierCache.v
+  if (!city) throw new Error('ما عرفنا مدينة موقع الاستلام في أوتو، تأكد منها في «مواقع المرسل»')
+  const { ok, b } = await call('/checkOTODeliveryFee', { method: 'POST', body: { originCity: city, destinationCity: city, weight: Math.max(1, Math.ceil(weight)) } })
+  if (!ok) throw new Error(otoError(b))
+  const list = b.deliveryCompany || []
+  const name = (o) => `${o.deliveryCompanyName || ''} ${o.deliveryOptionName || ''}`.toLowerCase()
+  const mine = list.filter((o) => name(o).includes(want) && o.deliveryOptionId)
+  // to her door, the ordinary service first (not same-day, locker or branch pickup), then the cheapest
+  const plain = mine.filter((o) => (!o.deliveryType || o.deliveryType === 'toCustomerDoorstep') && !/sameDay|bullet|pudo|locker/i.test(`${o.serviceType} ${o.deliveryOptionName}`))
+  const pick = (plain.length ? plain : mine).sort((x, y) => Number(x.price) - Number(y.price))[0]
+  if (!pick) throw new Error(`شركة «${want}» مو ضمن شركات أوتو المتاحة لك: ${[...new Set(list.map((o) => o.deliveryCompanyName))].join('، ') || 'ما رجعت أي شركة'}`)
+  carrierCache = { key: want + city, v: { id: pick.deliveryOptionId, name: pick.deliveryOptionName || pick.deliveryCompanyName } }
+  return carrierCache.v
 }
 
 /** Creates the OTO order with its shipment. { weight (kg), count } come from the owner, never guessed. */
@@ -81,7 +103,9 @@ export async function createShipment(order, { weight, count }) {
   await ensureWebhook().catch((e) => console.error('oto webhook', e?.message))
   const s = order.shipping, c = order.customer || {}
   const seller = await loadSeller()
-  const pickup = await pickupCode()
+  const pickup = await pickupLocation()
+  const carrier = await carrierOption(pickup.city, weight)
+  const dc = carrier ? { deliveryOptionId: carrier.id } : {}
   const d = new Date(new Date(order.created_at).getTime() + 3 * 3600_000), p = (n) => String(n).padStart(2, '0') // Saudi time
   const items = (order.items || []).map((it) => ({
     // OTO takes a numeric productId only (the store's ids are text: it rides in the sku instead)
@@ -91,12 +115,12 @@ export async function createShipment(order, { weight, count }) {
   }))
   // a retry: the OTO order is there already, only its shipment failed
   let res = order.shipment?.otoId
-    ? await call('/createShipment', { method: 'POST', body: { orderId: ref(order), packageWeight: weight, packageCount: count } })
+    ? await call('/createShipment', { method: 'POST', body: { orderId: ref(order), packageWeight: weight, packageCount: count, ...dc } })
     : await call('/createOrder', { method: 'POST', body: {
     orderId: ref(order), createShipment: true, payment_method: 'paid', amount: Number(order.total), amount_due: 0, currency: 'SAR',
     packageCount: count, packageWeight: weight, senderName: seller.name,
     orderDate: `${p(d.getUTCDate())}/${p(d.getUTCMonth() + 1)}/${d.getUTCFullYear()} ${p(d.getUTCHours())}:${p(d.getUTCMinutes())}`,
-    pickupLocationCode: pickup,
+    pickupLocationCode: pickup.code, ...dc,
     customer: {
       name: c.name, email: c.email, mobile: String(c.phone || '').replace(/\D/g, '').replace(/^(966|0)/, ''),
       address: [s.street, s.district, s.city, s.details].filter((x) => String(x || '').trim()).join('، ') || s.shortAddress,
@@ -105,9 +129,9 @@ export async function createShipment(order, { weight, count }) {
     items,
   } })
   // the OTO order is there from an earlier try that wasn't saved: ask for the shipment only
-  if (!res.ok && /exist/i.test(res.b.otoErrorMessage || '')) res = await call('/createShipment', { method: 'POST', body: { orderId: ref(order), packageWeight: weight, packageCount: count } })
+  if (!res.ok && /exist/i.test(res.b.otoErrorMessage || '')) res = await call('/createShipment', { method: 'POST', body: { orderId: ref(order), packageWeight: weight, packageCount: count, ...dc } })
   if (!res.ok) throw new Error(otoError(res.b))
-  const saved = await saveShipment(order, { ref: ref(order), otoId: res.b.otoId || order.shipment?.otoId || null, weight, count, requestedAt: new Date().toISOString(), status: 'requested', error: null })
+  const saved = await saveShipment(order, { ref: ref(order), otoId: res.b.otoId || order.shipment?.otoId || null, weight, count, requestedAt: new Date().toISOString(), status: 'requested', error: null, ...(carrier ? { company: carrier.name } : {}) })
   return advance(saved, 'in_progress', 'أُنشئت بوليصة الشحن في أوتو').then((o) => ({ ...o, shipment: saved.shipment }))
 }
 
