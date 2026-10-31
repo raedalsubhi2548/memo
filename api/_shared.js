@@ -65,18 +65,11 @@ export async function confirmCharge(chargeId, browser = {}) {
   if (!order) return { ok: false, reason: 'order-not-found' }
   if (charge.status !== 'CAPTURED') return { ok: false, status: charge.status, orderId }
   if (Math.abs(Number(charge.amount) - Number(order.total)) > 0.01 || charge.currency !== 'SAR') return { ok: false, reason: 'amount-mismatch', orderId }
-  await markPaid(order, { ref: charge.id, amount: charge.amount, via: 'Tap', where: 'Tap' })
-  return { ok: true, orderId }
-}
-
-/** Marks a pending order paid once its gateway confirmed the money (Tap or Tabby), and sends the receipt.
- *  Money on a cancelled order, or a second payment for a paid one, goes to the owner as an alert instead. */
-export async function markPaid(order, { ref, amount, via, where }) {
   if (order.status === 'pending') {
     const { data: updated } = await admin.from('orders').update({
-      status: 'paid', payment_ref: ref,
-      history: [...(order.history || []), { status: 'paid', at: new Date().toISOString(), note: `تم الدفع عبر ${via}` }],
-    }).eq('id', order.id).eq('status', 'pending').select('*')
+      status: 'paid', payment_ref: charge.id,
+      history: [...(order.history || []), { status: 'paid', at: new Date().toISOString(), note: 'تم الدفع عبر Tap' }],
+    }).eq('id', orderId).eq('status', 'pending').select('*')
     // only the call that actually marked it paid sends the receipt + invoice (the redirect and the webhook may both arrive)
     if (updated?.[0]) {
       const { sendOrderEmail } = await import('./_mail.js')
@@ -85,14 +78,15 @@ export async function markPaid(order, { ref, amount, via, where }) {
   }
   else if (order.status === 'cancelled') {
     // money arrived for an order that was cancelled meanwhile (by the admin, or replaced by a newer checkout)
-    console.error('payment on cancelled order', order.id, ref)
+    console.error('captured charge on cancelled order', orderId, charge.id)
     const { sendAdminAlert } = await import('./_mail.js')
-    await sendAdminAlert(`دفعة على طلب ملغي #${order.number}`, `وصلت دفعة مقبولة ${ref} بمبلغ ${amount} ر.س للطلب #${order.number} وهو ملغي. راجعها في ${where}: نفّذ الطلب أو استرجع المبلغ للعميل.`).catch(() => {})
+    await sendAdminAlert(`دفعة على طلب ملغي #${order.number}`, `وصلت دفعة مقبولة ${charge.id} بمبلغ ${charge.amount} ر.س للطلب #${order.number} وهو ملغي. راجعها في Tap: نفّذ الطلب أو استرجع المبلغ للعميل.`).catch(() => {})
   }
-  else if (order.payment_ref && order.payment_ref !== ref) {
-    // paid twice (two tabs, or card and Tabby): keep the first, flag the extra payment for a refund
-    console.error('extra payment', order.id, ref)
+  else if (order.payment_ref && order.payment_ref !== charge.id) {
+    // paid twice (two tabs): keep the first, flag the extra charge for a refund
+    console.error('extra captured charge', orderId, charge.id)
     const { sendAdminAlert } = await import('./_mail.js')
-    await sendAdminAlert(`دفعة مكررة للطلب #${order.number}`, `الطلب #${order.number} مدفوع مسبقاً (${order.payment_ref})، ووصلت دفعة ثانية مقبولة ${ref} بمبلغ ${amount} ر.س. راجعها في ${where} واسترجعها للعميل.`).catch(() => {})
+    await sendAdminAlert(`دفعة مكررة للطلب #${order.number}`, `الطلب #${order.number} مدفوع مسبقاً (${order.payment_ref})، ووصلت دفعة ثانية مقبولة ${charge.id} بمبلغ ${charge.amount} ر.س. راجعها في Tap واسترجعها للعميل.`).catch(() => {})
   }
+  return { ok: true, orderId }
 }

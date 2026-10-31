@@ -24,8 +24,6 @@ A custom-coded store for hair and skin care products, forked (Oct 2026) from Rae
 - Supabase (auth, Postgres + RLS + SECURITY DEFINER RPCs, storage). No env → demo mode (`src/lib/local.js`, localStorage).
 - Vercel functions in `api/` (Hobby plan: 12 max — merge with `?op=`, don't add files). Files starting with `_` are helpers.
 - Payments: Tap hosted page (`api/tap-charge.js`), confirmed server-side (`api/_shared.js confirmCharge`) + webhook.
-- Tabby (31 Oct 2026, Saudi API `api.tabby.sa`): `api/_tabby.js`, routed through `api/tap-charge.js?op=tabby|tabby-check`, `api/tap-verify.js?op=tabby`, `api/tap-webhook.js?op=tabby` (registered automatically, checked by a header derived from the secret key).
-  Checkout offers card or Tabby (background pre-check hides a rejected Tabby with Tabby's reason); she returns to `/order/<id>?tabby=success|cancel|failure`, the server reads the order's own payment (`payment_ref` `tabby:<id>`), captures it once (`capture-<order id>`) and marks it paid via `markPaid` (shared with Tap). A Tabby payment for an order already paid another way is closed, not captured. Snippets (`src/components/Tabby.jsx`) on the product page, cart and under the option. Env `TABBY_SECRET_KEY`, `VITE_TABBY_PUBLIC_KEY`, `VITE_TABBY_MERCHANT_CODE`; refunds from Tabby's dashboard.
 - Domain: `VITE_SITE_URL` / `SITE_URL` env. `admin.<domain>` opens the dashboard; until a domain is set, use `/admin`.
 
 ## Key places
@@ -61,7 +59,7 @@ A custom-coded store for hair and skin care products, forked (Oct 2026) from Rae
 - Later changes: a new SQL file in `supabase/`, add it to `scripts/install-sql.mjs`, test it locally (PGlite with stubbed auth works), and Raed runs it. Never run SQL on production yourself.
 
 ## Env vars (names only; see .env.example)
-`VITE_SITE_URL`, `SITE_URL`, `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `TAP_SECRET_KEY`, `VITE_TAP_PUBLIC_KEY` (optional), `VITE_TAP_MERCHANT_ID` (optional, Apple Pay), `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `MAIL_FROM`, `ORDER_NOTIFY_TO`, `STORE_EMAIL`, `VERCEL_DEPLOY_HOOK`, `OTO_REFRESH_TOKEN`, optional `OTO_PICKUP_CODE`, optional `TABBY_SECRET_KEY` + `VITE_TABBY_PUBLIC_KEY` + `VITE_TABBY_MERCHANT_CODE`, `VITE_GA_ID`, `VITE_SNAP_PIXEL`, `VITE_TURNSTILE_SITE_KEY`.
+`VITE_SITE_URL`, `SITE_URL`, `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `TAP_SECRET_KEY`, `VITE_TAP_PUBLIC_KEY` (optional), `VITE_TAP_MERCHANT_ID` (optional, Apple Pay), `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `MAIL_FROM`, `ORDER_NOTIFY_TO`, `STORE_EMAIL`, `VERCEL_DEPLOY_HOOK`, `OTO_REFRESH_TOKEN`, optional `OTO_PICKUP_CODE`, `VITE_GA_ID`, `VITE_SNAP_PIXEL`, `VITE_TURNSTILE_SITE_KEY`.
 
 ## Rules that broke things before (inherited)
 - The server is the only place prices and totals are computed (`place_order`). Test the demo checkout after touching checkout/payments.

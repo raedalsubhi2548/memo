@@ -71,7 +71,7 @@ export default function Checkout() {
       <div className="grid justify-items-center gap-5 text-center">
         <Lock className="size-9 text-primary" />
         <span className="size-9 animate-spin rounded-full border-[3px] border-primary/15 border-t-primary" aria-hidden="true" />
-        <p className="text-lg font-semibold text-primary">{leaving === 'bank' ? 'نحوّلك لبنكك لتأكيد الدفع…' : leaving === 'tabby' ? 'نحوّلك لتابي لتقسيم المبلغ…' : 'نحوّلك لبوابة الدفع الآمنة…'}</p>
+        <p className="text-lg font-semibold text-primary">{leaving === 'bank' ? 'نحوّلك لبنكك لتأكيد الدفع…' : 'نحوّلك لبوابة الدفع الآمنة…'}</p>
       </div>
     </div>
   )
@@ -137,9 +137,7 @@ export default function Checkout() {
       throw e
     }
   }
-  const onPay = ({ token, via }) => placeOrder(async (order) => via === 'tabby'
-    ? { ...(await api.startTabby(order)), kind: 'tabby' }
-    : { ...(await api.startPayment(order, token)), kind: token ? 'bank' : 'gateway' })
+  const onPay = ({ token }) => placeOrder(async (order) => ({ ...(await api.startPayment(order, token)), kind: token ? 'bank' : 'gateway' }))
 
   const f = (k) => ({ value: form[k], onChange: (e) => setForm({ ...form, [k]: e.target.value }) })
   const a = (k) => ({ id: 'addr-' + k, value: addr[k], 'aria-invalid': !!addrErr[k] || undefined, onChange: (e) => { setAddr({ ...addr, [k]: e.target.value }); if (addrErr[k]) setAddrErr({ ...addrErr, [k]: '' }) } })

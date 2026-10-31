@@ -394,8 +394,6 @@ export const local = {
 
   // ---------- payments ----------
   async startPayment(order) { return { redirect: null, order } },
-  async startTabby(order) { return { redirect: null, order } },
-  async tabbyCheck() { return { ok: true } },
   async notifyOrder() {},
   async testOrderNotice() { return { sent: false, reason: 'demo' } },
   async createShipment() { throw new Error('البوليصة متاحة في المتجر الحقيقي فقط') },

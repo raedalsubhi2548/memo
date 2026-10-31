@@ -43,8 +43,7 @@ export default function Order() {
   const [paying, setPaying] = useState(false)
   const [order, setOrder] = useState(undefined)
   const [verifying, setVerifying] = useState(false)
-  const back = params.get('tabby') // success | cancel | failure, when Tabby sends her back
-  const isNew = params.get('new') || params.get('tap_id') || back
+  const isNew = params.get('new') || params.get('tap_id')
   const [apple, setApple] = useState(false) // known only in the browser, after hydration
   useEffect(() => { setApple(canApplePay()) }, [])
 
@@ -54,10 +53,9 @@ export default function Order() {
     let paidNow = false
     const load = () => api.getOrder(id).then((o) => { if (paidNow && o && o.status !== 'pending') trackPurchase(o); if (alive) setOrder(o) }).catch(() => alive && setOrder(null))
     const tap = params.get('tap_id')
-    // Tabby: the server checks the order's own Tabby payment, whatever page she came back to
-    if ((tap && api.verifyPayment) || (back && api.verifyTabby)) {
+    if (tap && api.verifyPayment) {
       setVerifying(true)
-      ;(tap ? api.verifyPayment(id, tap) : api.verifyTabby(id)).then((r) => {
+      api.verifyPayment(id, tap).then((r) => {
         if (r?.ok) { paidNow = true; clearCart(); try { sessionStorage.removeItem('mimi:pending-order') } catch { /* ignore */ } }
       }).finally(() => { if (alive) setVerifying(false); load() })
     } else load()
@@ -69,10 +67,10 @@ export default function Order() {
 
   const paid = order.status !== 'pending' && order.status !== 'cancelled'
   // the card fields or Apple Pay give a token; paid on the spot, or the bank's 3-D Secure page first
-  const payNow = async ({ token, via }) => {
+  const payNow = async ({ token }) => {
     setPaying(true)
     try {
-      const { redirect, free, paid } = via === 'tabby' ? await api.startTabby(order) : await api.startPayment(order, token)
+      const { redirect, free, paid } = await api.startPayment(order, token)
       if (free || paid) { clearCart(); try { sessionStorage.removeItem('mimi:pending-order') } catch { /* ignore */ } trackPurchase(order); setOrder(await api.getOrder(order.id)); setPaying(false); return }
       window.location.href = redirect
     } catch (e) { setPaying(false); throw e }
@@ -85,7 +83,7 @@ export default function Order() {
           <div>
             <h1 className={cn('font-display text-2xl font-semibold sm:text-3xl', !paid && 'text-primary')}>{paid ? 'وصلنا طلبك، شكراً لك' : 'استلمنا طلبك وبانتظار الدفع'}</h1>
             <p className={cn('mt-1', paid ? 'text-on-inverse/80' : 'text-muted-foreground')}>
-              <span className="tabular">رقم الطلب #{order.number}.</span> {paid ? 'نجهّز طلبك ونشحنه لك، ويوصلك إيميل مع كل تحديث.' : back === 'cancel' ? 'ألغيتي الدفع مع تابي. تقدرين تكملين الدفع الحين بالطريقة اللي تناسبك.' : back === 'failure' ? 'تابي ما وافقت على العملية. تقدرين تدفعين بالبطاقة الحين.' : 'ما اكتملت عملية الدفع، تقدرين تكملينها الحين.'}
+              <span className="tabular">رقم الطلب #{order.number}.</span> {paid ? 'نجهّز طلبك ونشحنه لك، ويوصلك إيميل مع كل تحديث.' : 'ما اكتملت عملية الدفع، تقدرين تكملينها الحين.'}
             </p>
           </div>
         </div>
