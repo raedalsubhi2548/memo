@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useApp } from '@/state.jsx'
+import { deliveryDays, dayWord } from '@/lib/theme.js'
 import { Link, useLocation } from 'react-router-dom'
 import { PageHead } from '@/components/ui/kit.jsx'
 import { cn } from '@/lib/utils'
@@ -9,12 +10,10 @@ import { POLICY_SECTIONS, POLICY_DATE } from '@/data/terms.js'
 
 const SECTIONS = POLICY_SECTIONS
 
-// the return window the owner set in the store designer, in Arabic's number forms
-const dayWord = (n) => (n === 1 ? 'يوم واحد' : n === 2 ? 'يومين' : n <= 10 ? `${n} أيام` : `${n} يوماً`)
-
 export default function Policies() {
   const { settings } = useApp()
   const returnDays = settings.shipping.returnDays
+  const eta = deliveryDays(settings.shipping)
   const { hash } = useLocation()
   // links like /policies#refund land on that section
   useEffect(() => { if (hash) document.getElementById(hash.slice(1))?.scrollIntoView({ block: 'start' }) }, [hash])
@@ -53,6 +52,7 @@ export default function Policies() {
               <h2 className="font-display text-[1.35rem] font-semibold text-primary">{s.h}</h2>
               <div className="mt-3 grid max-w-[78ch] gap-2.5 text-[14.5px] leading-[1.95] text-foreground/85">
                 {s.p.map((x) => <p key={x}>{x}</p>)}
+                {s.id === 'shipping' && eta && <p>مدة التوصيل {eta.min === eta.max ? `خلال ${dayWord(eta.max)}` : `من ${eta.min} إلى ${dayWord(eta.max)}`}، وتختلف حسب سياسة شركات الشحن والمواسم.</p>}
                 {s.id === 'refund' && returnDays && <p>يمكنك طلب استرجاع المنتج غير المفتوح خلال {dayWord(returnDays)} من استلامه، بالتواصل معنا على واتساب.</p>}
               </div>
             </section>

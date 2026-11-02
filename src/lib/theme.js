@@ -117,11 +117,13 @@ function cleanBlock(b) {
 export const DEFAULT_HEADER_LINKS = [{ label: 'كل المنتجات', to: '/shop' }, { label: 'العناية بالشعر', to: '/hair-care' }, { label: 'العناية بالبشرة', to: '/skin-care' }, { label: 'تواصلي معنا', to: '/contact' }]
 export const DEFAULT_FOOTER_LINKS = [{ label: 'كل المنتجات', to: '/shop' }, { label: 'العناية بالشعر', to: '/hair-care' }, { label: 'العناية بالبشرة', to: '/skin-care' }, { label: 'السياسات والشروط', to: '/policies' }]
 /** Shipping: one fee per order (place_order in the database charges the same); freeOver 0 = never free. */
-export const DEFAULT_SHIPPING = { fee: 35, freeOver: 0 }
-// the owner's own numbers; a blank stays blank (null), so nothing is ever claimed that she didn't set
+export const DEFAULT_SHIPPING = { fee: 35, freeOver: 0, deliveryMin: 3, deliveryMax: 10 }
+// the owner's own numbers; a blank stays blank (null), so nothing is claimed that she didn't set
 const dayCount = (v, max) => (v === '' || v == null || !Number.isFinite(Number(v)) ? null : Math.min(max, Math.max(0, Math.round(Number(v)))))
-// handling + transit days, only when all four are set and make sense
-export const deliveryDays = ({ handlingMin: a, handlingMax: b, transitMin: c, transitMax: d } = {}) => ([a, b, c, d].every((n) => n != null) && a <= b && c <= d && d > 0 ? { min: a + c, max: b + d } : null)
+// the owner's delivery range, order to door (a blank field hides it)
+export const deliveryDays = ({ deliveryMin: min, deliveryMax: max } = {}) => (min != null && max != null && min <= max && max > 0 ? { min, max } : null)
+// a day count in Arabic's number forms
+export const dayWord = (n) => (n === 1 ? 'يوم واحد' : n === 2 ? 'يومين' : n <= 10 ? `${n} أيام` : `${n} يوماً`)
 export const shippingFor = (shipping, subtotal) => (shipping.freeOver > 0 && subtotal >= shipping.freeOver ? 0 : shipping.fee)
 export const DEFAULT_CTA = ['محتارة وش يناسبك؟', 'كلمينا على واتساب ونساعدك تختارين.']
 export const DEFAULT_ABOUT = 'في عناية ميمي رجّعنا لك خلطات الجدات بلمسة اليوم: صابونيات تقليدية بالكركم والعكر الفارسي والنيلة المغربية، وزيت يدلّع شعرك. لحظة عناية تستاهلينها، توصلك لين باب بيتك.'
@@ -189,8 +191,7 @@ export function mergeSettings(raw) {
     shipping: {
       fee: Math.min(500, Math.max(0, Math.round((Number(s.shipping?.fee ?? DEFAULT_SHIPPING.fee) || 0) * 100) / 100)),
       freeOver: Math.min(100000, Math.max(0, Math.round(Number(s.shipping?.freeOver) || 0))),
-      handlingMin: dayCount(s.shipping?.handlingMin, 30), handlingMax: dayCount(s.shipping?.handlingMax, 30),
-      transitMin: dayCount(s.shipping?.transitMin, 30), transitMax: dayCount(s.shipping?.transitMax, 30),
+      deliveryMin: dayCount(s.shipping?.deliveryMin ?? DEFAULT_SHIPPING.deliveryMin, 60), deliveryMax: dayCount(s.shipping?.deliveryMax ?? DEFAULT_SHIPPING.deliveryMax, 60),
       returnDays: dayCount(s.shipping?.returnDays, 365) || null,
     },
     footer: {

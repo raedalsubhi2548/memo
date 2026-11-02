@@ -2,7 +2,7 @@ import { coverFor } from '@/lib/cover.js'
 import { useEffect, useState } from 'react'
 import { Link, Navigate, useParams } from 'react-router-dom'
 import { Heart, ShieldCheck, Truck, Clock, MessageCircle, Check, ChevronDown, ShoppingBag } from 'lucide-react'
-import { deliveryDays } from '@/lib/theme.js'
+import { deliveryDays, dayWord } from '@/lib/theme.js'
 import { useApp } from '@/state.jsx'
 import { cn } from '@/lib/utils'
 import ServiceTicket from '@/components/home/ServiceTicket.jsx'
@@ -126,7 +126,7 @@ export default function Product({ slug: fromProps }) {
               </div>
               <ul className="grid gap-2.5 border-t border-[var(--p-cream-200)] pt-4 text-[13.5px] text-muted-foreground">
                 <li className="flex items-center gap-2.5"><Truck className="size-4 text-primary" />{fee > 0 ? `الشحن ${money(fee)}${settings.shipping.freeOver > 0 ? `، ومجاني للطلبات من ${money(settings.shipping.freeOver)}` : ''}` : 'شحن مجاني'}، وتتابعين طلبك من حسابك</li>
-                {eta && <li className="flex items-center gap-2.5"><Clock className="size-4 text-primary" />يوصلك خلال {eta.min === eta.max ? eta.max : `${eta.min}–${eta.max}`} أيام عمل</li>}
+                {eta && <li className="flex items-center gap-2.5"><Clock className="size-4 text-primary" />التوصيل {eta.min === eta.max ? `خلال ${dayWord(eta.max)}` : `من ${eta.min} إلى ${dayWord(eta.max)}`}، حسب شركة الشحن والموسم</li>}
                 <li className="flex items-center gap-2.5"><ShieldCheck className="size-4 text-primary" />دفع آمن: مدى، فيزا، ماستركارد وApple Pay</li>
                 <li><a href={waLink(`السلام عليكم، عندي سؤال عن: ${p.name}`)} target="_blank" rel="noreferrer" className="flex items-center gap-2.5 font-semibold text-primary hover:underline"><MessageCircle className="size-4" />اسألينا عن المنتج على واتساب</a></li>
               </ul>

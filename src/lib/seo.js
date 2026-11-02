@@ -131,6 +131,7 @@ export function seoFor(path, data = {}) {
     const card = ogCard(p.id)
     const ship = data.settings?.shipping || {}
     const fee = Number(ship.fee ?? 35)
+    // the owner gives one range, order to door, so it all sits in the transit time
     const days = (min, max) => ({ '@type': 'QuantitativeValue', minValue: min, maxValue: max, unitCode: 'DAY' })
     return {
       ...base,
@@ -159,7 +160,7 @@ export function seoFor(path, data = {}) {
           })(serviceScore(SERVICE_RATINGS[p.id], data.feedback?.reviews, p.id)),
           offers: {
             '@type': 'Offer', url: abs(productPath(p.id)), priceCurrency: 'SAR', price: String(price(p)), availability: 'https://schema.org/InStock', itemCondition: 'https://schema.org/NewCondition', seller: { '@id': abs('/#org') },
-            shippingDetails: { '@type': 'OfferShippingDetails', shippingRate: { '@type': 'MonetaryAmount', value: String(fee), currency: 'SAR' }, shippingDestination: { '@type': 'DefinedRegion', addressCountry: 'SA' }, ...(deliveryDays(ship) && { deliveryTime: { '@type': 'ShippingDeliveryTime', handlingTime: days(ship.handlingMin, ship.handlingMax), transitTime: days(ship.transitMin, ship.transitMax) } }) },
+            shippingDetails: { '@type': 'OfferShippingDetails', shippingRate: { '@type': 'MonetaryAmount', value: String(fee), currency: 'SAR' }, shippingDestination: { '@type': 'DefinedRegion', addressCountry: 'SA' }, ...(deliveryDays(ship) && { deliveryTime: { '@type': 'ShippingDeliveryTime', handlingTime: days(0, 0), transitTime: days(ship.deliveryMin, ship.deliveryMax) } }) },
             ...(ship.returnDays && { hasMerchantReturnPolicy: { '@type': 'MerchantReturnPolicy', applicableCountry: 'SA', returnPolicyCategory: 'https://schema.org/MerchantReturnFiniteReturnWindow', merchantReturnDays: ship.returnDays, merchantReturnLink: abs('/policies#refund') } }),
           },
         },
