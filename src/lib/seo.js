@@ -2,6 +2,7 @@ import { fromSlug, toSlug, productPath } from './slug.js'
 import { SERVICE_FAQ } from '../data/serviceFaq.js'
 import { SERVICE_RATINGS } from '../data/reviews.js'
 import { serviceScore } from './feedback.js'
+import { deliveryDays } from './theme.js'
 // One source of truth for titles, descriptions, canonical links, social cards and structured
 // data. Used at runtime (useSeo) and at build time (scripts/prerender.mjs) so crawlers that do
 // not run JavaScript still get the full head for every public page.
@@ -128,7 +129,9 @@ export function seoFor(path, data = {}) {
     const c = categories.find((x) => x.id === p.categoryId)
     const img = abs(p.image && !p.image.startsWith('data:') ? p.image : CAT_ART[p.categoryId] || SITE.ogImage)
     const card = ogCard(p.id)
-    const fee = Number(data.settings?.shipping?.fee ?? 35)
+    const ship = data.settings?.shipping || {}
+    const fee = Number(ship.fee ?? 35)
+    const days = (min, max) => ({ '@type': 'QuantitativeValue', minValue: min, maxValue: max, unitCode: 'DAY' })
     return {
       ...base,
       type: 'product',
@@ -156,7 +159,8 @@ export function seoFor(path, data = {}) {
           })(serviceScore(SERVICE_RATINGS[p.id], data.feedback?.reviews, p.id)),
           offers: {
             '@type': 'Offer', url: abs(productPath(p.id)), priceCurrency: 'SAR', price: String(price(p)), availability: 'https://schema.org/InStock', itemCondition: 'https://schema.org/NewCondition', seller: { '@id': abs('/#org') },
-            shippingDetails: { '@type': 'OfferShippingDetails', shippingRate: { '@type': 'MonetaryAmount', value: String(fee), currency: 'SAR' }, shippingDestination: { '@type': 'DefinedRegion', addressCountry: 'SA' } },
+            shippingDetails: { '@type': 'OfferShippingDetails', shippingRate: { '@type': 'MonetaryAmount', value: String(fee), currency: 'SAR' }, shippingDestination: { '@type': 'DefinedRegion', addressCountry: 'SA' }, ...(deliveryDays(ship) && { deliveryTime: { '@type': 'ShippingDeliveryTime', handlingTime: days(ship.handlingMin, ship.handlingMax), transitTime: days(ship.transitMin, ship.transitMax) } }) },
+            ...(ship.returnDays && { hasMerchantReturnPolicy: { '@type': 'MerchantReturnPolicy', applicableCountry: 'SA', returnPolicyCategory: 'https://schema.org/MerchantReturnFiniteReturnWindow', merchantReturnDays: ship.returnDays, merchantReturnLink: abs('/policies#refund') } }),
           },
         },
         SERVICE_FAQ[p.id]?.length && { '@context': 'https://schema.org', '@type': 'FAQPage', mainEntity: SERVICE_FAQ[p.id].map((q) => ({ '@type': 'Question', name: q.q, acceptedAnswer: { '@type': 'Answer', text: q.a } })) },

@@ -449,6 +449,15 @@ export default function Designer() {
                 <Field label="رسوم الشحن للطلب (ر.س)"><Input value={draft.shipping?.fee ?? 35} inputMode="decimal" dir="ltr" className="text-end" onChange={(e) => patch((d) => { d.shipping ||= {}; d.shipping.fee = e.target.value.replace(/[^\d.]/g, '').slice(0, 6) })} /></Field>
                 <Field label="شحن مجاني للطلبات من (ر.س)"><Input value={draft.shipping?.freeOver || ''} inputMode="numeric" dir="ltr" className="text-end" placeholder="بدون" onChange={(e) => patch((d) => { d.shipping ||= {}; d.shipping.freeOver = e.target.value.replace(/\D/g, '').slice(0, 6) })} /></Field>
               </div>
+              <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4">
+                {[['handlingMin', 'التجهيز: من (يوم عمل)'], ['handlingMax', 'التجهيز: إلى'], ['transitMin', 'التوصيل: من (يوم عمل)'], ['transitMax', 'التوصيل: إلى']].map(([k, label]) => (
+                  <Field key={k} label={label}><Input value={draft.shipping?.[k] ?? ''} inputMode="numeric" dir="ltr" className="text-end" onChange={(e) => patch((d) => { d.shipping ||= {}; d.shipping[k] = e.target.value.replace(/\D/g, '').slice(0, 2) })} /></Field>
+                ))}
+              </div>
+              <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                <Field label="مدة الاسترجاع للمنتج غير المفتوح (يوم)"><Input value={draft.shipping?.returnDays ?? ''} inputMode="numeric" dir="ltr" className="text-end" onChange={(e) => patch((d) => { d.shipping ||= {}; d.shipping.returnDays = e.target.value.replace(/\D/g, '').slice(0, 3) })} /></Field>
+              </div>
+              <p className="mt-3 text-xs leading-6 text-muted-foreground">تظهر هالمدد في صفحة المنتج والسياسات وتوصل لقوقل. اللي تتركينه فاضي ما يظهر.</p>
             </Panel>
           </>}
 

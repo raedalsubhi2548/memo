@@ -12,7 +12,7 @@ Project memory for Claude Code. Read this before any change.
 ## What this is
 A custom-coded store for hair and skin care products, forked (Oct 2026) from Raed's own platform (rraed.com) and adapted:
 - Physical products with shipping: checkout asks for the national short address (4 letters + 4 digits), city, district, street, details.
-- Shipping fee: owner-editable in لوحة التحكم ← مصمم المتجر ← معلومات المتجر ← «الشحن» (fee, free-over amount). Default 35 SAR.
+- Shipping fee: owner-editable in لوحة التحكم ← مصمم المتجر ← معلومات المتجر ← «الشحن» (fee, free-over amount). Default 35 SAR. Same panel: handling/transit days and the return window, blank until the owner sets them; only then they show on the product and policies pages and in the JSON-LD (`deliveryDays` in `src/lib/theme.js`, `seoFor`). Never default them. `aggregateRating`/`review` appear on their own once real reviews exist.
   The database computes it (`shipping_fee_for` in `supabase/store-2026-10.sql`) — the browser never sets totals.
   A coupon can also give free shipping (`coupons.free_shipping`, switch «مع شحن مجاني» in كوبونات الخصم; a free-shipping code may have no discount). `place_order` lives in `supabase/coupons-shipping-2026-10.sql` now.
 - Removed from the fork: blog, portfolio, Tamara, Snap Conversions API, the old services catalog, the business-verification seal.

@@ -118,6 +118,10 @@ export const DEFAULT_HEADER_LINKS = [{ label: 'كل المنتجات', to: '/sho
 export const DEFAULT_FOOTER_LINKS = [{ label: 'كل المنتجات', to: '/shop' }, { label: 'العناية بالشعر', to: '/hair-care' }, { label: 'العناية بالبشرة', to: '/skin-care' }, { label: 'السياسات والشروط', to: '/policies' }]
 /** Shipping: one fee per order (place_order in the database charges the same); freeOver 0 = never free. */
 export const DEFAULT_SHIPPING = { fee: 35, freeOver: 0 }
+// the owner's own numbers; a blank stays blank (null), so nothing is ever claimed that she didn't set
+const dayCount = (v, max) => (v === '' || v == null || !Number.isFinite(Number(v)) ? null : Math.min(max, Math.max(0, Math.round(Number(v)))))
+// handling + transit days, only when all four are set and make sense
+export const deliveryDays = ({ handlingMin: a, handlingMax: b, transitMin: c, transitMax: d } = {}) => ([a, b, c, d].every((n) => n != null) && a <= b && c <= d && d > 0 ? { min: a + c, max: b + d } : null)
 export const shippingFor = (shipping, subtotal) => (shipping.freeOver > 0 && subtotal >= shipping.freeOver ? 0 : shipping.fee)
 export const DEFAULT_CTA = ['محتارة وش يناسبك؟', 'كلمينا على واتساب ونساعدك تختارين.']
 export const DEFAULT_ABOUT = 'في عناية ميمي رجّعنا لك خلطات الجدات بلمسة اليوم: صابونيات تقليدية بالكركم والعكر الفارسي والنيلة المغربية، وزيت يدلّع شعرك. لحظة عناية تستاهلينها، توصلك لين باب بيتك.'
@@ -185,6 +189,9 @@ export function mergeSettings(raw) {
     shipping: {
       fee: Math.min(500, Math.max(0, Math.round((Number(s.shipping?.fee ?? DEFAULT_SHIPPING.fee) || 0) * 100) / 100)),
       freeOver: Math.min(100000, Math.max(0, Math.round(Number(s.shipping?.freeOver) || 0))),
+      handlingMin: dayCount(s.shipping?.handlingMin, 30), handlingMax: dayCount(s.shipping?.handlingMax, 30),
+      transitMin: dayCount(s.shipping?.transitMin, 30), transitMax: dayCount(s.shipping?.transitMax, 30),
+      returnDays: dayCount(s.shipping?.returnDays, 365) || null,
     },
     footer: {
       links: Array.isArray(s.footer?.links) ? s.footer.links.slice(0, 8).map((l) => ({ label: text(l?.label, '', 30), to: safeLink(l?.to, '') })).filter((l) => l.label && l.to) : null,
